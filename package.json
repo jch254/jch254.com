@@ -4,6 +4,7 @@
   "description": "jch254.com source code",
   "author": "Jordan Hornblow <jordan@jch254.com>",
   "license": "MIT",
+  "packageManager": "pnpm@10.30.3",
   "repository": {
     "type": "git",
     "url": "https://github.com/jch254/jch254.com"
