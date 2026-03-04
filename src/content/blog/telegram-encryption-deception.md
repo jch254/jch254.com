@@ -10,11 +10,11 @@ As mentioned by many news sources around the globe — Telegram will better coop
 
 ## The encryption gap
 
-A surprising fact that many of Telegram's nearly **one billion users** likely do not realise is that while many of Telegram's rivals have adopted end-to-end/client-to-client encryption by default, **Telegram has not**. Unless users manually set up a "Secret Chat" within the app with each and every specific contact they require end-to-end/client-to-client encrypted conversations with, the company is likely able to access/read messages being sent on the platform stored in their database servers (Telegram is a cloud-based service after all). There are often controls around production database access at technology companies depending on company policies, however if this is not well enforced as is often the case, employees may have full production read/write access to production data.
+A surprising fact that many of Telegram's nearly **one billion users** likely do not realise is that while many of Telegram's rivals have adopted end-to-end/client-to-client encryption by default, **Telegram has not**. Unless users manually set up a `Secret Chat` within the app with each and every specific contact they require end-to-end/client-to-client encrypted conversations with, the company is likely able to access/read messages being sent on the platform stored in their database servers (Telegram is a cloud-based service after all). There are often controls around production database access at technology companies depending on company policies, however if this is not well enforced as is often the case, employees may have full production read/write access to production data.
 
 ## The deletion illusion
 
-I imagine when those law enforcement requests start flowing in, Telegram are gonna be busy... As illicit Telegram groups clear/reduce their presence on the platform by deleting chats and media, it's possible this is pointless. Many tech companies keep database backups and soft delete data so it's not actually deleted from the database servers (just a deleted date column is set in the related database table/s).
+I imagine when those law enforcement requests start flowing in, Telegram are gonna be busy... As illicit Telegram groups clear/reduce their presence on the platform by deleting chats and media, it's possible this is pointless. Many tech companies keep database backups and soft delete data so it's not actually deleted from the database servers (just a `deleted_at` column is set in the related database table/s).
 
 ## Direct from Telegram's FAQ
 
@@ -28,7 +28,7 @@ All secret chats in Telegram are device-specific and are not part of the Telegra
 
 ### Q: Why not just make all chats 'secret'?
 
-All Telegram messages are always securely encrypted. Messages in Secret Chats use *client-client* encryption, while Cloud Chats use *client-server/server-client* encryption and are stored in the Telegram Cloud. This enables your cloud messages to be both secure and immediately accessible from any of your devices - even if you lose your device altogether.
+All Telegram messages are always securely encrypted. Messages in Secret Chats use `client-client` encryption, while Cloud Chats use `client-server/server-client` encryption and are stored in the Telegram Cloud. This enables your cloud messages to be both secure and immediately accessible from any of your devices - even if you lose your device altogether.
 
 The problem of restoring access to your chat history on a newly connected device (e.g. when you lose your phone) does not have an elegant solution in the end-to-end encryption paradigm. At the same time, reliable backups are an essential feature for any mass-market messenger. To solve this problem, some applications (like WhatsApp and Viber) allow decryptable backups that put their users' privacy at risk - even if they do not enable backups themselves. Other apps ignore the need for backups altogether and leave their users vulnerable to data loss.
 
@@ -40,7 +40,7 @@ Telegram can help when it comes to data transfer and secure communication. This 
 
 But please remember that we cannot protect you from your own mother if she takes your unlocked phone without a passcode. Or from your IT-department if they access your computer at work. Or from any other people that get physical or root access to your phones or computers running Telegram.
 
-If you have reasons to worry about your personal security, we strongly recommend using only Secret Chats in official or at least verifiable open-source apps for sensitive information, preferably with a self-destruct timer. We also recommend enabling 2-Step Verification and setting up a strong passcode to lock your app. You will find both options in Settings → Privacy and Security.
+If you have reasons to worry about your personal security, we strongly recommend using only Secret Chats in official or at least verifiable open-source apps for sensitive information, preferably with a self-destruct timer. We also recommend enabling `2-Step Verification` and setting up a strong passcode to lock your app. You will find both options in `Settings → Privacy and Security`.
 
 ## Telegram's Privacy Policy
 

@@ -8,6 +8,6 @@ draft: false
 
 Replit's CEO is literally surfing with Kai Lenny while talking about "AI for everyone."
 
-OpenAI is busy reshuffling execs, Anthropic is quoting Aristotle, and the rest of us are duct-taping GPT into apps that worked fine before the hype. This isn't innovation — it's a **$100B improv show**.
+OpenAI is busy reshuffling execs, Anthropic is quoting Aristotle, and the rest of us are duct-taping `GPT` into apps that worked fine before the hype. This isn't innovation — it's a **$100B improv show**.
 
 [Watch: The surf session that says it all](https://www.youtube.com/watch?v=r45-w5MKOiE)

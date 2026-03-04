@@ -8,7 +8,7 @@ draft: false
 
 OpenAI CTO **Mira Murati** and Chief Research Officer **Bob McGrew**, both veterans at the AI company, are leaving. Meanwhile, OpenAI will soon let go of its nonprofit nature and CEO Sam Altman will get equity — [as reported by Reuters](https://www.reuters.com/technology/artificial-intelligence/openai-remove-non-profit-control-give-sam-altman-equity-sources-say-2024-09-25).
 
-Murati made a recent appearance on behalf of OpenAI when it introduced the new, voice-driven, GPT-4o, among other things. That appears to be the final chord of a six-and-a-half-year track record. McGrew worked at OpenAI for nearly eight years, as a researcher, VP of Research and one month as Chief Research Officer.
+Murati made a recent appearance on behalf of OpenAI when it introduced the new, voice-driven, `GPT-4o`, among other things. That appears to be the final chord of a six-and-a-half-year track record. McGrew worked at OpenAI for nearly eight years, as a researcher, VP of Research and one month as Chief Research Officer.
 
 Murati sent the ominous tweet ["OpenAI is nothing without its people"](https://x.com/miramurati/status/1726542556201483392) out into the world late last year.
 
