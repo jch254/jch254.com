@@ -6,9 +6,13 @@ tags: ["security", "privacy", "encryption", "tech"]
 draft: false
 ---
 
-As mentioned by many news sources around the globe - Telegram will better cooperate with law enforcement agencies and hand over the IP addresses and phone numbers of users in response to "valid requests", in a major policy change from the encrypted messaging platform just weeks after the arrest of its founder.
+As mentioned by many news sources around the globe — Telegram will better cooperate with law enforcement agencies and hand over the IP addresses and phone numbers of users in response to "valid requests", in a major policy change from the encrypted messaging platform just weeks after the arrest of its founder.
 
-A surprising fact that many of Telegram's nearly one billion users likely do not realize is that while many of Telegram's rivals have adopted end-to-end/client-to-client encryption by default, Telegram has not. Unless users manually set up a "Secret Chat" within the app with each and every specific contact they require end-to-end/client-to-client encrypted conversations with, the company is likely able to access/read messages being sent on the platform stored in their database servers (Telegram is a cloud-based service after all). There are often controls around production database access at technology companies depending on company policies, however if this is not well enforced as is often the case, employees may have full production read/write access to production data.
+## The encryption gap
+
+A surprising fact that many of Telegram's nearly **one billion users** likely do not realise is that while many of Telegram's rivals have adopted end-to-end/client-to-client encryption by default, **Telegram has not**. Unless users manually set up a "Secret Chat" within the app with each and every specific contact they require end-to-end/client-to-client encrypted conversations with, the company is likely able to access/read messages being sent on the platform stored in their database servers (Telegram is a cloud-based service after all). There are often controls around production database access at technology companies depending on company policies, however if this is not well enforced as is often the case, employees may have full production read/write access to production data.
+
+## The deletion illusion
 
 I imagine when those law enforcement requests start flowing in, Telegram are gonna be busy... As illicit Telegram groups clear/reduce their presence on the platform by deleting chats and media, it's possible this is pointless. Many tech companies keep database backups and soft delete data so it's not actually deleted from the database servers (just a deleted date column is set in the related database table/s).
 
@@ -48,7 +52,7 @@ Telegram is a cloud service. We store messages, photos, videos and documents fro
 
 Secret chats use end-to-end encryption. This means that all data is encrypted with a key that only you and the recipient know. There is no way for us or anybody else without direct access to your device to learn what content is being sent in those messages. We do not store your secret chat messages on our servers. We also do not keep any logs for messages in secret chats, so after a short period of time we no longer know who or when you messaged via secret chats. For the same reasons secret chats are not available in the cloud — you can only access those messages from the device they were sent to or from.
 
-Watch my YouTube overview and switch to Signal ASAP - [https://signal.org](https://signal.org) - let the Signal exodus begin!
+Watch my YouTube overview and switch to [Signal](https://signal.org) ASAP — let the Signal exodus begin!
 
 ## Further reading
 
