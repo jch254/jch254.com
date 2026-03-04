@@ -3,12 +3,18 @@ interface Props {
   title: string;
   description?: string;
   ogImage?: string;
+  ogType?: 'website' | 'article';
+  publishedTime?: string;
+  noindex?: boolean;
 }
 
 const {
   title,
   description = 'Jordan Hornblow — Principal Software Engineer. Blog, portfolio, and more.',
   ogImage,
+  ogType = 'website',
+  publishedTime,
+  noindex = false,
 } = Astro.props;
 
 const canonicalUrl = new URL(Astro.url.pathname, Astro.site);
@@ -30,9 +36,11 @@ const resolvedOgImage = ogImage
     <meta name="title" content={title} />
     <meta name="description" content={description} />
     <meta name="generator" content={Astro.generator} />
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
 
     <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content={ogType} />
+    {publishedTime && <meta property="article:published_time" content={publishedTime} />}
     <meta property="og:url" content={canonicalUrl} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
@@ -44,6 +52,42 @@ const resolvedOgImage = ogImage
     <meta property="twitter:title" content={title} />
     <meta property="twitter:description" content={description} />
     <meta property="twitter:image" content={resolvedOgImage} />
+
+    <!-- JSON-LD Structured Data -->
+    {ogType === 'article' && publishedTime ? (
+      <script type="application/ld+json" set:html={JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'Article',
+        headline: title,
+        description,
+        image: resolvedOgImage,
+        datePublished: publishedTime,
+        url: canonicalUrl.href,
+        author: {
+          '@type': 'Person',
+          name: 'Jordan Hornblow',
+          url: 'https://jch254.com',
+        },
+        publisher: {
+          '@type': 'Person',
+          name: 'Jordan Hornblow',
+          url: 'https://jch254.com',
+        },
+      })} />
+    ) : !noindex && (
+      <script type="application/ld+json" set:html={JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'WebSite',
+        name: 'Jordan Hornblow',
+        url: 'https://jch254.com',
+        description,
+        author: {
+          '@type': 'Person',
+          name: 'Jordan Hornblow',
+          url: 'https://jch254.com',
+        },
+      })} />
+    )}
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />

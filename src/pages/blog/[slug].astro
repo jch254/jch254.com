@@ -23,7 +23,7 @@ const formattedDate = post.data.date.toLocaleDateString('en-NZ', {
 });
 ---
 
-<BaseLayout title={`${post.data.title} — Jordan Hornblow`} description={post.data.description} ogImage={post.data.heroImage?.src}>
+<BaseLayout title={`${post.data.title} — Jordan Hornblow`} description={post.data.description} ogImage={post.data.heroImage?.src} ogType="article" publishedTime={post.data.date.toISOString()}>
   <Hero compact />
 
   <Breadcrumb items={[
