@@ -46,14 +46,12 @@ Personal website and blog for Jordan Hornblow, built with [Astro](https://astro.
 
 ## Deployment
 
-Designed for **Cloudflare Pages** with Git integration:
+Deployed to **GitHub Pages** via GitHub Actions:
 
-1. Connect your repo to Cloudflare Pages
-2. Set build command: `npm run build`
-3. Set output directory: `dist`
-4. Every push to `main` triggers an automatic build and deploy
-
-The `public/_redirects` and `public/_headers` files are picked up automatically by Cloudflare Pages.
+1. In your repo, go to **Settings > Pages** and set the source to **GitHub Actions**
+2. Every push to `main` or `master` triggers the workflow in `.github/workflows/deploy-gh-pages.yml`
+3. The workflow installs dependencies, builds with Astro, and deploys the `dist/` output to GitHub Pages
+4. Custom domain is configured via `public/CNAME`
 
 ## Adding a Blog Post
 
