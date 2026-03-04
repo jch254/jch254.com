@@ -16,6 +16,7 @@ export default defineConfig({
         './src/components/embeds/SoundCloud.astro',
         './src/components/embeds/Spotify.astro',
         './src/components/embeds/Vimeo.astro',
+        './src/components/embeds/Instagram.astro',
       ],
     }),
     react(),

@@ -1,0 +1,29 @@
+---
+interface Props {
+  /** Instagram post/reel ID or full URL */
+  url: string;
+  title?: string;
+}
+
+const { url, title = 'Instagram post' } = Astro.props;
+
+// Extract the path from a full URL or use as-is
+const match = url.match(/instagram\.com\/(p|reel)\/([A-Za-z0-9_-]+)/);
+const embedUrl = match
+  ? `https://www.instagram.com/${match[1]}/${match[2]}/embed/`
+  : `https://www.instagram.com/p/${url}/embed/`;
+---
+
+<div class="not-prose my-6">
+  <div class="mx-auto max-w-lg overflow-hidden rounded-xl border border-brand-border">
+    <iframe
+      src={embedUrl}
+      title={title}
+      allowtransparency
+      allowfullscreen
+      loading="lazy"
+      class="w-full"
+      style="min-height: 500px; border: 0;"
+    ></iframe>
+  </div>
+</div>
