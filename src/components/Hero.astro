@@ -11,7 +11,7 @@ interface Props {
 const { compact = false } = Astro.props;
 ---
 
-<header class:list={['relative overflow-hidden', compact ? 'pb-10 pt-10 md:pt-14' : 'pb-10 pt-16 md:pt-24']}>
+<header class:list={['relative overflow-hidden', compact ? 'pb-10 pt-16 md:pt-24' : 'pb-10 pt-16 md:pt-24']}>
   <!-- Matrix-style background -->
   <div class="absolute inset-0 z-0">
     <div class="matrix-bg absolute inset-0 opacity-20"></div>
