@@ -72,7 +72,7 @@ Every blog post is a `.md` file with frontmatter. No CMS, no database, no admin 
 
 **Full ownership.** The source code is on GitHub. The content is in Markdown files I control. If GitHub Pages disappeared tomorrow, I could deploy the same `dist/` folder to Cloudflare Pages, Netlify, or an S3 bucket in minutes.
 
-**Performance.** The site loads almost instantly. Zero JavaScript on most pages. Lighthouse scores that actually mean something.
+**Performance.** The site loads almost instantly. Zero JavaScript on most pages. Global Lighthouse scores come in at 88–93 for performance across six regions, with 100 for Best Practices and SEO, zero total blocking time, and just 62 kB transferred over 5 requests. [See the full Lighthouse report](https://lighthouse-metrics.com/lighthouse/checks/38056e9d-26dd-432e-bb32-70411f275d1f).
 
 **Creative freedom.** The dark theme with the green accent colour, the card-based layouts, the responsive hero with social icons - all built exactly how I envisioned them. Try getting that level of control from a no-code builder.
 
