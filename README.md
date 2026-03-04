@@ -1,6 +1,6 @@
-# jch254.com
+# [jch254.com](https://jch254.com)
 
-Personal website and blog for Jordan Hornblow, built with [Astro](https://astro.build) + React + TypeScript + Tailwind CSS.
+Personal website and blog, built with [Astro](https://astro.build) + React + TypeScript + Tailwind CSS. See [blog post](https://jch254.com/blog/fingertip-to-github-astro) for more details.
 
 ## Stack
 
@@ -15,9 +15,9 @@ Personal website and blog for Jordan Hornblow, built with [Astro](https://astro.
 
 ```text
 /
-├── public/              # Static assets (_redirects, _headers, robots.txt, favicon)
+├── public/              # Static assets (CNAME, robots.txt, favicon, og-default.png)
 ├── src/
-│   ├── components/      # Astro components (Hero, BlogCard, SectionCard, etc.)
+│   ├── components/      # Astro components (Hero, BlogCard, Breadcrumb, SectionCard, etc.)
 │   ├── content/
 │   │   └── blog/        # Markdown blog posts (Content Collection)
 │   ├── layouts/
@@ -63,6 +63,8 @@ title: "Your Post Title"
 description: "A brief description for cards and meta tags."
 date: 2026-03-05
 tags: ["tag1", "tag2"]
+heroImage: ./your-hero-image.png   # optional — used as og:image for social sharing
+heroImageCaption: "Alt text"       # optional
 draft: false
 ---
 
@@ -70,6 +72,15 @@ Your content here...
 ```
 
 The post will appear on the blog listing page and get its own URL at `/blog/<filename>/`.
+
+## Open Graph / Social Sharing
+
+Every page includes `og:image` and `twitter:image` meta tags for link previews on LinkedIn, Twitter/X, etc.
+
+- **Blog posts with a `heroImage`** use that image as the OG image.
+- **All other pages** fall back to `public/og-default.png`.
+
+Use [LinkedIn's Post Inspector](https://www.linkedin.com/post-inspector/) or [Facebook's Sharing Debugger](https://developers.facebook.com/tools/debug/) to verify previews after deploying.
 
 ## License
 
