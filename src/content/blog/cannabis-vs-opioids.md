@@ -1,0 +1,23 @@
+---
+title: "Cannabis vs Opioids"
+description: "A real conversation with my GP about outdated medical advice, the opioid epidemic, and why cannabis stigma is costing lives."
+date: 2025-08-10
+tags: ["chronic pain", "cannabis", "opioids", "healthcare"]
+draft: false
+---
+
+[https://soundcloud.com/jch254/cannabis-vs-opioids](https://soundcloud.com/jch254/cannabis-vs-opioids)
+
+This short recording captures a real conversation I had with my GP in Australia in August - one that left me questioning how deeply outdated parts of our medical system still are... and why the opioid epidemic continues to take unneeded lives.
+
+After months of agonising withdrawal from long-term oxycodone and codeine, I was advised to stop using cannabis and go back on opioids. As "Cannabis messes up the mind". I can tell you from lived experience that the brain is much more messed up from addiction/dependence to opioids than cannabis.
+
+That advice directly contradicts both my experience and the growing body of scientific research around cannabinoids, pain modulation and neuroinflammation.
+
+I'm sharing this not out of anger, but transparency. Too many people with chronic pain end up caught between stigma and bureaucracy - told to choose between being compliant or being well.
+
+The audio has been anonymised and voice-morphed for privacy, but the sentiment is real. This isn't anti-doctor; it's pro-truth. It's about asking why evidence that challenges the status quo still gets buried.
+
+Sometimes the system needs a remix.
+
+EDIT: Added interview excerpt with Guy Haddleton - Every New Zealander Should Have The Right to a Pain Free Existence - [https://soundcloud.com/jch254/every-new-zealander-should-have-the-right-to-a-pain-free-existence](https://soundcloud.com/jch254/every-new-zealander-should-have-the-right-to-a-pain-free-existence)

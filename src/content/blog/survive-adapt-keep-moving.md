@@ -1,0 +1,15 @@
+---
+title: "I Was An MIT Educated Neurosurgeon Now I'm Unemployed And Alone In The Mountains How Did I Get Here?"
+description: "An amazing watch about chronic pain, the western medical system, and finding clarity outside of it."
+date: 2025-05-20
+tags: ["chronic pain", "healthcare", "personal"]
+draft: false
+---
+
+Absolutely amazing watch. I have lived with chronic pain and thoracic outlet syndrome for almost ten years. The western medical system's solution was opioids of course. So I was essentially made dependent on substances I didn't want to be taking. I've been the ICU twice with respiratory depression from these medications, had multiple seizures and struggle to make it through the day without being in agony.
+
+Surgery was always the last option. I was young and fit and I could manage the pain with drugs, what's the problem right? I haven't had surgery yet and I don't believe I will because the system and models of the institutions are broken. It's all about money and big pharma at the end of the day.
+
+Just a few words from someone who has lived in debilitating pain for almost a decade.
+
+[https://www.youtube.com/watch?v=25LUF8GmbFU](https://www.youtube.com/watch?v=25LUF8GmbFU)

@@ -1,0 +1,19 @@
+---
+title: "Don't speak unless your words are more beautiful than silence"
+description: "Ab-Soul on survival, vulnerability, and second chances after jumping off a freeway overpass."
+date: 2025-04-10
+tags: ["music", "mental health", "hip hop", "vulnerability"]
+draft: false
+---
+
+"Don't speak unless your words are more beautiful than silence." - Ab-Soul - [https://x.com/abdashsoul/status/834107301535506432](https://x.com/abdashsoul/status/834107301535506432)
+
+"I pretty much finished the album before I did what I did," he explained. "How I'm choosing to take it is and I'm not giving it credit - but it brought me down to a place where I needed to be as vulnerable as possible, and as soon as I said everything I needed to say, I jumped."
+
+"My jaw's f**ked up. I got a lot of work to do still. My foot is completely reconstructed, all the way to my pelvis. Everything but my knee. It doesn't even make sense that my knee wasn't affected," said the Los Angeles native. "If my knee would have been affected, I might not be walking. I did not get any brain damage. I jumped off a freeway overpass, man, it was about 50 feet. I think a car broke my fall. No brain damage. It's God. That was, 'Alright bro, now sit down and shut up. Take it all in. Relax. You blessed, man.'"
+
+Ab-Soul recalled that he woke up on the ground, acknowledging the fact that he was still alive. "My first thought was, 'F**king idiot.' I woke up on the floor, bro. Yanked me up. I passed back out and woke up in the hospital." Additionally, he shared that he kept this secret from several of his loved ones, but once he did explain what transpired, he felt a sense of relief.
+
+It's deeply interesting to understand what drives people to the point of no return and how they react in such situations. In Ab-Soul's case he survived a 50 foot jump off a freeway overpass which he attributes to God and has today released a new album that is a banger ([https://open.spotify.com/album/4h3f43cFQyDqezGcREnTK6](https://open.spotify.com/album/4h3f43cFQyDqezGcREnTK6)). Others unfortunately do not get that second chance and are gone for good 🕊
+
+Never take anyone or anything for granted. One second they are here, and the next, they are gone.
