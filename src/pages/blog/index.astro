@@ -19,7 +19,7 @@ const posts = (await getCollection('blog', ({ data }) => !data.draft))
   ]} />
 
   <main class="mx-auto max-w-2xl px-6 pb-16">
-    <h2 class="mb-8 text-3xl font-extrabold tracking-tight md:text-4xl">Blog</h2>
+    <h2 class="mb-8 text-2xl font-extrabold tracking-tight md:text-3xl">Blog</h2>
 
     <div class="space-y-4">
       {posts.map((post) => (

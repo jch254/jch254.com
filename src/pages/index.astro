@@ -1,7 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Hero from '../components/Hero.astro';
-import SectionCard from '../components/SectionCard.astro';
 import Footer from '../components/Footer.astro';
 ---
 
@@ -11,7 +10,7 @@ import Footer from '../components/Footer.astro';
   <main class="mx-auto max-w-2xl px-6">
     <!-- Who am I? -->
     <section class="py-10">
-      <h2 class="mb-6 text-3xl font-extrabold tracking-tight md:text-4xl">Who am I?</h2>
+      <h2 class="mb-6 text-2xl font-extrabold tracking-tight md:text-3xl">Who am I?</h2>
       <div class="space-y-4 text-base leading-relaxed text-brand-muted">
         <p>
           Hi, I'm Jordan H. I turn code into systems by day and get lost in music by night.
@@ -32,7 +31,7 @@ import Footer from '../components/Footer.astro';
 
     <!-- What do I do? -->
     <section class="py-10">
-      <h2 class="mb-6 text-3xl font-extrabold tracking-tight md:text-4xl">What do I do?</h2>
+      <h2 class="mb-6 text-2xl font-extrabold tracking-tight md:text-3xl">What do I do?</h2>
       <div class="space-y-4 text-base leading-relaxed text-brand-muted">
         <p>
           I see product development like music. Every layer of the stack is an instrument: you
@@ -57,7 +56,7 @@ import Footer from '../components/Footer.astro';
 
     <!-- Anything else? -->
     <section class="py-10">
-      <h2 class="mb-6 text-3xl font-extrabold tracking-tight md:text-4xl">Anything else?</h2>
+      <h2 class="mb-6 text-2xl font-extrabold tracking-tight md:text-3xl">Anything else?</h2>
       <div class="space-y-4 text-base leading-relaxed text-brand-muted">
         <p>
           Music is life. I'm a musician, producer, and long-time vinyl collector. During the
@@ -80,29 +79,7 @@ import Footer from '../components/Footer.astro';
       </div>
     </section>
 
-    <!-- Section Cards -->
-    <section class="grid gap-4 py-10 sm:grid-cols-2 lg:grid-cols-3">
-      <SectionCard
-        title="Blog"
-        description="Posts on whatever is on my mind"
-        href="/blog"
-        ctaLabel="Open Blog"
-      />
-      <SectionCard
-        title="Portfolio"
-        description="Internet-powered/related projects"
-        href="https://603.nz"
-        ctaLabel="Open Portfolio"
-        external
-      />
-      <SectionCard
-        title="GitHub"
-        description="Open source projects created/maintained by me"
-        href="https://github.com/jch254"
-        ctaLabel="Open @jch254"
-        external
-      />
-    </section>
+
   </main>
 
   <Footer />
