@@ -20,4 +20,4 @@ Ever heard of the [12 Factor App](https://12factor.net/)?
 
 ## Further reading
 
-- [Vibe coding is a hot skill — and security experts are worried](https://ia.acs.org.au/article/2025/vibe-coding-is-a-hot-skill--and-security-experts-are-worried.html)
+- [Vibe coding is a hot skill — and security experts are worried](https://ia.acs.org.au/article/2025/vibe-coding-is-a-hot-skill---and-security-experts-are-worried.html)

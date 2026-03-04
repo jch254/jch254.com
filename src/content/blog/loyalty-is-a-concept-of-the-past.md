@@ -26,10 +26,10 @@ Now a key metric many companies are focused on is **profitability**, regardless 
 
 The amount of material discussing mental illness and suicide within startups is vast:
 
-- [The Suicidal Founder](https://joineboot.org/p/the-suicidal-founder) — "Dreams can come true, but at what cost?"
+- [The Suicidal Founder](https://joinreboot.org/p/the-suicidal-founder) — "Dreams can come true, but at what cost?"
 - [Why Rates of Suicide And Depression Are So High For Entrepreneurs](https://medium.com/invisible-illness/why-rates-of-suicide-and-depression-are-so-high-for-entrepreneurs-a53734ff1deb)
 - [Entrepreneurs And Suicide Risk: A New Perspective On Entrapment Provides Hope](https://www.forbes.com/sites/prudygourguechon/2018/08/23/entrepreneurs-and-suicide-a-new-perspective-on-entrapment-gives-hope/)
-- [Suicide prevention steps for startup founders & entrepreneurs](https://medium.com/getting-better-together/suicide-prevention-steps-for-startup-founders-entrepreneurs-3a6a385a3931)
+- [Suicide prevention steps for startup founders & entrepreneurs](https://medium.com/getting-better-together/suicide-prevention-steps-for-startup-founders-entrepreneurs-3e6a385a3971)
 - [The death of a young New Zealand startup founder makes me wonder if it's really safe for entrepreneurs to fail](https://www.startupdaily.net/advice/the-death-of-a-young-new-zealand-startup-founder-makes-me-wonder-if-its-really-safe-for-entrepreneurs-to-fail/)
 
 ## Further reading
