@@ -7,7 +7,7 @@ import sitemap from '@astrojs/sitemap';
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://jch254.nz',
+  site: 'https://jch254.com',
   integrations: [react(), mdx(), tailwind(), sitemap()],
   output: 'static',
 });
