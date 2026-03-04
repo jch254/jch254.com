@@ -10,7 +10,7 @@ draft: false
 
 I've been a software engineer for over 15 years. I've built platforms that scale to millions of users. And yet, for the longest time, my personal website lived on Fingertip - a no-code website builder.
 
-It worked. Sort of. But "sort of" eventually stops being good enough. And as it turns out, my timing was impeccable - Fingertip has since been acquired by LinkTree and is shutting down in May 2026.
+It worked. Sort of. But "sort of" eventually stops being good enough. And as it turns out, my timing was impeccable - Fingertip has since been acquired by Linktree and is shutting down in May 2026.
 
 ## Why Fingertip?
 
@@ -18,7 +18,7 @@ When I first set up jch254.com, I wanted something quick and low-friction. Finge
 
 ## Where it fell short
 
-**No real ownership.** My content lived on someone else's platform, behind someone else's CMS. If Fingertip shut down tomorrow, I'd be scrambling - and that's exactly what happened. LinkTree acquired Fingertip and is winding it down. For someone who preaches infrastructure resilience at work, the irony of being caught out by platform risk on my own personal site wasn't lost on me.
+**No real ownership.** My content lived on someone else's platform, behind someone else's CMS. If Fingertip shut down tomorrow, I'd be scrambling - and that's exactly what happened. Linktree acquired Fingertip and is winding it down. For someone who preaches infrastructure resilience at work, the irony of being caught out by platform risk on my own personal site wasn't lost on me.
 
 **Limited customisation.** Want a dark theme with a custom colour palette and pixel-perfect layout? Good luck. No-code tools give you freedom within a box - and the box is smaller than it looks. Every time I wanted to tweak something, I hit a wall that a few lines of CSS would have solved instantly.
 
