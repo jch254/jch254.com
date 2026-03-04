@@ -1,0 +1,28 @@
+---
+interface Props {
+  /** Spotify URI or URL — e.g. "track/5kDkWHFx0AEvJ1Pfm2i0ac" or full URL */
+  src: string;
+  /** Embed height in pixels (default: 152 for tracks, use 352 for albums/playlists) */
+  height?: number;
+}
+
+const { src, height = 152 } = Astro.props;
+
+// Extract the path (type/id) from a full URL or a short path
+const match = src.match(/(?:open\.spotify\.com\/|spotify:)(track|album|playlist|episode|show)[/:]([a-zA-Z0-9]+)/);
+const embedPath = match ? `${match[1]}/${match[2]}` : src;
+---
+
+<div class="not-prose my-6">
+  <div class="overflow-hidden rounded-xl border border-brand-border">
+    <iframe
+      src={`https://open.spotify.com/embed/${embedPath}?theme=0`}
+      width="100%"
+      height={height}
+      frameborder="0"
+      allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+      allowfullscreen
+      loading="lazy"
+    ></iframe>
+  </div>
+</div>

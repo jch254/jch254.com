@@ -1,0 +1,25 @@
+---
+interface Props {
+  /** Full SoundCloud URL (track, playlist, or artist) */
+  url: string;
+  /** Embed height in pixels (default: 166 for tracks, use 300+ for playlists) */
+  height?: number;
+}
+
+const { url, height = 166 } = Astro.props;
+const encodedUrl = encodeURIComponent(url);
+---
+
+<div class="not-prose my-6">
+  <div class="overflow-hidden rounded-xl border border-brand-border">
+    <iframe
+      width="100%"
+      height={height}
+      scrolling="no"
+      frameborder="no"
+      allow="autoplay"
+      loading="lazy"
+      src={`https://w.soundcloud.com/player/?url=${encodedUrl}&color=%23ff5500&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false&visual=true`}
+    ></iframe>
+  </div>
+</div>

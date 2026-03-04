@@ -32,6 +32,9 @@ importers:
       astro:
         specifier: ^5.17.1
         version: 5.18.0(jiti@1.21.7)(rollup@4.59.0)(typescript@5.9.3)(yaml@2.8.2)
+      astro-auto-import:
+        specifier: ^0.5.1
+        version: 0.5.1(astro@5.18.0(jiti@1.21.7)(rollup@4.59.0)(typescript@5.9.3)(yaml@2.8.2))
       react:
         specifier: ^19.2.4
         version: 19.2.4
@@ -970,6 +973,12 @@ packages:
   astring@1.9.0:
     resolution: {integrity: sha512-LElXdjswlqjWrPpJFg1Fx4wpkOCxj1TDHlSV4PlaRxHGWko024xICaa97ZkMfs6DRKlCguiAI+rbXv5GWwXIkg==}
     hasBin: true
+
+  astro-auto-import@0.5.1:
+    resolution: {integrity: sha512-7YZKVA7LE5nLkopOM+KIHqnh6g2CfHrysj2JUXNBrC3FppHH42RSNBM7mgsEgaq2lgHVDt7hsDQIA0JKTwIN8A==}
+    engines: {node: '>=20.0.0'}
+    peerDependencies:
+      astro: ^5.0.0-beta || ^6.0.0-alpha
 
   astro@5.18.0:
     resolution: {integrity: sha512-CHiohwJIS4L0G6/IzE1Fx3dgWqXBCXus/od0eGUfxrZJD2um2pE7ehclMmgL/fXqbU7NfE1Ze2pq34h2QaA6iQ==}
@@ -3116,6 +3125,11 @@ snapshots:
   array-iterate@2.0.1: {}
 
   astring@1.9.0: {}
+
+  astro-auto-import@0.5.1(astro@5.18.0(jiti@1.21.7)(rollup@4.59.0)(typescript@5.9.3)(yaml@2.8.2)):
+    dependencies:
+      acorn: 8.16.0
+      astro: 5.18.0(jiti@1.21.7)(rollup@4.59.0)(typescript@5.9.3)(yaml@2.8.2)
 
   astro@5.18.0(jiti@1.21.7)(rollup@4.59.0)(typescript@5.9.3)(yaml@2.8.2):
     dependencies:
