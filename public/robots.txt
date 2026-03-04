@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://jch254.com/sitemap-index.xml
+Sitemap: https://jch254.nz/sitemap-index.xml
