@@ -1,0 +1,109 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from '../components/Hero.astro';
+import SectionCard from '../components/SectionCard.astro';
+import Footer from '../components/Footer.astro';
+---
+
+<BaseLayout title="Jordan Hornblow — Principal Software Engineer">
+  <Hero />
+
+  <main class="mx-auto max-w-2xl px-6">
+    <!-- Who am I? -->
+    <section class="py-10">
+      <h2 class="mb-6 text-3xl font-extrabold tracking-tight md:text-4xl">Who am I?</h2>
+      <div class="space-y-4 text-base leading-relaxed text-brand-muted">
+        <p>
+          Hi, I'm Jordan H. I turn code into systems by day and get lost in music by night.
+          I was born in New Zealand, where I spent the first 23 years of my life. After living
+          through thousands of earthquakes in Christchurch, I decided a broken city wasn't for
+          me at the time and moved to Melbourne, Australia in 2014. Eight years later, in mid-2022,
+          I relocated to Austin, Texas for work.
+        </p>
+        <p>
+          I returned to Te Waipounamu, Aotearoa in early 2024 for health reasons and worked
+          remotely from home.
+          I'm still here but will be back in Melbourne for the next chapter very soon. Coming home was energizing, the warmth and
+          strength of Kiwi culture reminded me how greedy and transactional much of the world
+          had become in my decade away.
+        </p>
+      </div>
+    </section>
+
+    <!-- What do I do? -->
+    <section class="py-10">
+      <h2 class="mb-6 text-3xl font-extrabold tracking-tight md:text-4xl">What do I do?</h2>
+      <div class="space-y-4 text-base leading-relaxed text-brand-muted">
+        <p>
+          I see product development like music. Every layer of the stack is an instrument: you
+          can play them on their own, but when you understand how they fit together, that's when
+          you create something that really sings. Going deep into the full stack lets me architect
+          systems that are stronger, more resilient, and easier to tune when things go off-key.
+        </p>
+        <p>
+          I thrive on the creative rush of building from the ground up, but I've also learned to
+          appreciate the rhythm of working with existing systems: maintaining, refining, and
+          pushing them to perform better than before. Whether it's writing code, squashing bugs,
+          or shaping the bigger picture, I approach it like composing: build, listen, adjust,
+          iterate until it feels right.
+        </p>
+        <p>
+          Lately, I've been spending time with AWS, Terraform, Node.js/Nest.js, TypeScript,
+          React, GraphQL, and Python, alongside AI tools. Experimenting with ways to fuse
+          cutting-edge tech into products that feel fresh and meaningful.
+        </p>
+      </div>
+    </section>
+
+    <!-- Anything else? -->
+    <section class="py-10">
+      <h2 class="mb-6 text-3xl font-extrabold tracking-tight md:text-4xl">Anything else?</h2>
+      <div class="space-y-4 text-base leading-relaxed text-brand-muted">
+        <p>
+          Music is life. I'm a musician, producer, and long-time vinyl collector. During the
+          Melbourne COVID lockdowns I leaned hard into that passion, amassing over 800 records,
+          which I catalog and track through Discogs (OS beta tester represent). For me, music
+          isn't just a hobby, it's a way of making sense of the world: listening, creating, and
+          always chasing the next sound that moves me.
+        </p>
+        <p>
+          I'm also an active contributor to open-source software and have shared a number of my
+          own projects with the community. Beyond code, I enjoy stepping behind the camera to
+          capture moments, and I keep a blog, project portfolio, and GitHub profile where I share
+          what I'm building.
+        </p>
+        <p>
+          Most importantly, I'm an advocate for suicide awareness and prevention, a cause deeply
+          personal after losing an uncle and two close friends. It's a reminder that behind the
+          code, the projects, and the music, people and connection matter most.
+        </p>
+      </div>
+    </section>
+
+    <!-- Section Cards -->
+    <section class="grid gap-4 py-10 sm:grid-cols-2 lg:grid-cols-3">
+      <SectionCard
+        title="Blog"
+        description="Posts on whatever is on my mind"
+        href="/blog"
+        ctaLabel="Open Blog"
+      />
+      <SectionCard
+        title="Portfolio"
+        description="Internet-powered/related projects"
+        href="https://603.nz"
+        ctaLabel="Open Portfolio"
+        external
+      />
+      <SectionCard
+        title="GitHub"
+        description="Open source projects created/maintained by me"
+        href="https://github.com/jch254"
+        ctaLabel="Open @jch254"
+        external
+      />
+    </section>
+  </main>
+
+  <Footer />
+</BaseLayout>

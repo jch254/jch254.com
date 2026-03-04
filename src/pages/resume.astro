@@ -1,0 +1,177 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from '../components/Hero.astro';
+import Footer from '../components/Footer.astro';
+---
+
+<BaseLayout title="Resume — Jordan Hornblow" description="Jordan Hornblow's resume — Principal Engineer with 15+ years scaling SaaS platforms.">
+  <Hero compact />
+
+  <main class="mx-auto max-w-2xl px-6 pb-16">
+    <h1 class="mb-2 text-3xl font-extrabold tracking-tight md:text-4xl">Resume</h1>
+    <p class="mb-8 text-sm text-brand-muted">Te Waipounamu, Aotearoa | New Zealand <span class="text-brand-border">·</span> From late 2025 based back in Melbourne</p>
+
+    <!-- Summary -->
+    <section class="mb-10">
+      <p class="text-base leading-relaxed text-brand-muted">
+        Principal Engineer with 15+ years scaling SaaS platforms (Xero, me&amp;u, LawVu) through
+        AI-powered automation and modern architecture. Proven track record of reducing customer
+        onboarding time by building systems that outperform commercial solutions, while leading
+        technical strategy and cross-functional teams.
+      </p>
+    </section>
+
+    <!-- Skills -->
+    <section class="mb-10">
+      <h2 class="mb-4 text-2xl font-bold tracking-tight">Skills</h2>
+      <div class="space-y-2 text-sm text-brand-muted">
+        <p><span class="font-semibold text-white">Domain Expertise:</span> API Design, Microservices, SaaS Scaling, Automation</p>
+        <p><span class="font-semibold text-white">Core Technologies:</span> TypeScript, Node.js, React, Python, AWS, NestJS</p>
+        <p><span class="font-semibold text-white">Cloud &amp; Infrastructure:</span> AWS, Azure, Terraform, Docker</p>
+        <p><span class="font-semibold text-white">AI/ML:</span> Claude, OpenAI ChatGPT, Azure AI, Prompt Engineering</p>
+        <p><span class="font-semibold text-white">Architecture:</span> Microservices, Event-Driven, API Design (REST/GraphQL)</p>
+      </div>
+    </section>
+
+    <!-- Experience -->
+    <section class="mb-10">
+      <h2 class="mb-6 text-2xl font-bold tracking-tight">Experience</h2>
+      <div class="space-y-8">
+
+        <!-- LawVu -->
+        <div class="relative border-l-2 border-brand-border pl-6">
+          <div class="absolute -left-[9px] top-1 h-4 w-4 rounded-full border-2 border-brand-accent bg-brand-bg"></div>
+          <h3 class="text-lg font-bold text-white">Senior Software Engineer L2</h3>
+          <p class="text-sm font-medium text-brand-accent">LawVu · Remote, New Zealand · Apr 2024 – Aug 2025</p>
+          <ul class="mt-2 space-y-1.5 text-sm leading-relaxed text-brand-muted list-disc pl-4">
+            <li>Built and scaled contract management workflows within LawVu's platform, improving onboarding speed and reducing support overhead.</li>
+            <li>Engineered backend, infrastructure, and AI/automation solutions to streamline customer onboarding, cutting manual steps and reducing time-to-value.</li>
+            <li>Built improved C# backend for complex approval workflows; led migration from legacy systems.</li>
+            <li>Designed Python-based spreadsheet transformation service using Python/OpenAI, reducing onboarding data prep.</li>
+            <li>Developed Python + Azure AI Content Understanding powered PDF parsing solution processing 10k+ legacy contracts, outperforming commercial tools in accuracy and speed (e.g. Zuva).</li>
+          </ul>
+        </div>
+
+        <!-- Career break -->
+        <div class="relative border-l-2 border-brand-border pl-6">
+          <div class="absolute -left-[9px] top-1 h-4 w-4 rounded-full border-2 border-brand-border bg-brand-bg"></div>
+          <h3 class="text-lg font-bold text-white">Career Break</h3>
+          <p class="text-sm font-medium text-brand-accent">Austin, TX · Mar 2023 – Apr 2024</p>
+          <p class="mt-2 text-sm leading-relaxed text-brand-muted">
+            Took dedicated time away from full-time engineering to focus on health and well-being. Used this period to reset, reflect, and prepare for the next chapter with renewed energy and perspective, and relocation back to NZ.
+          </p>
+        </div>
+
+        <!-- me&u -->
+        <div class="relative border-l-2 border-brand-border pl-6">
+          <div class="absolute -left-[9px] top-1 h-4 w-4 rounded-full border-2 border-brand-accent bg-brand-bg"></div>
+          <h3 class="text-lg font-bold text-white">Head of Integration Engineering (Principal Engineer)</h3>
+          <p class="text-sm font-medium text-brand-accent">me&amp;u (FKA Mr Yum) · Melbourne / Austin, TX · Apr 2020 – Mar 2023</p>
+          <ul class="mt-2 space-y-1.5 text-sm leading-relaxed text-brand-muted list-disc pl-4">
+            <li>Designed and scaled third-party API integrations for the core platform as an early engineer, enabling rapid partner adoption and platform growth. Scaled integrations from 5 to 50+ partners in 18 months.</li>
+            <li>Led integrations team of 6 engineers, mentoring 3 to promotions while establishing development practices adopted across engineering org.</li>
+            <li>Led integrations with US partners after relocating to Austin, TX, expanding platform reach and accelerating North American growth.</li>
+            <li>Led the modularization of the entire me&amp;u monolithic solution into more agile, focused services, improving scalability and flexibility.</li>
+            <li>Delivered production-ready products with TypeScript, React, NestJS, GraphQL, Terraform, and AWS, accelerating platform scalability and improving developer velocity.</li>
+            <li>Contributed to growth milestones, including Australia's third-largest Series A ($65M USD, 2021).</li>
+          </ul>
+        </div>
+
+        <!-- APositive -->
+        <div class="relative border-l-2 border-brand-border pl-6">
+          <div class="absolute -left-[9px] top-1 h-4 w-4 rounded-full border-2 border-brand-accent bg-brand-bg"></div>
+          <h3 class="text-lg font-bold text-white">Senior Full Stack Developer</h3>
+          <p class="text-sm font-medium text-brand-accent">APositive · Melbourne, Australia · Dec 2016 – Jul 2020</p>
+          <ul class="mt-2 space-y-1.5 text-sm leading-relaxed text-brand-muted list-disc pl-4">
+            <li>Delivered and maintained fintech products using React, Node.js, Terraform, and AWS, strengthening platform reliability and scalability.</li>
+            <li>Designed and delivered APay, a key workforce finance product (think Afterpay for recruiters).</li>
+            <li>Scripted all infrastructure automation and cloud migration initiatives.</li>
+          </ul>
+        </div>
+
+        <!-- Xero -->
+        <div class="relative border-l-2 border-brand-border pl-6">
+          <div class="absolute -left-[9px] top-1 h-4 w-4 rounded-full border-2 border-brand-accent bg-brand-bg"></div>
+          <h3 class="text-lg font-bold text-white">Developer / Senior Developer</h3>
+          <p class="text-sm font-medium text-brand-accent">Xero · Melbourne, Australia · May 2014 – Dec 2016</p>
+          <ul class="mt-2 space-y-1.5 text-sm leading-relaxed text-brand-muted list-disc pl-4">
+            <li>Developed features across multiple Xero teams (fixed assets, quotes, 2FA, provisioning), adapting quickly to new challenges and successfully transitioning to long-term remote collaboration.</li>
+            <li>Contributed as a key developer on Xero TaxTouch (iOS) across design, development, release, and production support.</li>
+            <li>Partnered with global teams, gaining full end-to-end mobile app delivery experience and adaptability in cross-time-zone collaboration.</li>
+            <li>Promoted to senior developer in Oct 2016.</li>
+          </ul>
+        </div>
+
+        <!-- Telogis -->
+        <div class="relative border-l-2 border-brand-border pl-6">
+          <div class="absolute -left-[9px] top-1 h-4 w-4 rounded-full border-2 border-brand-accent bg-brand-bg"></div>
+          <h3 class="text-lg font-bold text-white">Software Engineer</h3>
+          <p class="text-sm font-medium text-brand-accent">Telogis / Verizon Connect · Christchurch, NZ · Mar 2012 – Mar 2014</p>
+          <ul class="mt-2 space-y-1.5 text-sm leading-relaxed text-brand-muted list-disc pl-4">
+            <li>Built backend services for Telogis Fleet SaaS using .NET, JavaScript, and PostgreSQL in a Kanban environment, improving platform performance and reliability.</li>
+            <li>Redesigned and enhanced the Fleet UI with Ext JS, creating reusable custom components adopted across other products.</li>
+            <li>Completed a developer exchange in Austin, TX (2013), working on lower-level server-side processes (parsing raw UDP GPS/diagnostic packets into standardized formats).</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Early Career -->
+    <section class="mb-10">
+      <h2 class="mb-6 text-2xl font-bold tracking-tight">Early Career Highlights</h2>
+      <div class="space-y-3 text-sm leading-relaxed text-brand-muted">
+        <p><span class="font-semibold text-white">Founder / Software Engineer, Kiwi Development (2011–2014)</span> — Founded Kiwi Development; accepted into Microsoft BizSpark. Delivered client projects in .NET, Ruby on Rails, and JavaScript; managed Windows/SQL Server infrastructure; maintained Inzone Experience kiosks across NZ.</p>
+        <p><span class="font-semibold text-white">Tutor, University of Canterbury (2011)</span> — Taught Python &amp; CS fundamentals; led classes of 50; supported Pacific students via PASS programme.</p>
+        <p><span class="font-semibold text-white">Research Intern, HITLab NZ (2010–2011)</span> — Summer Scholarship recipient; researched mobile AR for navigation; ran experiments; learned Android/AR systems.</p>
+      </div>
+    </section>
+
+    <!-- Education -->
+    <section class="mb-10">
+      <h2 class="mb-6 text-2xl font-bold tracking-tight">Education</h2>
+      <div class="relative border-l-2 border-brand-border pl-6">
+        <div class="absolute -left-[9px] top-1 h-4 w-4 rounded-full border-2 border-brand-accent bg-brand-bg"></div>
+        <h3 class="text-lg font-bold text-white">BSc (Computer Science)</h3>
+        <p class="text-sm font-medium text-brand-accent">University of Canterbury · Christchurch, NZ · 2009–2011</p>
+        <ul class="mt-2 space-y-1 text-sm leading-relaxed text-brand-muted list-disc pl-4">
+          <li>Completed projects in Java, C, C++, Python, and Android.</li>
+          <li>Gained exposure to the full software development life cycle (requirements, design, implementation, testing).</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Achievements -->
+    <section class="mb-10">
+      <h2 class="mb-4 text-2xl font-bold tracking-tight">Achievements &amp; Awards</h2>
+      <ul class="space-y-1.5 text-sm leading-relaxed text-brand-muted list-disc pl-4">
+        <li>University of Canterbury Summer Scholarship (2010–2011)</li>
+        <li>Golden Key International Honour Society (2009–present)</li>
+        <li>College of Engineering Computer Science Scholarship (2009)</li>
+        <li>NCEA Levels 1–3 &amp; NZ University Entrance</li>
+      </ul>
+    </section>
+
+    <!-- Contact -->
+    <section class="flex flex-wrap gap-4">
+      <a
+        href="mailto:jordan@jch254.com"
+        class="inline-flex items-center gap-2 rounded-full bg-brand-accent px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-accent-hover"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+        </svg>
+        Get in touch
+      </a>
+      <a
+        href="https://linkedin.com/in/jch254"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="inline-flex items-center gap-2 rounded-full border border-brand-border px-6 py-2.5 text-sm font-semibold text-brand-text transition hover:border-brand-accent hover:text-white"
+      >
+        View on LinkedIn
+      </a>
+    </section>
+  </main>
+
+  <Footer />
+</BaseLayout>

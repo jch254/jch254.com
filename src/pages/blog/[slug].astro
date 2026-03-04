@@ -1,0 +1,92 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Hero from '../../components/Hero.astro';
+import Breadcrumb from '../../components/Breadcrumb.astro';
+import Footer from '../../components/Footer.astro';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog', ({ data }) => !data.draft);
+  return posts.map((post) => ({
+    params: { slug: post.slug },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+
+const formattedDate = post.data.date.toLocaleDateString('en-NZ', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+});
+---
+
+<BaseLayout title={`${post.data.title} — Jordan Hornblow`} description={post.data.description}>
+  <Hero compact />
+
+  <Breadcrumb items={[
+    { label: 'Jordan Hornblow', href: '/' },
+    { label: 'Blog', href: '/blog' },
+    { label: 'Post' },
+  ]} />
+
+  <main class="mx-auto max-w-2xl px-6 pb-16">
+    <article>
+      <header class="mb-8">
+        <h1 class="mb-3 text-3xl font-extrabold leading-tight tracking-tight md:text-4xl">
+          {post.data.title}
+        </h1>
+
+        <div class="flex flex-wrap items-center gap-3 text-sm text-brand-muted">
+          <time datetime={post.data.date.toISOString()}>
+            {formattedDate}
+          </time>
+
+          {post.data.tags.length > 0 && (
+            <>
+              <span class="text-brand-border">·</span>
+              <div class="flex flex-wrap gap-1.5">
+                {post.data.tags.map((tag: string) => (
+                  <span class="rounded-full bg-brand-accent/10 px-2.5 py-0.5 text-xs font-medium text-brand-accent">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+      </header>
+
+      {post.data.heroImage && (
+        <div class="mb-8 overflow-hidden rounded-xl">
+          <img
+            src={post.data.heroImage.src}
+            alt={post.data.title}
+            class="w-full"
+          />
+        </div>
+      )}
+
+      <div class="prose prose-invert prose-lg max-w-none prose-headings:font-bold prose-headings:tracking-tight prose-a:text-brand-accent prose-a:no-underline hover:prose-a:underline prose-strong:text-white prose-code:text-brand-accent prose-code:bg-brand-card prose-code:rounded prose-code:px-1.5 prose-code:py-0.5 prose-code:text-sm prose-pre:bg-brand-card prose-pre:border prose-pre:border-brand-border prose-blockquote:border-brand-accent prose-li:marker:text-brand-accent">
+        <Content />
+      </div>
+    </article>
+
+    <!-- Back link -->
+    <div class="mt-12 border-t border-brand-border pt-6">
+      <a
+        href="/blog"
+        class="inline-flex items-center gap-2 text-sm font-semibold text-brand-accent transition hover:text-brand-accent-hover"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M7 16l-4-4m0 0l4-4m-4 4h18" />
+        </svg>
+        Back to all posts
+      </a>
+    </div>
+  </main>
+
+  <Footer />
+</BaseLayout>
