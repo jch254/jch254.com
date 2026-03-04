@@ -1,7 +1,7 @@
 ---
 title: "Cannabis vs Opioids"
 description: "A real conversation with my GP about outdated medical advice, the opioid epidemic, and why cannabis stigma is costing lives."
-date: 2025-08-10
+date: 2025-10-25
 tags: ["chronic pain", "cannabis", "opioids", "healthcare"]
 draft: false
 ---

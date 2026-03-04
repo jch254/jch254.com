@@ -1,7 +1,7 @@
 ---
 title: "I Was An MIT Educated Neurosurgeon Now I'm Unemployed And Alone In The Mountains How Did I Get Here?"
 description: "An amazing watch about chronic pain, the western medical system, and finding clarity outside of it."
-date: 2025-05-20
+date: 2024-08-20
 tags: ["chronic pain", "healthcare", "personal"]
 draft: false
 ---
