@@ -6,20 +6,23 @@ Personal website and blog, built with [Astro](https://astro.build) + React + Typ
 
 - **Astro** — static site generator (content-first, zero JS by default)
 - **React** — interactive islands where needed (`@astrojs/react`)
-- **MDX** — JSX-in-Markdown for rich blog posts (`@astrojs/mdx`)
-- **Tailwind CSS** — utility-first styling (`@astrojs/tailwind`)
+- **MDX** — JSX-in-Markdown for rich blog posts with embeds (`@astrojs/mdx`)
+- **Tailwind CSS** — utility-first styling (`@astrojs/tailwind`) + `@tailwindcss/typography`
 - **Content Collections** — type-safe blog post schema in `src/content/blog/`
 - **Sitemap** — auto-generated at build time (`@astrojs/sitemap`)
+- **Auto Import** — embed components auto-imported into MDX (`astro-auto-import`)
+- **Sharp** — image optimization at build time
 
 ## Project Structure
 
 ```text
 /
-├── public/              # Static assets (CNAME, robots.txt, favicon, og-default.png)
+├── public/              # Static assets (CNAME, robots.txt, favicon.ico, favicon.svg, og-default.png)
 ├── src/
 │   ├── components/      # Astro components (Hero, BlogCard, Breadcrumb, SectionCard, etc.)
+│   │   └── embeds/      # Media embed components (YouTube, SoundCloud, Spotify, Vimeo, Instagram)
 │   ├── content/
-│   │   └── blog/        # Markdown blog posts (Content Collection)
+│   │   └── blog/        # Markdown / MDX blog posts (Content Collection)
 │   ├── layouts/
 │   │   └── BaseLayout.astro
 │   └── pages/
@@ -55,7 +58,7 @@ Deployed to **GitHub Pages** via GitHub Actions:
 
 ## Adding a Blog Post
 
-Create a new `.md` file in `src/content/blog/`:
+Create a new `.md` or `.mdx` file in `src/content/blog/`. Use `.mdx` if you need embed components:
 
 ```markdown
 ---
@@ -73,10 +76,25 @@ Your content here...
 
 The post will appear on the blog listing page and get its own URL at `/blog/<filename>/`.
 
-## Open Graph / Social Sharing
+## Embed Components
 
-Every page includes `og:image` and `twitter:image` meta tags for link previews on LinkedIn, Twitter/X, etc.
+Five media embed components are auto-imported into all MDX blog posts via `astro-auto-import` — no manual imports needed:
 
+| Component      | Props                                     | Example                                              |
+| :------------- | :---------------------------------------- | :--------------------------------------------------- |
+| `<YouTube />`  | `id` (required), `title?`                 | `<YouTube id="dQw4w9WgXcQ" />`                       |
+| `<SoundCloud />`| `url` (required), `height?`              | `<SoundCloud url="https://soundcloud.com/..." />`     |
+| `<Spotify />`  | `src` (URI or path), `height?`            | `<Spotify src="track/4uLU6hMCjMI75M1A2tKUQC" />`     |
+| `<Vimeo />`    | `id` (required), `title?`                 | `<Vimeo id="123456789" />`                            |
+| `<Instagram />` | `url` (URL or ID), `title?`              | `<Instagram url="https://instagram.com/p/..." />`     |
+
+## SEO & Social Sharing
+
+Every page includes full meta tags and structured data:
+
+- **Open Graph & Twitter cards** — `og:image`, `twitter:image`, and related meta tags for link previews on LinkedIn, Twitter/X, etc.
+- **JSON-LD structured data** — `Article` schema for blog posts, `WebSite` schema for other pages
+- **Canonical URLs** — auto-generated for all pages
 - **Blog posts with a `heroImage`** use that image as the OG image.
 - **All other pages** fall back to `public/og-default.png`.
 
