@@ -2,7 +2,7 @@
 title: "The Great 2025-26 Software Security Lapse"
 description: "No shit Sherlock... here comes the Great 2025-26 Software Security Lapse affecting anything and everything that is powered by software from the vibers."
 date: 2025-08-25
-tags: ["security", "AI", "vibe coding", "tech industry"]
+tags: ["security", "ai", "vibe coding"]
 draft: false
 ---
 

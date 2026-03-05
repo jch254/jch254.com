@@ -2,7 +2,7 @@
 title: "Loyalty is a concept of the past in this day and age"
 description: "OpenAI's leadership exodus, corporate loyalty, and why companies are absolutely nothing without the people that built them."
 date: 2024-10-01
-tags: ["tech industry", "loyalty", "corporate culture", "OpenAI"]
+tags: ["loyalty", "corporate culture", "openai"]
 draft: false
 ---
 

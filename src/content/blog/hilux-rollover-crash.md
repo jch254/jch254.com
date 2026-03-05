@@ -2,7 +2,9 @@
 title: "I Survived a Hilux Rollover Crash: Black Ice, Mud, and a Miracle Escape"
 description: "Two weeks after a minor crash on black ice that left me with a fractured metacarpal, I was on my way to an orthopaedic follow-up when things got... interesting."
 date: 2025-08-11
-tags: ["personal", "life", "resilience"]
+tags: ["life", "resilience", "survival"]
+heroImage: ./hilux-rollover-crash-hero.jpeg
+heroImageCaption: The aftermath of a Hilux kickflip
 draft: false
 ---
 

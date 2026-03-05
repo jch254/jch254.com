@@ -2,7 +2,7 @@
 title: "Telegram's Encryption Deception"
 description: "As mentioned by many news sources around the globe - Telegram will better cooperate with law enforcement agencies and hand over user data."
 date: 2024-09-15
-tags: ["security", "privacy", "encryption", "tech"]
+tags: ["telegram", "security", "encryption"]
 draft: false
 ---
 

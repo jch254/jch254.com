@@ -1,0 +1,29 @@
+---
+interface Props {
+  /** Full Apple Podcasts URL */
+  url: string;
+  /** Embed height in pixels (default: 175 for episodes) */
+  height?: number;
+}
+
+const { url, height = 175 } = Astro.props;
+
+// Convert podcasts.apple.com URL to embed.podcasts.apple.com
+const embedUrl = url.replace('https://podcasts.apple.com', 'https://embed.podcasts.apple.com');
+---
+
+<div class="not-prose my-6">
+  <div class="overflow-hidden rounded-xl border border-brand-border">
+    <iframe
+      src={embedUrl}
+      width="100%"
+      height={height}
+      frameborder="0"
+      allow="autoplay; clipboard-write; encrypted-media"
+      allowfullscreen
+      loading="lazy"
+      sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-top-navigation-by-user-activation"
+      style="background: transparent;"
+    ></iframe>
+  </div>
+</div>

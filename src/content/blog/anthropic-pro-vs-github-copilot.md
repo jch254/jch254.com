@@ -2,7 +2,8 @@
 title: "🚫 Anthropic Pro vs. GitHub Copilot: Night and Day 🚫"
 description: "I paid $400 NZD for a year of Claude Pro. Here's what I got — and why GitHub Copilot is worth every cent."
 date: 2025-09-25
-tags: ["AI", "developer tools", "Claude", "GitHub Copilot"]
+tags: ["ai", "developer tools", "claude"]
+heroImage: ./anthropic-pro-vs-github-copilot-hero.jpeg
 draft: false
 ---
 

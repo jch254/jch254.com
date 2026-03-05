@@ -17,6 +17,7 @@ export default defineConfig({
         './src/components/embeds/Spotify.astro',
         './src/components/embeds/Vimeo.astro',
         './src/components/embeds/Instagram.astro',
+        './src/components/embeds/ApplePodcast.astro',
       ],
     }),
     react(),

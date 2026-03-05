@@ -3,6 +3,8 @@ title: "When Professionalism Meets Pain"
 description: "A reflection on how workplaces and professional platforms respond when someone is in crisis — and why honest expression shouldn't be treated as a policy breach."
 date: 2025-08-15
 tags: ["mental health", "vulnerability", "workplace culture"]
+heroImage: ./when-professionalism-meets-pain-hero.png
+heroImageCaption: My mother and I with matching fractures
 draft: false
 ---
 
