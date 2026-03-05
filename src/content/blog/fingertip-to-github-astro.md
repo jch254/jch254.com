@@ -20,7 +20,7 @@ When I first set up jch254.com, I wanted something quick and low-friction. Finge
 
 **No real ownership.** My content lived on someone else's platform, behind someone else's CMS. If Fingertip shut down tomorrow, I'd be scrambling - and that's exactly what happened. Linktree acquired Fingertip and is winding it down. For someone who preaches infrastructure resilience at work, the irony of being caught out by platform risk on my own personal site wasn't lost on me.
 
-**Limited customisation.** Want a dark theme with a custom colour palette and pixel-perfect layout? Good luck. No-code tools give you freedom within a box - and the box is smaller than it looks. Every time I wanted to tweak something, I hit a wall that a few lines of CSS would have solved instantly.
+**Limited customisation.** Want falling matrix-style digits raining down your hero section? A custom CSS animation on a tiled SVG background? Good luck. No-code tools give you freedom within a box - and the box is smaller than it looks. Every time I wanted to tweak something beyond basic theming, I hit a wall that a few lines of CSS would have solved instantly.
 
 **No blog workflow that made sense.** I write in Markdown. I think in Markdown. Fingertip's content editing felt like fighting the tool instead of working with it. For someone who lives in a code editor, it was friction I didn't need.
 
