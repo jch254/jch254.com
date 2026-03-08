@@ -3,6 +3,7 @@ title: "Automating the $100 of AWS Credits Available to New Accounts"
 description: "New AWS accounts get $100 in credits for completing five Explore activities. Four of them can be fully automated with Terraform — here's how."
 date: 2026-03-08
 tags: ["aws", "terraform", "infrastructure"]
+heroImage: "automate-aws-credits-terraform-hero.png"
 draft: false
 ---
 
