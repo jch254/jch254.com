@@ -3,6 +3,7 @@ title: "Beyond Vibe Coding: Using AI as an Engineering Collaborator"
 description: "Most AI dev content is about vibe coding or tool comparisons. Here's the structured workflow I've been using across real projects — and why it actually works."
 date: 2026-03-10
 tags: ["ai", "software engineering", "developer tools"]
+heroImage: "beyond-vibe-coding.png"
 draft: false
 ---
 
@@ -10,7 +11,7 @@ Most writing about AI-assisted development falls into two camps: vibe-coding hyp
 
 Over the last few projects I've been experimenting with a different approach — treating AI less like a magic code generator and more like a technical collaborator across the full development lifecycle. The difference matters: vibe coding is blind prompting and hoping for the best. What I'm describing is closer to **AI-assisted systems engineering**.
 
-The most effective way I've found to use AI in development isn't to generate software from scratch — it's to use it as a continuous feedback system across the entire build cycle.
+The most effective way I've found to use AI in development isn't to generate software from scratch — it's to use it as a continuous feedback system across the entire build cycle. The workflow that's worked best for me is simple: **design → implement → audit → refine**.
 
 ## The problem with vibe coding
 
@@ -28,7 +29,7 @@ Prompting an LLM to "build me an app" gives you something that looks right. Look
 
 The workflow looks simple, but each stage uses AI in a different way.
 
-I've been using this loop on a couple of recent projects — from refining my portfolio site to building a more complex backend system. In both cases the pattern held: design the architecture myself, use AI to stress-test assumptions, implement quickly with Copilot, then run an audit pass before refining the product. The biggest improvement wasn't that the AI wrote the code — it was that the feedback loop got dramatically shorter.
+I've been using this loop on a couple of recent projects — from refining my portfolio site to building a more complex backend system. In both cases the pattern held: design the architecture myself, use AI to stress-test assumptions, implement quickly with Copilot, then run an audit pass before refining the product.
 
 What's been working for me is a simple 4-stage loop where AI plays a different role at each step. The human stays in control of architecture and direction. The AI accelerates everything else.
 
