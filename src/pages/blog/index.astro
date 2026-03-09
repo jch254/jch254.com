@@ -19,7 +19,8 @@ const posts = (await getCollection('blog', ({ data }) => !data.draft))
   ]} />
 
   <main class="mx-auto max-w-2xl px-6 pb-16">
-    <h2 class="mb-8 text-2xl font-extrabold tracking-tight md:text-3xl">Blog</h2>
+    <h2 class="mb-2 text-2xl font-extrabold tracking-tight md:text-3xl">Blog</h2>
+    <p class="mb-8 text-sm text-brand-muted">Writing about engineering, AI, systems, and the human side of building technology.</p>
 
     <div class="space-y-4">
       {posts.map((post) => (
