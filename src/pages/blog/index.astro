@@ -10,7 +10,7 @@ const posts = (await getCollection('blog', ({ data }) => !data.draft))
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 ---
 
-<BaseLayout title="Blog — Jordan Hornblow" description="Posts on whatever is on my mind.">
+<BaseLayout title="Blog | Jordan Hornblow" description="Posts on whatever is on my mind.">
   <Hero compact />
 
   <Breadcrumb items={[
