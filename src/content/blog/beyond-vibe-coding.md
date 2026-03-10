@@ -109,6 +109,8 @@ In my workflow I tend to use two modes:
 - **Ask mode** when I want to reason about an approach or sanity-check a design
 - **Agent mode** when I want the assistant to execute well-scoped implementation tasks
 
+Some environments also include a planning mode where the model proposes a structured change before modifying the codebase. I occasionally use this when a task spans multiple files or services. It's useful as a quick sanity check before letting the agent execute larger changes.
+
 The critical difference from vibe coding is that you're directing the implementation, not asking for random code.
 
 Instead of:
