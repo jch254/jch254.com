@@ -10,7 +10,7 @@ No shit Sherlock... here comes the Great 2025-26 Software Security Lapse affecti
 
 ## The problem
 
-While **vibe coding** — writing apps via conversational AI prompts — is the shiny new toy in the land of 1s and 0s, some serious alarm bells are clanging in the security crowd. Generative AI tools like Claude Code, Cursor, and GitHub Spark make it feel like coding is as easy as chatting, but experts warn this can open the door to unchecked vulnerabilities and data exposure.
+**Vibe coding** (writing apps via conversational AI prompts) is the shiny new toy in the land of 1s and 0s. But serious alarm bells are clanging in the security crowd. Generative AI tools like Claude Code, Cursor, and GitHub Spark make it feel like coding is as easy as chatting. Experts warn this can open the door to unchecked vulnerabilities and data exposure.
 
 ## The reality
 

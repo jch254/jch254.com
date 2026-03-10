@@ -1,6 +1,6 @@
 ---
 title: "Beyond Vibe Coding: Using AI as an Engineering Collaborator"
-description: "Most AI dev content is about vibe coding or tool comparisons. Here's the structured workflow I've been using across real projects — and why it actually works."
+description: "Most AI dev content is about vibe coding or tool comparisons. Here's the structured workflow I've been using across real projects, and why it actually works."
 date: 2026-03-10
 tags: ["ai", "software engineering", "developer tools"]
 heroImage: "beyond-vibe-coding.png"
@@ -9,9 +9,9 @@ draft: false
 
 Most writing about AI-assisted development falls into two camps: vibe-coding hype ("I built an app in 30 minutes with ChatGPT") or shallow tool comparisons (Copilot vs Cursor vs Claude). Neither is particularly useful if you're building real systems.
 
-Over the last few projects I've been experimenting with a different approach — treating AI less like a magic code generator and more like a technical collaborator across the full development lifecycle. The difference matters: vibe coding is blind prompting and hoping for the best. What I'm describing is closer to **AI-assisted systems engineering**.
+Over the last few projects I've been experimenting with a different approach. Treating AI less like a magic code generator and more like a technical collaborator across the full development lifecycle. The difference matters: vibe coding is blind prompting and hoping for the best. What I'm describing is closer to **AI-assisted systems engineering**.
 
-The most effective way I've found to use AI in development isn't to generate software from scratch — it's to use it as a continuous feedback system across the entire build cycle. The workflow that's worked best for me is simple: **design → implement → audit → refine**.
+The most effective way I've found to use AI in development isn't to generate software from scratch. It's using it as a continuous feedback system across the entire build cycle. The workflow that's worked best for me is simple: **design → implement → audit → refine**.
 
 ## The problem with vibe coding
 
@@ -29,7 +29,7 @@ Prompting an LLM to "build me an app" gives you something that looks right. Look
 
 The workflow looks simple, but each stage uses AI in a different way.
 
-I've been using this loop on a couple of recent projects — from refining my portfolio site to building a more complex backend system. In both cases the pattern held: design the architecture myself, use AI to stress-test assumptions, implement quickly with Copilot, then run an audit pass before refining the product.
+I've been using this loop on a couple of recent projects. From refining my portfolio site to building a more complex backend system. In both cases the pattern held: design the architecture myself, use AI to stress-test assumptions, implement quickly with Copilot, then run an audit pass before refining the product.
 
 What's been working for me is a simple 4-stage loop where AI plays a different role at each step. The human stays in control of architecture and direction. The AI accelerates everything else.
 
@@ -56,13 +56,13 @@ Typical things it will flag:
 - Missing retry logic for external APIs
 - Dependency initialisation happening at request time
 
-None of these are glamorous problems, but they're exactly the kind of issues that cause production incidents later. Catching them early is where the real leverage comes from.
+None of these are glamorous problems, but they're exactly the kind of issues that cause production incidents later. Catching them early is where the real value comes from.
 
-### 1. Architecture stage — design the system
+### 1. Architecture stage: design the system
 
 The goal here is to stress-test your design before writing too much code.
 
-You still do the core engineering thinking: service boundaries, data models, pipelines, infrastructure. That part is human-driven. The goal isn't to have AI design the system — it's to **pressure-test assumptions and identify problems early**.
+You still do the core engineering thinking: service boundaries, data models, pipelines, infrastructure. That part is human-driven. The goal isn't to have AI design the system. It's to **pressure-test assumptions and identify problems early**.
 
 Once you have a design, you feed it into GPT and ask it to poke holes. Structured prompts work best here:
 
@@ -76,11 +76,11 @@ Review this architecture for:
 5. Security risks
 ```
 
-This is basically **free architecture review**. Large language models are surprisingly good at pattern recognition across systems — they'll flag things like missing retry logic, async interface mismatches, lifecycle issues with external services, or temporary resource handling problems you might not catch until production.
+This is basically **free architecture review**. Large language models are surprisingly good at pattern recognition across systems. They'll flag things like missing retry logic, async interface mismatches, lifecycle issues with external services, or temporary resource handling problems you might not catch until production.
 
 The key is being specific. Open-ended prompts like "review my code" get vague answers. Structured prompts get actionable feedback.
 
-### 2. Implementation stage — accelerate coding
+### 2. Implementation stage: accelerate coding
 
 The goal here is to turn clear architecture into working code as fast as possible.
 
@@ -110,7 +110,7 @@ In this stage, AI tools work best as **pair programmers, not system designers**.
 
 The architecture still needs to come from you.
 
-### 3. Audit stage — automated code review
+### 3. Audit stage: automated code review
 
 The goal here is to catch bugs and design issues before they reach production.
 
@@ -137,7 +137,7 @@ GPT acts as a codebase reviewer. I've had it catch real issues this way:
 
 Issues that would normally surface as production incidents get caught during the review loop instead. They won't catch everything, but they catch enough issues to justify the five minutes it takes to run the audit. It's essentially an automated engineering sanity check.
 
-### 4. Refinement stage — product and UX iteration
+### 4. Refinement stage: product and UX iteration
 
 The goal here is to polish everything around the code: copy, structure, documentation.
 
@@ -151,7 +151,7 @@ On my portfolio site I used the same iterative loop for:
 - Project positioning
 - Documentation
 
-The workflow was: design review → copy improvement → structure improvement. This stage tends to produce lots of small improvements that add up quickly. Iterating with AI on the non-code aspects of a project is underrated — it's fast, and it gives you a second perspective that's often surprisingly useful.
+The workflow was: design review → copy improvement → structure improvement. This stage tends to produce lots of small improvements that add up quickly. Iterating with AI on the non-code aspects of a project is underrated. It's fast, and it gives you a second perspective that's often surprisingly useful.
 
 ## The full loop
 
@@ -184,7 +184,7 @@ think → prompt → ship → pray
 
 ## What changed in practice
 
-After using this workflow across a few recent projects, the biggest difference wasn't that AI wrote the code — it was that problems surfaced earlier.
+After using this workflow across a few recent projects, the biggest difference wasn't that AI wrote the code. It was that problems surfaced earlier.
 
 Architecture issues that normally appear weeks later show up during the design review. Implementation moves faster because the direction is clear. And the audit stage regularly catches small bugs and lifecycle issues before they ever reach production.
 
@@ -194,21 +194,19 @@ The end result isn't "AI-built software". It's simply tighter engineering loops.
 
 After running this workflow across multiple projects, here's where AI consistently delivers:
 
-- **Architecture critique** — identifying bottlenecks, failure modes, and missing components
-- **Code review** — pattern matching across files, catching resource leaks and concurrency issues
-- **Implementation speed** — producing clean code when given specific, well-scoped tasks
-- **Copy and UX refinement** — iterating on language, structure, and presentation
+- **Architecture critique**: identifying bottlenecks, failure modes, and missing components
+- **Code review**: pattern matching across files, catching resource leaks and concurrency issues
+- **Implementation speed**: producing clean code when given specific, well-scoped tasks
+- **Copy and UX refinement**: iterating on language, structure, and presentation
 
 ## What it's not good at
 
-Equally important:
+- **System design decisions**: it can critique your architecture, but it shouldn't be making the architectural calls. That requires context it doesn't have.
+- **Domain modelling**: it doesn't understand your business, your users, or your constraints the way you do.
+- **Trade-offs between technologies**: it can list pros and cons, but it can't weigh them against your operational reality.
+- **Long-term thinking**: it optimises for the current prompt, not for where your system needs to be in six months.
 
-- **System design decisions** — it can critique your architecture, but it shouldn't be making the architectural calls. That requires context it doesn't have.
-- **Domain modelling** — it doesn't understand your business, your users, or your constraints the way you do.
-- **Trade-offs between technologies** — it can list pros and cons, but it can't weigh them against your operational reality.
-- **Long-term thinking** — it optimises for the current prompt, not for where your system needs to be in six months.
-
-AI has no operational accountability — it doesn't run your systems in production. It can highlight issues, but it doesn't truly understand the context of a system the way an engineer does. That's exactly why the human stays in the driver's seat.
+AI has no operational accountability. It doesn't run your systems in production. It can highlight issues, but it doesn't truly understand the context of a system the way an engineer does. That's exactly why the human stays in the driver's seat.
 
 ## The real productivity boost
 
@@ -227,4 +225,4 @@ It's better engineering loops.
 
 AI isn't most useful when it's generating software. It's most useful when it tightens the feedback loop around engineering decisions. And in complex systems, tighter feedback loops are where the real productivity gains come from.
 
-If you're doing serious engineering work with AI tools, stop vibe coding. Design the system, implement it, audit it, refine it, repeat. That loop is where the actual leverage is.
+If you're doing serious engineering work with AI tools, stop vibe coding. Design the system, implement it, audit it, refine it, repeat. That loop is where the actual value is.

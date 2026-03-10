@@ -1,6 +1,6 @@
 ---
 title: "Anthropic Pro vs. GitHub Copilot: Night and Day"
-description: "I paid $400 NZD for a year of Claude Pro. Here's what I got — and why GitHub Copilot is worth every cent."
+description: "I paid $400 NZD for a year of Claude Pro. Here's what I got, and why GitHub Copilot is worth every cent."
 date: 2025-09-25
 tags: ["ai", "developer tools", "claude"]
 heroImage: ./anthropic-pro-vs-github-copilot-hero.jpeg
@@ -14,11 +14,11 @@ I paid $400 NZD for a year of Claude Pro. Here's what I got:
 - Hours wasted manually restoring projects from git history
 - Slower development velocity than if I'd just written everything myself
 
-Claude didn't just miss the mark — it actively damaged my work.
+Claude didn't just miss the mark. It actively damaged my work.
 
 ## The refund request
 
-When I requested a refund under the **NZ Consumer Guarantees Act (CGA)** — which legally entitles consumers to a remedy when a service isn't fit for purpose — Anthropic refused. Their stance:
+When I requested a refund under the **NZ Consumer Guarantees Act (CGA)**, which legally entitles consumers to a remedy when a service isn't fit for purpose, Anthropic refused. Their stance:
 
 > "We do not provide compensation for degraded service."
 

@@ -1,6 +1,6 @@
 ---
 title: "From Fingertip to GitHub Pages + Astro: Taking Back Control"
-description: "Why I ditched Fingertip's no-code website builder and rebuilt jch254.com from scratch with Astro, Tailwind CSS, and GitHub Pages — and why it was worth every line of code."
+description: "Why I ditched Fingertip's no-code website builder and rebuilt jch254.com from scratch with Astro, Tailwind CSS, and GitHub Pages, and why it was worth every line of code."
 date: 2026-03-05
 tags: ["astro", "open source", "github pages"]
 heroImage: ./fingertip-to-github-astro-hero.png
