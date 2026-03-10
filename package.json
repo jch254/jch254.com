@@ -4,7 +4,7 @@
   "description": "jch254.com source code",
   "author": "Jordan Hornblow <jordan@jch254.com>",
   "license": "MIT",
-  "packageManager": "pnpm@10.30.3",
+  "packageManager": "pnpm@10.32.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/jch254/jch254.com"
@@ -16,14 +16,14 @@
     "astro": "astro"
   },
   "dependencies": {
-    "@astrojs/mdx": "^4.3.13",
-    "@astrojs/react": "^4.4.2",
-    "@astrojs/sitemap": "^3.7.0",
+    "@astrojs/mdx": "^5.0.0",
+    "@astrojs/react": "^5.0.0",
+    "@astrojs/sitemap": "^3.7.1",
     "@astrojs/tailwind": "^6.0.2",
     "@tailwindcss/typography": "^0.5.19",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
-    "astro": "^5.17.1",
+    "astro": "^6.0.2",
     "astro-auto-import": "^0.5.1",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
