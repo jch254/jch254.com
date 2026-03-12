@@ -27,3 +27,5 @@ pnpm-debug.log*
 .vscode/
 .venv/
 .codereview
+
+.terraform*
