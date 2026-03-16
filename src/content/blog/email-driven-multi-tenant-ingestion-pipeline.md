@@ -2,15 +2,15 @@
 title: "Building an Email-Driven Multi-Tenant Ingestion Pipeline"
 description: "Most write interfaces are HTTP forms posting JSON. For Lush Aural Treats, submissions enter through email. Here's the architecture behind a tenant-aware ingestion pipeline where the inbox is the API."
 date: 2026-03-17
-tags: ["aws", "architecture", "serverless", "lush aural treats"]
+tags: ["aws", "architecture", "serverless"]
 draft: true
 ---
 
-Most web applications expose their write interface through HTTP. A form posts JSON to an API endpoint, the backend validates it, stores it, and the UI updates. Standard stuff.
+Most web applications expose their write interface through HTTP. A form posts JSON to an API endpoint, the backend validates it, stores it, and the UI updates. Standard.
 
 For [Lush Aural Treats](https://lushauraltreats.com) I took a different approach. Submissions enter the system through email.
 
-A user sends a message containing a link to an album. The system parses the email, validates the link, resolves the tenant, and persists the submission. The frontend surfaces the album in the exchange feed.
+A user sends a message containing a link to an album. The system parses the email, validates the sender, resolves the tenant, enriches the metadata, and persists the album. The frontend surfaces it in the exchange feed.
 
 In effect, **email becomes the ingestion API**.
 
@@ -29,12 +29,12 @@ Traditional approaches introduce overhead that doesn't serve the user:
 - **Mobile friction.** Tiny input fields, soft keyboards, slow page loads on cellular.
 - **Another UI surface to maintain.** Another page, another component, another thing that can break.
 
-Email avoids all of it. Anyone can submit from any device without visiting the site.
+Email avoids all of it. Authorised senders can submit from any device without visiting the site. Each exchange has a membership list. If your email is on it, you can submit. No login, no password, no session.
 
 A submission looks like this:
 
 ```text
-To: music@parse.lushauraltreats.com
+To: collective@parse.lushauraltreats.com
 Subject: https://open.spotify.com/album/<id>
 ```
 
@@ -44,226 +44,277 @@ The subject line contains the album URL. No attachments, no body parsing, no str
 
 ## System overview
 
-The pipeline is conceptually simple. A series of stages, each with a single responsibility:
+Once the email arrives it moves through a small ingestion pipeline. The pipeline validates the submission, resolves the tenant, enriches the album metadata, and persists it to the exchange feed.
+
+Each stage has a single responsibility:
 
 ```text
 Email
   ↓
-Inbound email handler (SES)
+SES (receive)
   ↓
-Lambda
+Lambda (forward to API)
   ↓
-Application service
-  ↓
-Tenant resolution
-  ↓
-DynamoDB persistence
+NestJS application
+  ├─ Resolve tenant
+  ├─ Validate sender
+  ├─ Extract + validate link
+  ├─ Deduplicate
+  ├─ Enrich metadata (Spotify API)
+  └─ Persist album
   ↓
 Frontend read model
 ```
 
-Five things happen in sequence:
+Six things happen:
 
-1. Accept the email event
-2. Parse the submission
-3. Validate the album link
-4. Determine the tenant
-5. Persist the submission
+1. SES receives the email and triggers a Lambda
+2. The Lambda forwards the payload to the application as an HTTP POST
+3. The application resolves the tenant and validates the sender against the membership list
+4. It extracts and validates the album link from the subject line
+5. Spotify enrichment fetches metadata (titles, artwork, genres)
+6. The album is persisted to DynamoDB
 
-The frontend reads from the resulting dataset. No websockets, no push notifications, no real-time sync. Just a read model that reflects the current state of submissions.
+The controller returns a 202 immediately. Enrichment and persistence continue asynchronously inside the service layer after the HTTP response is sent. The sender gets an acknowledgement email right away, then a second email with the result once processing finishes.
+
+The frontend reads from DynamoDB via the albums API. No websockets, no push notifications, no real-time sync. Just a read model that reflects the current state of the exchange.
 
 ---
 
 ## Email ingestion
 
-Inbound email is routed through SES to a parsing endpoint. The parser extracts a minimal payload:
+Inbound email is routed through SES to a Lambda function. The Lambda is a thin HTTP bridge. It extracts three fields from the SES event and POSTs them to the application:
 
 ```json
 {
   "from": "user@example.com",
   "subject": "https://open.spotify.com/album/...",
-  "to": "music@parse.lushauraltreats.com"
+  "to": "collective@parse.lushauraltreats.com"
 }
 ```
 
-Only the subject line matters. No multipart parsing, no attachment handling, no content decoding. The interesting part of the email is a single string.
+That's all the Lambda does. No parsing, no validation, no business logic. It translates an SES event into an HTTP request.
 
-The ingestion Lambda performs the first validation step:
+The NestJS application receives the payload and runs the pipeline. The first step is link extraction. Only the subject line matters. No multipart parsing, no attachment handling, no content decoding.
 
 ```text
-albumUrl = parseSubject(subject)
+albumUrl = extractMusicLink(subject)
 
-if (!isValidAlbumUrl(albumUrl)) {
+if (!albumUrl) {
   rejectSubmission()
   return
 }
 ```
 
-Early rejection keeps the pipeline clean and prevents unnecessary downstream processing. If the subject line isn't a recognisable album URL, the submission is dropped immediately. No queuing, no retry, no dead letter queue for malformed input.
+Early rejection keeps the pipeline clean. If the subject line isn't a recognisable album URL, the submission is dropped immediately.
 
 ---
 
-## Canonicalising album links
+## Sender validation
+
+Not anyone can submit. Each exchange maintains a membership list stored in DynamoDB as `MEMBER#` records under the tenant partition. The security service checks whether the sender's email appears in that list before the pipeline continues.
+
+```text
+securityCheck = validateSender(tenantSlug, senderEmail)
+
+if (!securityCheck.allowed) {
+  rejectWithReason(securityCheck.reason)
+  return
+}
+```
+
+Rate limiting runs alongside the membership check. Each member has a submission cap per rolling period to prevent flooding. The rate limit records use DynamoDB's TTL to auto-expire after each period ends.
+
+In development, tenants with no member records allow all senders. In production, every exchange requires explicit membership.
+
+---
+
+## Normalising album links
 
 Album URLs appear in different formats depending on how they're shared. Copy from the Spotify app, the web player, or a share sheet and you get different strings for the same album:
 
 ```text
 https://open.spotify.com/album/<id>
 https://open.spotify.com/album/<id>?si=abc123
-spotify:album:<id>
+https://spotify.link/<shortcode>
 ```
 
-The ingestion layer normalises these into a canonical form before anything else happens:
+Short links (`spotify.link`) are resolved by following the redirect to get the full `open.spotify.com` URL. Query parameters are stripped. The result is a consistent URL that can be used for deduplication and API lookups.
 
-```text
-albumId = extractSpotifyAlbumId(url)
-canonicalUrl = "https://open.spotify.com/album/" + albumId
-```
+Not glamorous, but essential. Without it, the same album submitted twice via different URL formats would be stored as two separate entries.
 
-Not glamorous, but essential. Without it, deduplication breaks. The same album submitted twice via different URL formats would be stored as two separate submissions. Consistent storage depends on consistent input.
+The system also validates the content type. Only albums are accepted. Tracks and playlists get rejected with a descriptive error message sent back to the submitter.
 
 ---
 
 ## Tenant resolution
 
-Lush Aural Treats is designed as a **multi-tenant system** even though it currently runs with a single tenant. Every submission must resolve to a tenant before being persisted.
+Lush Aural Treats is a **multi-tenant system**. Every submission must resolve to a tenant before being persisted. There is no default fallback.
 
-The backend performs resolution using the request context:
+It started as a single tenant. The original feed lived on the apex domain at lushauraltreats.com. As the product evolved, the apex became a landing page linking out to separate exchanges. The original feed moved to Lush Collective under collective.lushauraltreats.com.
 
-```text
-tenant = resolveTenant(hostHeader)
-```
-
-When submissions originate from email, resolution falls back to a default tenant:
+The email address is the routing key. Each tenant has its own submission address:
 
 ```text
-tenant = DEFAULT_TENANT
+collective@parse.lushauraltreats.com  → TENANT#collective
+demo@parse.lushauraltreats.com        → TENANT#demo
 ```
 
-But the architecture is designed so that the email address itself can become the routing key. Future versions could support tenant-aware addresses:
+The local part maps directly to a tenant slug. No lookup table, no API call. The routing information is in the address itself.
 
 ```text
-lush@parse.domain.com     → TENANT#lush
-jazz@parse.domain.com     → TENANT#jazz
-friends@parse.domain.com  → TENANT#friends
+tenant = extractLocalPart(toAddress)
 ```
 
-The local part of the email address maps directly to a tenant. No additional configuration, no lookup table, no API call. The routing information is embedded in the address.
+For the web frontend, the application resolves tenant from the hostname instead. A middleware extracts the subdomain:
 
 ```text
-tenant = resolveTenant(emailLocalPart)
+collective.lushauraltreats.com  → slug = "collective"
+demo.lushauraltreats.com        → slug = "demo"
 ```
 
-This is the bridge between ingestion and multi-tenancy. The pipeline is tenant-aware from the very first stage. It doesn't bolt on tenant resolution later. It doesn't retrofit isolation. The submission knows where it belongs before it's even validated.
+Either way, tenant resolution happens at the start of the pipeline. Everything downstream already knows which tenant it's dealing with.
 
 ---
 
 ## DynamoDB data model
 
-Submissions are stored in DynamoDB using a **single-table design**.
+Albums are stored in DynamoDB using a **single-table design**.
 
-The key structure:
+The primary key identifies each album:
 
 ```text
-PK: TENANT#lush
-SK: SUBMISSION#<timestamp>
+PK: ALBUM#<spotify_album_id>
+SK: META
 ```
 
-Simple partition strategy. It works well for a few reasons.
-
-**Tenant isolation** is a natural property of the key structure. Every query is scoped to a partition key. One tenant can never accidentally read another tenant's data. There's no `WHERE tenant = ?` filter to forget. The isolation is structural.
-
-**Query patterns** map directly to the access pattern. The most common read operation is "fetch recent submissions for a tenant":
+A global secondary index (GSI) partitions albums by tenant:
 
 ```text
-PK = TENANT#lush
-SK begins_with SUBMISSION#
+GSI1PK: TENANT#collective
+GSI1SK: <created_at>
+```
+
+This gives two access patterns from one table.
+
+**Direct lookup** uses the primary key. Given a Spotify album ID, fetch the full record in a single read. This powers deduplication checks and individual album pages.
+
+**Tenant feed** uses the GSI. The most common read operation is "fetch recent albums for an exchange":
+
+```text
+GSI1PK = TENANT#collective
 ScanIndexForward = false
 ```
 
-That's a single query. No joins, no secondary indices, no aggregation. DynamoDB returns exactly what the frontend needs, in the order it needs it.
+One query, sorted by date, scoped to a single tenant. No joins, no secondary filtering. DynamoDB returns exactly what the frontend needs, in the order it needs it.
 
-**Scaling** is handled by DynamoDB's partitioning. Each tenant lives in its own partition space. As tenants are added, capacity scales horizontally. No sharding logic, no connection pooling headaches, no migration scripts.
+Other entity types share the same table: tenants (`TENANT#<slug>` / `META`), members (`TENANT#<slug>` / `MEMBER#<email>`), and rate limit counters (`RATE_LIMIT#<tenant>#<email>` / `<period>`). Different key prefixes, same table.
 
-Because submissions are append-only, the model maps well to DynamoDB's strengths. There are no updates to existing items, no complex transactions, no read-modify-write cycles. Write a submission, read it back later. That's the entire data flow.
+Because albums are append-only, the model maps well to DynamoDB's strengths. That property removes a large class of concurrency and consistency problems. No updates to existing items, no complex transactions, no read-modify-write cycles. Write an album, read it back later. That's the entire data flow.
 
 ---
 
 ## Idempotency
 
-Email systems occasionally retry deliveries or duplicate messages. SES can invoke the Lambda more than once for the same inbound email. If the pipeline isn't idempotent, you get duplicate submissions.
+Email systems occasionally retry deliveries or duplicate messages. SES can invoke the Lambda more than once for the same inbound email. If the pipeline isn't idempotent, you get duplicate albums.
 
-Before persisting, check whether the canonical album ID already exists for the tenant:
+Two checks run before persisting:
 
 ```text
-if (submissionExists(canonicalAlbumId, tenant)) {
-  return  // already submitted
+if (existsBySpotifyId(albumId, tenant)) {
+  return  // duplicate submission
+}
+
+if (existsByTitleAndArtist(title, artist, tenant)) {
+  return  // different edition, same album
 }
 ```
 
-This keeps the pipeline safe from repeated deliveries without distributed locks, deduplication queues, or coordination between services. A simple conditional check at the persistence boundary.
+The first catches exact duplicates, same Spotify ID submitted twice. The second catches different editions or regional releases where the Spotify ID differs but the album is effectively the same.
+
+No distributed locks, no deduplication queues. Two conditional checks at the persistence boundary.
+
+---
+
+## Metadata enrichment
+
+Once the link passes validation and deduplication, the background pipeline kicks in. For Spotify submissions, the application calls the Spotify API (client credentials flow) to fetch album metadata: title, artist, artwork, release date, track count, genres.
+
+This metadata is stored alongside the album record and powers the frontend display. Without it, each album in the feed would be a bare URL.
+
+If the Spotify API call fails, the album is still persisted with whatever information is available. Enrichment failure doesn't block submission. The album shows up in the feed either way.
 
 ---
 
 ## Why multi-tenant from the start
 
-Most side projects don't bother with multi-tenancy. Single user, single tenant, ship it. Refactor later if it ever matters.
+Most side projects start single-tenant and retrofit multi-tenancy later. I went the other way.
 
-I went the other way. And it was cheap to do.
+In this system the overhead was small:
 
-The overhead of multi-tenancy in this system is minimal:
-
-- A `resolveTenant()` function that returns a string
-- A partition key prefix in DynamoDB
+- A `resolveTenant()` function that returns a slug
+- A tenant-prefixed partition key in DynamoDB
 - A routing decision at ingestion time
 
-That's it. Three small additions to the codebase. In return:
+Three small additions, but they keep the data model explicit and make adding new exchanges trivial. In return:
 
 **Cleaner domain model.** Every entity belongs to a tenant. There's no ambiguity about scope or ownership. The data model is explicit about boundaries from the start.
 
-**Simple routing.** New tenants don't require new infrastructure, new databases, or new deployments. They require a new partition key value.
+**Simple routing.** New tenants don't require new infrastructure, new databases, or new deployments. They need a new GSI partition key value and a DNS record.
 
-**Easier future expansion.** If Lush Aural Treats ever supports multiple exchanges (and the architecture already anticipates it), the work is additive. Add a tenant, configure a route, done. No migration, no refactor, no downtime.
+**Adding tenants is additive.** When I added the Demo Exchange, the work was: pick a slug, configure a route, deploy. No migration, no refactor, no downtime.
 
-Retrofitting multi-tenancy into a single-tenant system sounds straightforward. It never is. Data needs to be migrated, queries need scoping, isolation needs verifying across every access path. It's cheaper to model it correctly from the start, even if you only have one tenant.
+Retrofitting multi-tenancy into a single-tenant system sounds straightforward. It never is. Data needs migrating, queries need scoping, isolation needs verifying across every access path. Cheaper to model it correctly from the start.
 
 ---
 
 ## The complete picture
+
+At this point the pieces fit together into a single pipeline.
 
 The full flow:
 
 ```text
 User sends email
   ↓
-SES receives and parses
+SES receives at <slug>@parse.lushauraltreats.com
   ↓
-Lambda: parse subject → validate URL → canonicalise
+Lambda forwards { from, to, subject } to API
   ↓
-Resolve tenant from email address or default
+Application: resolve tenant from to-address
   ↓
-Idempotency check against DynamoDB
+Validate sender against membership list
   ↓
-Persist submission (PK: TENANT#x, SK: SUBMISSION#timestamp)
+Extract album link from subject, validate platform
+  ↓
+Deduplication check (Spotify ID + title/artist)
+  ↓
+Return 202, send acknowledgement email
+  ↓
+Background: Spotify enrichment → persist to DynamoDB
+  ↓
+Send result email to submitter
   ↓
 Frontend queries DynamoDB → renders feed
 ```
 
-Seven stages. Each one does one thing. The entire pipeline from email to UI is a straight line.
+Each step does one thing. The entire pipeline from email to UI is a straight line.
 
-No message queues. No event buses. No saga orchestrators. No retry policies with exponential backoff. Just a Lambda that parses, validates, resolves, checks, and writes. If any step fails, the submission is dropped. Email is inherently fault-tolerant. The sender can always resend.
+No message queues. No event buses. No saga orchestrators. The Lambda forwards, the application processes, DynamoDB stores. If validation fails, the sender gets an error email explaining what went wrong. If it succeeds, they get a confirmation with the album details.
 
 ---
 
 ## Lessons learned
 
+After building and running the pipeline for a while, a few patterns became clear.
+
 **Email works well as an ingestion interface** when the payload is simple. A subject line containing a URL is about as minimal as input gets. No schema versioning, no content negotiation, no API contracts to maintain. The tradeoff is that you can't do anything complex with it. For album links, that's fine.
 
 **Minimal inputs simplify everything downstream.** One URL in, one canonical form out. Validation is a single function. Parsing is a single function. The entire ingestion layer fits in a few hundred lines. Simple inputs create simple systems.
 
-**Multi-tenant modelling is easier at the start.** Once the partition key includes a tenant prefix, every query is automatically scoped. It's the kind of decision that costs almost nothing to make on day one and costs a lot to make on day one hundred.
+**Multi-tenant modelling is easier at the start.** Once the key structure includes a tenant prefix, every query is automatically scoped. It's the kind of decision that costs almost nothing to make on day one and costs a lot to make on day one hundred.
 
-**Ingestion pipelines don't need to be complicated.** There's a temptation to reach for Step Functions, SQS, SNS, EventBridge, the full AWS eventing toolkit. For a synchronous pipeline with simple validation and a single persistence target, a Lambda function is enough. Add complexity when the requirements demand it, not before.
+**Ingestion pipelines don't need to be complicated.** There's a temptation to reach for Step Functions, SQS, SNS, EventBridge, the full AWS eventing toolkit. For a pipeline with simple validation and a single persistence target, a Lambda bridge and an application service are enough. Add complexity when the requirements demand it, not before.
 
 ---
 
