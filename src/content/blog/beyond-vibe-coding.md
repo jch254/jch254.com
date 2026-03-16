@@ -1,7 +1,7 @@
 ---
 title: "Beyond Vibe Coding: Using AI as an Engineering Collaborator"
 description: "Most AI dev content is about vibe coding or tool comparisons. Here's the structured workflow I've been using across real projects, and why it actually works."
-date: 2026-03-10
+date: 2026-03-17
 tags: ["ai", "software engineering", "developer tools"]
 heroImage: "beyond-vibe-coding.png"
 draft: false

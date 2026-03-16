@@ -1,7 +1,7 @@
 ---
 title: "Building an Email-Driven Multi-Tenant Ingestion Pipeline"
 description: "Most write interfaces are HTTP forms posting JSON. For Lush Aural Treats, submissions enter through email. Here's the architecture behind a tenant-aware ingestion pipeline where the inbox is the API."
-date: 2026-03-17
+date: 2026-03-31
 tags: ["aws", "architecture", "serverless"]
 draft: true
 ---
