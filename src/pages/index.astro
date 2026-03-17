@@ -1,7 +1,12 @@
 ---
+import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Hero from '../components/Hero.astro';
 import Footer from '../components/Footer.astro';
+
+const latestPosts = (await getCollection('blog', ({ data }) => !data.draft && !data.unlisted))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+  .slice(0, 3);
 ---
 
 <BaseLayout title="Jordan Hornblow | Software Engineer">
@@ -52,6 +57,28 @@ import Footer from '../components/Footer.astro';
           quickly from first principles.
         </p>
       </div>
+    </section>
+
+    <!-- Latest Writing -->
+    <section class="py-5">
+      <h2 class="mb-6 text-2xl font-extrabold tracking-tight md:text-3xl">Latest writing</h2>
+      <ul class="space-y-3 text-base leading-relaxed text-brand-text">
+        {latestPosts.map((post) => (
+          <li>
+            <a href={`/blog/${post.id.replace(/\.(md|mdx)$/, '')}`} class="inline-flex items-center gap-1 font-semibold text-brand-accent hover:underline">
+              → {post.data.title}
+            </a>
+          </li>
+        ))}
+      </ul>
+      <p class="pt-4">
+        <a href="/blog" class="inline-flex items-center gap-1 font-semibold text-brand-accent hover:underline">
+          View all posts
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+          </svg>
+        </a>
+      </p>
     </section>
 
     <!-- Systems I Build -->
