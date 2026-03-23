@@ -2,8 +2,10 @@
 title: "How a $1,000 AWS Bill Made Me Redesign My ECS Architecture"
 description: "I deployed a standard ECS architecture for Lush Aural Treats and didn't watch the bill. NAT gateways and ALBs quietly ate $1,000. Here's how I redesigned the whole thing to cost almost nothing."
 date: 2026-03-24
-tags: ["aws", "infrastructure", "ecs", "cost optimisation"]
-draft: true
+tags: ["aws", "infrastructure", "cost optimisation"]
+heroImage: ./lush-aural-treats-aws-cost-redesign-hero.png
+heroImageCaption: API Gateway HTTP API + VPC Link + AWS Cloud Map architecture transformation
+draft: false
 ---
 
 I've been building on AWS for over a decade. I know how the pricing works. I've designed cost-conscious architectures for companies that process millions of requests. I still managed to rack up a **$1,000 AWS bill** on a side project.
@@ -68,6 +70,8 @@ My first thought was that something was misconfigured. A runaway task, maybe. A 
 ## Investigating the cost
 
 The expensive parts weren't compute. They almost never are.
+
+![The expensive parts weren't compute. They almost never are.](./invisible-cost-surface.png)
 
 | Service | What I expected | What actually happened |
 | --- | --- | --- |
