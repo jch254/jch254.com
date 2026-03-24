@@ -1,7 +1,7 @@
 ---
 title: "How a $1,000 AWS Bill Made Me Redesign My ECS Architecture"
 description: "I deployed a standard ECS architecture for Lush Aural Treats and didn't watch the bill. NAT gateways and ALBs quietly ate $1,000. Here's how I redesigned the whole thing to cost almost nothing."
-date: 2026-03-24
+date: 2026-03-25
 tags: ["aws", "infrastructure", "cost optimisation"]
 heroImage: ./lush-aural-treats-aws-cost-redesign-hero.png
 heroImageCaption: API Gateway HTTP API + VPC Link + AWS Cloud Map architecture transformation
