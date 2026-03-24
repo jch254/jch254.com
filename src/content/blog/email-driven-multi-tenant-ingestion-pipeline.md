@@ -6,7 +6,9 @@ tags: ["aws", "architecture", "serverless"]
 draft: true
 ---
 
-Most web applications expose their write interface through HTTP. A form posts JSON to an API endpoint, the backend validates it, stores it, and the UI updates. Standard.
+Most web applications expose their write interface through HTTP. This one doesn’t. 
+
+A form posts JSON to an API endpoint, the backend validates it, stores it, and the UI updates. Standard.
 
 For [Lush Aural Treats](https://lushauraltreats.com) I took a different approach. Submissions enter the system through email.
 
@@ -29,7 +31,7 @@ Traditional approaches introduce overhead that doesn't serve the user:
 - **Mobile friction.** Tiny input fields, soft keyboards, slow page loads on cellular.
 - **Another UI surface to maintain.** Another page, another component, another thing that can break.
 
-Email avoids all of it. Authorised senders can submit from any device without visiting the site. Each exchange has a membership list. If your email is on it, you can submit. No login, no password, no session.
+Email avoids all of it by turning identity into the interface. Authorised senders can submit from any device without visiting the site. Each exchange has a membership list. If your email is on it, you can submit. No login, no password, no session.
 
 A submission looks like this:
 
@@ -301,6 +303,8 @@ Frontend queries DynamoDB → renders feed
 Each step does one thing. The entire pipeline from email to UI is a straight line.
 
 No message queues. No event buses. No saga orchestrators. The Lambda forwards, the application processes, DynamoDB stores. If validation fails, the sender gets an error email explaining what went wrong. If it succeeds, they get a confirmation with the album details.
+
+At a glance, the system looks simple. That’s intentional.
 
 ---
 
