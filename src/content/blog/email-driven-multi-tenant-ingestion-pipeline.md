@@ -1,20 +1,19 @@
 ---
 title: "Building an Email-Driven Multi-Tenant Ingestion Pipeline"
 description: "Most write interfaces are HTTP forms posting JSON. For Lush Aural Treats, submissions enter through email. Here's the architecture behind a tenant-aware ingestion pipeline where the inbox is the API."
-date: 2026-03-31
+date: 2026-04-01
 tags: ["aws", "architecture", "serverless"]
+heroImage: "email-driven-multi-tenant-ingestion-pipeline-hero.png"
 draft: true
 ---
 
-Most web applications expose their write interface through HTTP. This one doesn’t. 
+Most systems expose a write API over HTTP. This one uses email instead.
 
-A form posts JSON to an API endpoint, the backend validates it, stores it, and the UI updates. Standard.
-
-For [Lush Aural Treats](https://lushauraltreats.com) I took a different approach. Submissions enter the system through email.
+[Lush Aural Treats](https://lushauraltreats.com) submissions enter the system through email.
 
 A user sends a message containing a link to an album. The system parses the email, validates the sender, resolves the tenant, enriches the metadata, and persists the album. The frontend surfaces it in the exchange feed.
 
-In effect, **email becomes the ingestion API**.
+**Email becomes the ingestion API.**
 
 In a [previous post](/blog/lush-aural-treats-aws-cost-redesign), I covered the infrastructure side: how a $1,000 AWS bill forced a complete architecture redesign. This post covers the application side: the ingestion pipeline that processes submissions and why building it as multi-tenant from day one was worth the effort.
 
@@ -46,9 +45,15 @@ The subject line contains the album URL. No attachments, no body parsing, no str
 
 ## System overview
 
+### Architecture at a glance
+
+```text
+Email → SES → Lambda → NestJS → DynamoDB → Frontend
+```
+
 Once the email arrives it moves through a small ingestion pipeline. The pipeline validates the submission, resolves the tenant, enriches the album metadata, and persists it to the exchange feed.
 
-Each stage has a single responsibility:
+Each stage does one thing:
 
 ```text
 Email
@@ -218,7 +223,7 @@ Because albums are append-only, the model maps well to DynamoDB's strengths. Tha
 
 ## Idempotency
 
-Email systems occasionally retry deliveries or duplicate messages. SES can invoke the Lambda more than once for the same inbound email. If the pipeline isn't idempotent, you get duplicate albums.
+SES can deliver the same email more than once. Without idempotency checks, the same album shows up twice in the feed.
 
 Two checks run before persisting:
 
@@ -266,13 +271,15 @@ Three small additions, but they keep the data model explicit and make adding new
 
 **Adding tenants is additive.** When I added the Demo Exchange, the work was: pick a slug, configure a route, deploy. No migration, no refactor, no downtime.
 
-Retrofitting multi-tenancy into a single-tenant system sounds straightforward. It never is. Data needs migrating, queries need scoping, isolation needs verifying across every access path. Cheaper to model it correctly from the start.
+I've seen what the alternative looks like. A single-tenant DynamoDB table where every query assumes one dataset. Adding a second tenant means rewriting partition keys, backfilling every existing record with a tenant prefix, and checking every API endpoint for data leakage. One missed filter and tenant A sees tenant B's albums.
+
+Cheaper to model it correctly from the start than to retrofit it later.
 
 ---
 
 ## The complete picture
 
-At this point the pieces fit together into a single pipeline.
+The pieces fit together into a single pipeline.
 
 The full flow:
 
@@ -310,7 +317,7 @@ At a glance, the system looks simple. That’s intentional.
 
 ## Lessons learned
 
-After building and running the pipeline for a while, a few patterns became clear.
+After running the pipeline in production, a few things stood out.
 
 **Email works well as an ingestion interface** when the payload is simple. A subject line containing a URL is about as minimal as input gets. No schema versioning, no content negotiation, no API contracts to maintain. The tradeoff is that you can't do anything complex with it. For album links, that's fine.
 
@@ -326,6 +333,4 @@ After building and running the pipeline for a while, a few patterns became clear
 
 Together with the [infrastructure redesign](/blog/lush-aural-treats-aws-cost-redesign), these two posts cover both sides of the Lush Aural Treats architecture. The first dealt with infrastructure and cost. This one covers application design and data flow.
 
-The interesting thing about this system isn't any one component. It's that the simplest possible interface, a single email, drives a tenant-aware pipeline from ingestion to persistence to UI.
-
-No forms, no auth flows, no elaborate API contracts. Just a subject line and a pipeline that knows what to do with it.
+The interesting part isn't the components. It's that a single email drives the entire system, from ingestion to UI.
