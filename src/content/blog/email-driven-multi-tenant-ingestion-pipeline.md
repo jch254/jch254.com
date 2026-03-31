@@ -4,7 +4,7 @@ description: "Most write interfaces are HTTP forms posting JSON. For Lush Aural 
 date: 2026-04-01
 tags: ["aws", "architecture", "serverless"]
 heroImage: "email-driven-multi-tenant-ingestion-pipeline-hero.png"
-draft: true
+draft: false
 ---
 
 Most systems expose a write API over HTTP. This one uses email instead.
