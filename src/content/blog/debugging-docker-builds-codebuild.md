@@ -130,6 +130,67 @@ dockerd --storage-driver=vfs --dns 8.8.8.8 --dns 1.1.1.1 &
 
 Another thing that works on a normal host and breaks silently when nested.
 
+## Architecture mismatch
+
+Deployed. ECS task crashed immediately.
+
+```
+exec /usr/local/bin/docker-entrypoint.sh: exec format error
+```
+
+That error means one thing. The image was built for the wrong CPU architecture. My build produced an ARM image. ECS was running x86.
+
+The default `docker build` uses the host architecture. CodeBuild was running on an ARM instance. The resulting image only contained ARM binaries.
+
+Fix was to use buildx and specify the platform explicitly.
+
+```bash
+docker buildx build \
+  --platform linux/amd64 \
+  --push \
+  -t $IMAGE_URI .
+```
+
+Buildx with the container driver also handles cross-compilation through QEMU. No need to change the build instance type.
+
+## The second mismatch
+
+New error.
+
+```
+image Manifest does not contain descriptor matching platform 'linux/arm64/v8'
+```
+
+The image was amd64 now. But ECS was still configured for ARM64. The Terraform task definition had:
+
+```hcl
+runtime_platform {
+  cpu_architecture = "ARM64"
+}
+```
+
+Changed it to match the image.
+
+```hcl
+runtime_platform {
+  cpu_architecture = "X86_64"
+}
+```
+
+That's it. Not a new problem. Just alignment between what the build produces and what the runtime expects.
+
+## The actual end state
+
+Final working setup:
+
+- vfs storage driver for Docker-in-Docker
+- DNS configured on dockerd with `--dns 8.8.8.8 --dns 1.1.1.1`
+- buildx with container driver for cross-platform builds
+- linux/amd64 image pushed to ECR
+- ECS task definition set to X86_64
+
+Took a while to get there. But it worked.
+
 ## What I learned
 
 Every fix I tried addressed a real issue. BuildKit, exit codes, IAM, logging. All legitimate. But the core failure was environmental.
