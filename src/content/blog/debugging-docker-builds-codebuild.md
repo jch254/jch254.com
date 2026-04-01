@@ -1,7 +1,7 @@
 ---
 title: "Debugging Docker Builds in AWS CodeBuild: When Overlay Filesystems Break Everything"
 description: "A Docker build kept failing in CodeBuild with 'failed to mount overlay: invalid argument'. The problem wasn't my code, my config, or my permissions. It was the kernel."
-date: 2026-04-15
+date: 2026-04-08
 tags: ["aws", "docker", "infrastructure"]
 draft: true
 ---
@@ -191,6 +191,32 @@ Final working setup:
 
 Took a while to get there. But it worked.
 
+## The cache that made builds slower
+
+With the pipeline working, I added pnpm caching. Standard approach. Save the pnpm store between builds so installs run faster.
+
+It looked like it was working. Logs showed pnpm fetch reusing packages from the cache. Installs were quick. Everything seemed fine.
+
+Then I looked at the total build time.
+
+Cache upload took around 5 minutes every build. Cache download on the next run took 50 to 60 seconds. The actual `pnpm install` took 13 to 20 seconds.
+
+I was spending 5 minutes uploading a cache to save 13 seconds of install time. The caching worked. It also made builds slower.
+
+## Removing the cache
+
+Removed the pnpm cache from CodeBuild entirely. Kept Terraform plugin cache because that one actually pays for itself. Simplified the install step back to a clean `pnpm install` with no cache restore or save.
+
+Builds dropped from around 15 minutes to around 7 minutes 30 seconds.
+
+## Final build times
+
+Before: 15 to 16 minutes per build.
+
+After: 7 minutes 30 seconds.
+
+Roughly 50 percent reduction. About 8 minutes saved per build.
+
 ## What I learned
 
 Every fix I tried addressed a real issue. BuildKit, exit codes, IAM, logging. All legitimate. But the core failure was environmental.
@@ -199,8 +225,20 @@ Docker behaves differently inside containers. Same flags, same Dockerfile, same 
 
 You look at what you control. Code, config, permissions. Sometimes the problem is below all of that.
 
+Caching is not automatically a win. Measure the total system cost, not individual steps. `pnpm install` was already cheap at 13 seconds. The expensive part was the cache upload that ran every single build. I optimised the build for hours. The biggest win was deleting the optimisation.
+
+## The cost impact
+
+CodeBuild was the largest cost in the account. Around $14 per month. ECS was lower. Everything else was smaller.
+
+CodeBuild bills per build minute. Build time dropped from around 15 minutes to 7 minutes 30 seconds. That roughly halved the CodeBuild cost.
+
+No architecture change. No new service. Just fewer minutes per build. The performance fix was also a cost fix.
+
 ## What's next
 
-VFS works. The pipeline is stable. Builds are slower than they should be, and Docker-in-Docker adds complexity that a build-and-push workflow doesn't need.
+VFS works. The pipeline is stable. But Docker-in-Docker is still the wrong tool for a build-and-push workflow. It adds complexity, slows builds down, and introduces problems that don't exist on a normal host.
 
-Removing Docker-in-Docker entirely is the real fix. That's next.
+Removing Docker-in-Docker entirely is the next step.
+
+Sometimes the fastest build is the one where you delete something.

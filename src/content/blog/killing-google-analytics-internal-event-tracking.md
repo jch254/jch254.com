@@ -1,7 +1,7 @@
 ---
 title: "Why Google Analytics Was Useless for My Product"
 description: "Google Analytics tracked page views in a product where page views don't matter. I ripped it out and replaced it with internal event tracking and Cloudflare. Here's what I built and what I learned."
-date: 2026-04-08
+date: 2026-04-15
 tags: ["analytics", "architecture", "cloudflare"]
 #heroImage: "killing-google-analytics-internal-event-tracking-hero.png"
 draft: true
