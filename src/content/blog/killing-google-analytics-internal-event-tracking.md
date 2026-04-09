@@ -4,7 +4,7 @@ description: "Google Analytics tracked page views in a product where page views 
 date: 2026-04-10
 tags: ["analytics", "architecture", "cloudflare"]
 heroImage: "killing-google-analytics-internal-event-tracking-hero.png"
-draft: true
+draft: false
 ---
 
 Google Analytics wasn't useful for this product.
