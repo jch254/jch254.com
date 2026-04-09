@@ -1,25 +1,28 @@
 ---
-title: "Why Google Analytics Was Useless for My Product"
-description: "Google Analytics tracked page views in a product where page views don't matter. I ripped it out and replaced it with internal event tracking and Cloudflare. Here's what I built and what I learned."
-date: 2026-04-15
+title: "Google Analytics Was Measuring the Wrong Thing"
+description: "Google Analytics tracked page views in a product where page views don't matter. I replaced it with internal event tracking and Cloudflare, and finally saw how the system actually behaves."
+date: 2026-04-10
 tags: ["analytics", "architecture", "cloudflare"]
 #heroImage: "killing-google-analytics-internal-event-tracking-hero.png"
 draft: true
 ---
 
-Google Analytics was useless for this product.
+Google Analytics wasn't useful for this product.
 
-Not broken. Just measuring the wrong things.
+Not broken. Just measuring the wrong system.
 
 [Lush Aural Treats](https://lushauraltreats.com) is an email-driven music sharing platform. Users submit albums by sending an email. A backend pipeline parses the submission, enriches it with metadata, generates a review, and persists it to a tenant-scoped feed. Other members get notified. They react, browse, listen.
 
-The product is the pipeline and the email loop. Page views are just a side effect.
+The product is the pipeline and the email loop.
+Page views are just a side effect.
 
 Google Analytics sat on the frontend collecting session data and bounce rates. The product ran on the backend. I was looking at dashboards that told me nothing about whether the system was working.
 
 So I killed it.
 
 ## What the product actually does
+
+<!-- DIAGRAM: email → pipeline → feed → notifications flow -->
 
 The real flow looks like this:
 
@@ -29,7 +32,7 @@ Email → SES → Lambda → NestJS pipeline → DynamoDB → Feed → Email not
 
 A member sends an album link in the subject line of an email. The system validates the sender, resolves the tenant, enriches metadata from Spotify, generates an AI review, and writes the album to the feed. Other members get notified. They visit the feed, react, browse, maybe submit their own album. That triggers the loop again.
 
-In a [previous post](/blog/email-driven-multi-tenant-ingestion-pipeline) I covered the ingestion pipeline in detail. The point here is simpler: **the interesting behavior happens server-side**. A user opening the feed page is the least interesting event in the chain. The interesting events are: did someone submit an album? Did the pipeline complete? Did anyone react?
+In a [previous post](/blog/email-driven-multi-tenant-ingestion-pipeline) I covered the ingestion pipeline in detail. The point here is simpler: **the interesting behavior happens server-side**. A user opening the feed page is the least interesting event in the system. The interesting events are: did someone submit an album? Did the pipeline complete? Did anyone react?
 
 Google Analytics couldn't answer any of those questions.
 
@@ -56,7 +59,7 @@ Different layers answer different questions.
 
 **Product behavior** is an application concern. Which events happened? In what order? How long did things take? This is what I needed to build.
 
-Google Analytics didn't fit either layer. Too shallow for product insight, too heavy for traffic monitoring. Cloudflare covers one side. Internal tracking covers the other.
+Google Analytics didn't fit either layer. Too shallow for product insight, too heavy for infrastructure visibility. Cloudflare covers one side. Internal tracking covers the other.
 
 ## Removing Google Analytics
 
@@ -79,7 +82,7 @@ SK: <timestamp>#<eventId>
 
 Each event has a type, tenant, timestamp, and an optional metadata object. Events are partitioned by tenant, so queries are always scoped. No cross-tenant reads. The partition suffix spreads writes across multiple physical partitions to avoid hot keys.
 
-The event set is small. About 15 types total:
+The event set is intentionally small. About 15 types total:
 
 ```text
 Backend events:
@@ -110,18 +113,18 @@ The whole thing is fire-and-forget. Event tracking never blocks the main flow. I
 
 This was the most useful part of the system.
 
-Each pipeline run records timing across its stages:
+A typical pipeline run takes tens of seconds. Early on it was closer to two minutes. After instrumenting it and trimming the AI calls, it now averages around 30–40 seconds. Most of that time is spent generating the AI review. Each run records timing across its stages:
 
 ```text
 {
   type: "pipeline_completed",
-  durationMs: 4200,
+  durationMs: 38000,
   metadata: {
     stageDurations: {
-      metadata_fetch: 800,
-      review_generation: 2900,
-      persistence: 150,
-      notification: 350
+      metadata_fetch: 1200,
+      review_generation: 32000,
+      persistence: 400,
+      notification: 800
     }
   }
 }
@@ -129,17 +132,42 @@ Each pipeline run records timing across its stages:
 
 A few things stood out quickly.
 
-**AI review generation dominates pipeline time.** The OpenAI call for generating album reviews takes 2-4 seconds on average. Everything else combined is under a second. If the pipeline feels slow, that's where the time goes.
+**AI review generation dominates pipeline time.** The OpenAI call takes the vast majority of the total duration. Everything else is comparatively fast. If the pipeline feels slow, that's where the time goes.
 
-**Spotify metadata fetch is fast but occasionally spikes.** Usually 200-400ms. Sometimes over a second. Enough variance to notice, not enough to fix.
+**Spotify metadata fetch is fast but occasionally spikes.** Quick most of the time, but sometimes takes a few seconds. Enough variance to notice, not enough to fix.
 
 **The gap between the first album and the first reaction tells you if an exchange is alive.** If someone submits an album and nobody reacts within a few days, the exchange isn't working. This metric, `time_to_first_reaction`, was impossible to measure with Google Analytics. With internal events it's a derived query across two event types.
 
+## Closing the loop
+
+Once the event system existed, extending it was trivial.
+
+Pipeline timing tells you how long the backend takes. But users don't care about backend time. They care about "I sent an email and the album showed up in the feed." That's the full product loop. So I added a handful of events to measure user-perceived latency across the whole chain.
+
+Backend events track submission outcomes:
+
+```text
+submission_sent
+submission_duplicate
+submission_failed
+```
+
+Frontend events track when the result actually reaches the user:
+
+```text
+album_appeared_in_feed
+album_fully_hydrated
+```
+
+With these in place I can measure the things that actually matter to users. Submission to appear latency covers the full pipeline plus any propagation delay. Appear to hydrated latency covers metadata loading on the client. Drop-offs show where albums enter the pipeline but never show up in the feed. Duplicate rate tells me how often members re-submit the same album.
+
+The whole thing took about an hour to extend. Same DynamoDB table, same event model, same fire-and-forget pattern. No new infrastructure.
+
 ## Guardrails
 
-Building your own analytics is easy. Keeping it from becoming messy is the hard part.
+Left unchecked, internal analytics systems turn into junk drawers.
 
-I've seen internal analytics systems turn into unmanageable monsters. Every team adds their own events. Metadata blobs grow unbounded. Queries slow down. Nobody trusts the data. I didn't want that.
+Building your own analytics is easy. Keeping it from becoming messy is the hard part. I've seen these systems turn into unmanageable monsters. Every team adds their own events. Metadata blobs grow unbounded. Queries slow down. Nobody trusts the data. I didn't want that.
 
 **Metadata caps.** Every event metadata object is capped at 1KB. Each event type has a whitelist of allowed fields. Unknown fields get stripped. String values get truncated. This prevents the "let me just add one more field" creep that bloats analytics tables.
 
@@ -183,10 +211,10 @@ This isn't universal advice. Internal analytics made sense here because:
 
 **Cloudflare is already there.** Traffic-level analytics are covered. I didn't need to build that part. If I didn't have Cloudflare, I'd still need something for traffic visibility and removing Google Analytics would have left a bigger gap.
 
+Google Analytics is good software. It just wasn't the right fit for a product where the inbox is the interface and the backend is the product.
+
 ## Closing
 
 The whole change took less time than I expected. Remove GA. Add a DynamoDB entity type. Instrument the pipeline. Add a few client events. Wire up admin endpoints. Deploy.
 
 The system now tells me what I actually want to know, not how many visitors hit the landing page. Whether the product is working. Whether albums are flowing through the pipeline. Whether people are reacting. How fast things run.
-
-Google Analytics is good software. It just wasn't the right fit for a product where the inbox is the interface and the backend is the product.

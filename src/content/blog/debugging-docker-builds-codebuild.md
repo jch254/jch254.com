@@ -1,7 +1,7 @@
 ---
 title: "Debugging Docker Builds in AWS CodeBuild: When Overlay Filesystems Break Everything"
 description: "A Docker build kept failing in CodeBuild with 'failed to mount overlay: invalid argument'. The problem wasn't my code, my config, or my permissions. It was the kernel."
-date: 2026-04-08
+date: 2026-04-15
 tags: ["aws", "docker", "infrastructure"]
 draft: true
 ---
