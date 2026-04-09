@@ -45,7 +45,7 @@ Email notification
 Interaction (view, react, submit)
 ```
 
-A member sends an album link in the subject line of an email. The system validates the sender, resolves the tenant, enriches metadata from Spotify, generates an AI review, and writes the album to the feed. Other members get notified. They visit the feed, react, browse, maybe submit their own album. That triggers the loop again.
+A member sends an album link to their exchange email address. The system validates the sender, resolves the tenant, enriches metadata from Spotify, generates an AI review, and writes the album to the feed. Other members get notified. They visit the feed, react, browse, maybe submit their own album. That triggers the loop again.
 
 In a [previous post](/blog/email-driven-multi-tenant-ingestion-pipeline) I covered the ingestion pipeline in detail. The point here is simpler: **the interesting behavior happens server-side**. A user opening the feed is the least interesting event in the system. The interesting events are: did someone submit an album? Did the pipeline complete? Did anyone react?
 
@@ -70,7 +70,7 @@ I was opening Google Analytics, staring at traffic graphs, then switching to Clo
 
 Different layers answer different questions.
 
-**Traffic and referrers** are infrastructure concerns. How much traffic is hitting the site? Where is it coming from? Is anything getting hammered? I already had Cloudflare in front of the app. DNS, CDN, WAF, DDoS protection. The analytics dashboard shows requests, bandwidth, top paths, referrers, and country breakdown. I was paying for this data and ignoring it.
+**Traffic and referrers** are infrastructure concerns. How much traffic is hitting the site? Where is it coming from? Is anything getting hammered? I already had Cloudflare in front of the app. DNS, CDN, WAF, DDoS protection. The analytics dashboard shows requests, bandwidth, top paths, referrers, and country breakdown. It's included in the free tier and I was ignoring it.
 
 **Product behavior** is an application concern. Which events happened? In what order? How long did things take? This is what I needed to build.
 
