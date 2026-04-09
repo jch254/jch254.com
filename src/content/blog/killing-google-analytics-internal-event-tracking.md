@@ -3,7 +3,7 @@ title: "Google Analytics Was Measuring the Wrong Thing"
 description: "Google Analytics tracked page views in a product where page views don't matter. I replaced it with internal event tracking and Cloudflare, and finally saw how the system actually behaves."
 date: 2026-04-10
 tags: ["analytics", "architecture", "cloudflare"]
-#heroImage: "killing-google-analytics-internal-event-tracking-hero.png"
+heroImage: "killing-google-analytics-internal-event-tracking-hero.png"
 draft: true
 ---
 
@@ -20,21 +20,36 @@ Google Analytics sat on the frontend collecting session data and bounce rates. T
 
 So I killed it.
 
-## What the product actually does
+## What the system actually does
 
-<!-- DIAGRAM: email → pipeline → feed → notifications flow -->
-
-The real flow looks like this:
+At a system level, the flow looks like this:
 
 ```text
-Email → SES → Lambda → NestJS pipeline → DynamoDB → Feed → Email notification → Interaction
+Email
+  ↓
+SES (inbound)
+  ↓
+Lambda (parse + validate)
+  ↓
+NestJS pipeline
+  ├─ resolve tenant
+  ├─ enrich metadata (Spotify)
+  ├─ generate review (OpenAI)
+  ↓
+DynamoDB
+  ↓
+Feed (visible to members)
+  ↓
+Email notification
+  ↓
+Interaction (view, react, submit)
 ```
 
 A member sends an album link in the subject line of an email. The system validates the sender, resolves the tenant, enriches metadata from Spotify, generates an AI review, and writes the album to the feed. Other members get notified. They visit the feed, react, browse, maybe submit their own album. That triggers the loop again.
 
-In a [previous post](/blog/email-driven-multi-tenant-ingestion-pipeline) I covered the ingestion pipeline in detail. The point here is simpler: **the interesting behavior happens server-side**. A user opening the feed page is the least interesting event in the system. The interesting events are: did someone submit an album? Did the pipeline complete? Did anyone react?
+In a [previous post](/blog/email-driven-multi-tenant-ingestion-pipeline) I covered the ingestion pipeline in detail. The point here is simpler: **the interesting behavior happens server-side**. A user opening the feed is the least interesting event in the system. The interesting events are: did someone submit an album? Did the pipeline complete? Did anyone react?
 
-Google Analytics couldn't answer any of those questions.
+Google Analytics couldn't answer any of those questions. It wasn't looking in the right place.
 
 ## What I actually needed to know
 
