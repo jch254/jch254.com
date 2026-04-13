@@ -18,7 +18,7 @@ When you create a CodeBuild project linked to a GitHub repo, AWS stores the full
 
 Renaming a repo on GitHub creates a redirect from the old URL to the new one. `git push` and `git clone` follow that redirect. So does the browser. Everything looks normal.
 
-CodeBuild does not follow the redirect. The source URL still points to the old repo name. The webhook is tied to the old mapping. GitHub moves the webhook to the renamed repo, but CodeBuild does not update its internal linkage.
+CodeBuild does not follow the redirect. The source URL still points to the old repo name. The webhook is tied to the old repository linkage inside CodeBuild. GitHub moves the webhook to the renamed repo, but CodeBuild does not update its internal linkage.
 
 The webhook fires. CodeBuild ignores it.
 
@@ -33,7 +33,7 @@ No error. No log entry. The build never starts.
 - The CodeBuild console still shows the old repo name in the source config
 - CloudWatch has no CodeBuild logs for the period
 
-The missing webhook is the key. GitHub didn't preserve it during the rename. It just disappeared. Terraform still thought it existed under the old repo name, so it never recreated it. Nothing to fire, nothing to deliver, nothing to fail.
+The missing webhook is the key failure. GitHub didn't preserve it during the rename. It just disappeared. Terraform still thought it existed under the old repo name, so it never recreated it. Nothing to fire, nothing to deliver, nothing to fail.
 
 ## The fix
 
@@ -65,7 +65,7 @@ If you're not using Terraform, delete the webhook in GitHub and reconnect the so
 
 ## Why this is dangerous
 
-GitHub repo renames are supposed to be safe. Git operations keep working. Links redirect. Everything looks fine.
+GitHub repo renames are supposed to be safe. Git operations keep working. Links redirect. Everything looks fine. Everything looks correct until you notice nothing is happening.
 
 The problem is that redirects do not propagate through integrations. Git follows them. Browsers follow them. AWS does not.
 
@@ -106,7 +106,11 @@ More setup, but it works in every region and gives you more control over filteri
 
 ## Takeaway
 
-- If CodeBuild stops triggering after a repo rename, check the webhook first
+- If CodeBuild stops triggering after a repo rename, check the webhook before anything else
 - GitHub redirects do not extend to AWS integrations
 - Update the source URL in Terraform and recreate the webhook
 - Use `destroy -target` if Terraform state prevents webhook recreation
+
+---
+
+If you're interested in real-world AWS behaviour and tradeoffs, I wrote about redesigning Lush Aural Treats to cut a $1,000 AWS bill down to near zero: [Lush Aural Treats AWS Cost Redesign](/blog/lush-aural-treats-aws-cost-redesign/).
