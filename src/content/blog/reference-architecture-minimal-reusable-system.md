@@ -1,7 +1,7 @@
 ---
 title: "I Kept Rebuilding the Same System"
 description: "Every new project started with the same backend, the same infra, the same pipeline. I got tired of it, so I extracted the minimal patterns that actually matter into a reusable reference architecture."
-date: 2026-04-15
+date: 2026-04-22
 tags: ["architecture", "aws", "infrastructure"]
 draft: true
 ---
