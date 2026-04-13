@@ -81,28 +81,51 @@ Failure alerts would not have helped here. The builds never started. There were 
 
 What would have helped is noticing missing success notifications. If you're used to seeing "build succeeded" emails and they stop, that is your signal.
 
-CodeBuild supports this with SNS. Small setup:
+CodeBuild supports this with SNS. The setup went through three iterations before landing where it is now.
 
-- Create an SNS topic
-- Subscribe your email
-- Add a notification rule to the CodeBuild project
+### Round 1: CodeStar Notifications + SNS
 
-I only enabled two events:
+The first attempt used AWS CodeStar Notifications, which has native CodeBuild integration. Create a notification rule, point it at an SNS topic, add an email subscription, done. The emails were raw JSON blobs from AWS with no formatting. Functional.
 
-- Build succeeded
-- Build failed
+This is also where the GitHub rename bug bit. The fix to `source_location` was bundled into this same commit because the rename had already silently broken the webhook.
 
-That is enough signal without noise. Worth doing early. Otherwise you end up checking the console after every push, or not checking at all.
+### Round 2: EventBridge instead of CodeStar
 
-## Region gotcha
+CodeStar Notifications isn't available in `ap-southeast-4` (Melbourne). The next iteration replaced the notification rule with an EventBridge rule that watched for `CodeBuild Build State Change` events and routed them directly to SNS. Same raw JSON email output, but actually deployable in the target region.
 
-I tried to set this up using CodeStar Notifications. It's not available in `ap-southeast-4`.
+### Round 3: Lambda formatter in the middle
 
-That means the SNS + notification rule approach isn't an option in some regions.
+Direct EventBridge to SNS produces an unreadable wall of JSON. The final iteration inserted a small Node.js Lambda between EventBridge and SNS. EventBridge triggers the Lambda, the Lambda parses the CodeBuild event payload, and SNS publishes a formatted plain-text email.
 
-The workaround is EventBridge. CodeBuild emits build state events to EventBridge by default. Create a rule that matches your project and build state, send it to SNS, then subscribe your email.
+The formatter produces a human-readable layout:
 
-More setup, but it works in every region and gives you more control over filtering. Probably the better default.
+```text
+❌ Build FAILED
+────────────────────────────────────────
+Project:   namaste
+Build:     #83
+Status:    FAILED
+Duration:  3m 37s
+Commit:    797af25
+Initiator: GitHub-Hookshot/d97595e
+
+Phases:
+  ✅ SUBMITTED          0s
+  ✅ QUEUED             0s
+  ...
+  ❌ POST_BUILD         26s
+
+Error Details:
+  POST_BUILD: COMMAND_EXECUTION_ERROR: ...
+
+Logs: https://...
+```
+
+The Lambda is bundled with esbuild, zipped by Terraform's `archive_file` data source, and deployed inline alongside the rest of the infrastructure. No separate stack, no manual steps.
+
+This also exposed a missing IAM permission. Terraform needs `events:ListTargetsByRule` to reconcile the EventBridge target state. Without it, the plan fails. That is what caused build #83 to fail before I added it.
+
+More setup than CodeStar Notifications, but it works in every region and gives you more control over filtering. Probably the better default.
 
 ## Takeaway
 
