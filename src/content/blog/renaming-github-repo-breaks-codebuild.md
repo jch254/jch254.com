@@ -92,6 +92,16 @@ I only enabled two events:
 
 That is enough signal without noise. Worth doing early. Otherwise you end up checking the console after every push, or not checking at all.
 
+## Region gotcha
+
+I tried to set this up using CodeStar Notifications. It's not available in `ap-southeast-4`.
+
+That means the SNS + notification rule approach isn't an option in some regions.
+
+The workaround is EventBridge. CodeBuild emits build state events to EventBridge by default. You create a rule that matches on build state changes for your project, send that to an SNS topic, and subscribe your email.
+
+More setup, but it works in every region and gives you more control over filtering. In hindsight, it's probably the better default anyway.
+
 ## Takeaway
 
 - If CodeBuild stops triggering after a repo rename, check the webhook first
