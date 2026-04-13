@@ -65,7 +65,7 @@ If you're not using Terraform, delete the webhook in GitHub and reconnect the so
 
 ## Why this is dangerous
 
-GitHub repo renames are supposed to be safe. Git operations keep working. Links redirect. Everything looks fine. Everything looks correct until you notice nothing is happening.
+GitHub repo renames are supposed to be safe. Git operations keep working. Links redirect. Everything looks fine. Everything looks correct. Then you notice nothing is happening.
 
 The problem is that redirects do not propagate through integrations. Git follows them. Browsers follow them. AWS does not.
 
@@ -81,7 +81,7 @@ Failure alerts would not have helped here. The builds never started. There were 
 
 What would have helped is noticing missing success notifications. If you're used to seeing "build succeeded" emails and they stop, that is your signal.
 
-CodeBuild supports this with SNS. The setup went through three iterations before landing where it is now.
+CodeBuild supports this with SNS. This went through three iterations.
 
 ### Round 1: CodeStar Notifications + SNS
 
@@ -95,7 +95,7 @@ CodeStar Notifications isn't available in `ap-southeast-4` (Melbourne). The next
 
 ### Round 3: Lambda formatter in the middle
 
-Direct EventBridge to SNS produces an unreadable wall of JSON. The final iteration inserted a small Node.js Lambda between EventBridge and SNS. EventBridge triggers the Lambda, the Lambda parses the CodeBuild event payload, and SNS publishes a formatted plain-text email.
+Direct EventBridge to SNS produces an unreadable wall of JSON. The final iteration inserted a small Node.js Lambda between EventBridge and SNS. EventBridge triggers the Lambda. The Lambda formats the event. SNS sends the email.
 
 The formatter produces a human-readable layout:
 
@@ -125,7 +125,7 @@ The Lambda is bundled with esbuild, zipped by Terraform's `archive_file` data so
 
 This also exposed a missing IAM permission. Terraform needs `events:ListTargetsByRule` to reconcile the EventBridge target state. Without it, the plan fails. That is what caused build #83 to fail before I added it.
 
-More setup than CodeStar Notifications, but it works in every region and gives you more control over filtering. Probably the better default.
+More setup, but it works in every region and gives full control over filtering. Probably the better default.
 
 ## Takeaway
 
