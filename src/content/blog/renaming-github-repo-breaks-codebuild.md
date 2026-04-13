@@ -48,16 +48,20 @@ source {
 
 Run `terraform plan`. If it shows an update, apply it.
 
-The webhook is where this usually breaks. Terraform may not detect that it needs to be recreated. The existing webhook can still exist on the repo and look fine.
+But updating the source URL alone wasn't enough. The existing OAuth connection between CodeBuild and GitHub goes stale when the repo is renamed. That is what actually breaks the webhook.
 
-If builds still don't trigger, taint the webhook and apply again.
+After `terraform apply`, go to the AWS Console. Open the CodeBuild project, edit the source, and re-authorize the GitHub connection. Re-select the renamed repo. This re-establishes the OAuth link that the webhook depends on.
+
+If builds still don't trigger after that, destroy and recreate the webhook resource directly.
 
 ```bash
-terraform taint aws_codebuild_webhook.this
-terraform apply
+terraform destroy -target=aws_codebuild_webhook.main
+terraform apply -target=aws_codebuild_webhook.main
 ```
 
-This forces a new webhook linked to the correct repo. After that, pushes trigger builds again.
+Then push to main and check CodeBuild for a triggered build.
+
+If you added SNS notifications in the same apply, confirm the subscription email before testing. AWS sends a confirmation link immediately. Nothing fires until you click it.
 
 If you're not using Terraform, delete the webhook in GitHub and reconnect the source in the CodeBuild console. Same outcome.
 
@@ -105,6 +109,7 @@ More setup, but it works in every region and gives you more control over filteri
 ## Takeaway
 
 - If CodeBuild stops triggering after a repo rename, check the webhook first
+- The OAuth connection between CodeBuild and GitHub goes stale on rename. Re-authorize it in the console
 - GitHub redirects do not extend to AWS integrations
-- Update the source URL and recreate the webhook
-- Taint the webhook in Terraform if the plan alone does not fix it
+- Update the source URL, re-authorize, and recreate the webhook
+- `destroy -target` and `apply -target` on the webhook resource if a full apply doesn't fix it
