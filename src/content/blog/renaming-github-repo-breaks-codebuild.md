@@ -3,7 +3,7 @@ title: "Renaming a GitHub Repo Silently Breaks AWS CodeBuild"
 description: "Renamed a GitHub repo. Pushed multiple commits. Nothing deployed. No errors anywhere. Turns out CodeBuild doesn't follow GitHub's repo redirects, and the webhook linkage breaks without telling you."
 date: 2026-04-15
 tags: ["aws", "infrastructure", "terraform"]
-draft: true
+draft: false
 ---
 
 I pushed three commits over a few hours. Nothing deployed.
@@ -48,20 +48,28 @@ source {
 
 Run `terraform plan`. If it shows an update, apply it.
 
-But updating the source URL alone wasn't enough. The existing OAuth connection between CodeBuild and GitHub goes stale when the repo is renamed. That is what actually breaks the webhook.
+That alone is not enough.
 
-After `terraform apply`, go to the AWS Console. Open the CodeBuild project, edit the source, and re-authorize the GitHub connection. Re-select the renamed repo. This re-establishes the OAuth link that the webhook depends on.
+The GitHub OAuth connection goes stale when the repo is renamed. That is what actually breaks the webhook.
 
-If builds still don't trigger after that, destroy and recreate the webhook resource directly.
+After applying, go to the AWS console. Open the CodeBuild project, edit the source, and re-authorize the GitHub connection. Re-select the renamed repo.
+
+This re-establishes the link that the webhook depends on.
+
+If builds still don't trigger, check the repo's webhooks in GitHub Settings.
+
+In my case, the webhook was missing entirely. Terraform still thought it existed under the old repo name, so it didn't recreate it.
+
+Force-replace it:
 
 ```bash
 terraform destroy -target=aws_codebuild_webhook.main
 terraform apply -target=aws_codebuild_webhook.main
 ```
 
-Then push to main and check CodeBuild for a triggered build.
+That removes the stale state and creates a fresh webhook on the renamed repo. You should see it appear in GitHub Settings immediately.
 
-If you added SNS notifications in the same apply, confirm the subscription email before testing. AWS sends a confirmation link immediately. Nothing fires until you click it.
+If you added SNS notifications in the same apply, confirm the subscription email before testing. Nothing fires until you click it.
 
 If you're not using Terraform, delete the webhook in GitHub and reconnect the source in the CodeBuild console. Same outcome.
 
@@ -102,14 +110,14 @@ I tried to set this up using CodeStar Notifications. It's not available in `ap-s
 
 That means the SNS + notification rule approach isn't an option in some regions.
 
-The workaround is EventBridge. CodeBuild emits build state events to EventBridge by default. You create a rule that matches on build state changes for your project, send that to an SNS topic, and subscribe your email.
+The workaround is EventBridge. CodeBuild emits build state events to EventBridge by default. Create a rule that matches your project and build state, send it to SNS, then subscribe your email.
 
-More setup, but it works in every region and gives you more control over filtering. In hindsight, it's probably the better default anyway.
+More setup, but it works in every region and gives you more control over filtering. Probably the better default.
 
 ## Takeaway
 
 - If CodeBuild stops triggering after a repo rename, check the webhook first
-- The OAuth connection between CodeBuild and GitHub goes stale on rename. Re-authorize it in the console
+- The GitHub OAuth connection goes stale on rename. Re-authorize it in the console
 - GitHub redirects do not extend to AWS integrations
 - Update the source URL, re-authorize, and recreate the webhook
-- `destroy -target` and `apply -target` on the webhook resource if a full apply doesn't fix it
+- Use `destroy -target` if Terraform state prevents webhook recreation
