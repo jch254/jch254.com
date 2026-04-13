@@ -29,11 +29,11 @@ No error. No log entry. The build never starts.
 - Pushes to the renamed repo don't trigger builds
 - The CodeBuild project shows no recent build history
 - `git push` works fine, no errors
-- GitHub shows the webhook as active and delivering successfully (200 responses)
+- The webhook is missing entirely from the renamed repo's GitHub Settings
 - The CodeBuild console still shows the old repo name in the source config
 - CloudWatch has no CodeBuild logs for the period
 
-The GitHub webhook returning 200 is the worst part. It makes the integration look healthy. The payload is delivered. CodeBuild drops it.
+The missing webhook is the key. GitHub didn't preserve it during the rename. It just disappeared. Terraform still thought it existed under the old repo name, so it never recreated it. Nothing to fire, nothing to deliver, nothing to fail.
 
 ## The fix
 
