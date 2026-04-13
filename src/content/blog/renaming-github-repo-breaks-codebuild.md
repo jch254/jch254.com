@@ -127,6 +127,16 @@ This also exposed a missing IAM permission. Terraform needs `events:ListTargetsB
 
 More setup, but it works in every region and gives full control over filtering. Probably the better default.
 
+## Final result
+
+After wiring it all together, this is what the notification looks like:
+
+![CodeBuild build succeeded email with formatted output](./codebuild-notification-success.png)
+
+Readable. Immediate signal. No more checking the console.
+
+This runs through the same pipeline I use across projects, which lives in [reference-architecture](https://github.com/jch254/reference-architecture). I'll write about that separately.
+
 ## Takeaway
 
 - If CodeBuild stops triggering after a repo rename, check the webhook before anything else
