@@ -50,7 +50,7 @@ Run `terraform plan`. If it shows an update, apply it.
 
 That alone is not enough.
 
-The webhook was missing entirely. Terraform still thought it existed under the old repo name, so it didn't recreate it.
+The webhook may be missing entirely. Terraform can still think it exists under the old repo name, so it never recreates it.
 
 Force-replace it:
 
@@ -60,8 +60,6 @@ terraform apply -target=aws_codebuild_webhook.main
 ```
 
 That removes the stale state and creates a fresh webhook on the renamed repo. You should see it appear in the repo's GitHub Settings under Webhooks immediately after.
-
-If you added SNS notifications in the same apply, confirm the subscription email before testing. Nothing fires until you click it.
 
 If you're not using Terraform, delete the webhook in GitHub and reconnect the source in the CodeBuild console. Same outcome.
 
