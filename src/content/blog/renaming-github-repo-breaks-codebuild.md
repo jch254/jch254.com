@@ -18,11 +18,9 @@ When you create a CodeBuild project linked to a GitHub repo, AWS stores the full
 
 Renaming a repo on GitHub creates a redirect from the old URL to the new one. `git push` and `git clone` follow that redirect. So does the browser. Everything looks normal.
 
-CodeBuild does not follow the redirect. The source URL still points to the old repo name. The webhook is tied to the old repository linkage inside CodeBuild. GitHub moves the webhook to the renamed repo, but CodeBuild does not update its internal linkage.
+But the webhook doesn't survive the rename. GitHub removes it from the repo entirely. It doesn't move it, doesn't recreate it, doesn't error. It just disappears. The CodeBuild console still shows the old repo name in the source config, and Terraform still thinks the webhook exists under the old name, so nothing recreates it.
 
-The webhook fires. CodeBuild ignores it.
-
-No error. No log entry. The build never starts.
+No webhook means no trigger. Pushes land fine. Nothing fires. The build never starts.
 
 ## Symptoms
 
@@ -33,7 +31,7 @@ No error. No log entry. The build never starts.
 - The CodeBuild console still shows the old repo name in the source config
 - CloudWatch has no CodeBuild logs for the period
 
-The missing webhook is the key failure. GitHub didn't preserve it during the rename. It just disappeared. Terraform still thought it existed under the old repo name, so it never recreated it. Nothing to fire, nothing to deliver, nothing to fail.
+The missing webhook is the key failure. It disappears during the rename, but Terraform still thinks it exists under the old repo name, so nothing recreates it.
 
 ## The fix
 
@@ -50,7 +48,7 @@ Run `terraform plan`. If it shows an update, apply it.
 
 That alone is not enough.
 
-The webhook may be missing entirely. Terraform can still think it exists under the old repo name, so it never recreates it.
+If the webhook disappeared during the rename, Terraform will still think it exists and won't recreate it.
 
 Force-replace it:
 
