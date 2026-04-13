@@ -50,15 +50,7 @@ Run `terraform plan`. If it shows an update, apply it.
 
 That alone is not enough.
 
-The GitHub OAuth connection goes stale when the repo is renamed. That is what actually breaks the webhook.
-
-After applying, go to the AWS console. Open the CodeBuild project, edit the source, and re-authorize the GitHub connection. Re-select the renamed repo.
-
-This re-establishes the link that the webhook depends on.
-
-If builds still don't trigger, check the repo's webhooks in GitHub Settings.
-
-In my case, the webhook was missing entirely. Terraform still thought it existed under the old repo name, so it didn't recreate it.
+The webhook was missing entirely. Terraform still thought it existed under the old repo name, so it didn't recreate it.
 
 Force-replace it:
 
@@ -67,7 +59,7 @@ terraform destroy -target=aws_codebuild_webhook.main
 terraform apply -target=aws_codebuild_webhook.main
 ```
 
-That removes the stale state and creates a fresh webhook on the renamed repo. You should see it appear in GitHub Settings immediately.
+That removes the stale state and creates a fresh webhook on the renamed repo. You should see it appear in the repo's GitHub Settings under Webhooks immediately after.
 
 If you added SNS notifications in the same apply, confirm the subscription email before testing. Nothing fires until you click it.
 
@@ -117,7 +109,6 @@ More setup, but it works in every region and gives you more control over filteri
 ## Takeaway
 
 - If CodeBuild stops triggering after a repo rename, check the webhook first
-- The GitHub OAuth connection goes stale on rename. Re-authorize it in the console
 - GitHub redirects do not extend to AWS integrations
-- Update the source URL, re-authorize, and recreate the webhook
+- Update the source URL in Terraform and recreate the webhook
 - Use `destroy -target` if Terraform state prevents webhook recreation
