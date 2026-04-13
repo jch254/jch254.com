@@ -3,7 +3,7 @@ title: "Renaming a GitHub Repo Silently Breaks AWS CodeBuild"
 description: "Renamed a GitHub repo. Pushed multiple commits. Nothing deployed. No errors anywhere. Turns out CodeBuild doesn't follow GitHub's repo redirects, and the webhook linkage breaks without telling you."
 date: 2026-04-15
 tags: ["aws", "infrastructure", "terraform"]
-draft: false
+draft: true
 ---
 
 I pushed three commits over a few hours. Nothing deployed.
