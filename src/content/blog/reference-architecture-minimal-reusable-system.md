@@ -31,7 +31,9 @@ I removed everything that wasn't structural. What was left became [reference-arc
 - A way to know the system actually works after deploy
 - A client surface (web or mobile) that can plug into it without changing the backend or the system
 
-That's the system. No message queues. No async pipelines by default. If the system needs them later, add them then. No event buses. No staging environment. No separate services for things that don't need to be separate.
+That's the system.
+
+No message queues. No async pipelines by default. If the system needs them later, add them then. No event buses. No staging environment. No separate services for things that don't need to be separate.
 
 I've built systems with all of those pieces. Most weren't needed at the start, and they created drag long before they created value.
 
@@ -141,7 +143,7 @@ The AI isn't guessing. It's copying patterns from a working system that already 
 
 Same for infrastructure. The Terraform in `/example-project` is a complete working deployment. The AI generates Terraform that fits the style because the patterns are already in the codebase. Correct variable naming. Correct tag structure. Correct IAM scoping. No long prompt explaining conventions.
 
-Clients work the same way. The reference architecture includes a React demo UI served from the same container. Mobile uses the same API and auth flow. Both are thin layers over the same system. When scaffolding a new client, the example project shows the API contract, how tenant context flows, how the build packages everything into one Docker image. Copilot reads that context and produces components that integrate correctly from the start.
+Clients work the same way. The system doesn't care whether the request comes from a browser or a phone. The reference architecture includes a React demo UI served from the same container. Mobile uses the same API and auth flow. Both are thin layers over the same system. When scaffolding a new client, the example project shows the API contract, how tenant context flows, how the build packages everything into one Docker image. Copilot reads that context and produces components that integrate correctly from the start.
 
 The workflow: create a repo, drop in the example project folder, point the AI at it, scaffold. Backend, infrastructure, frontend. The AI has a concrete reference instead of general training data.
 
@@ -192,4 +194,6 @@ I'm already using this as the base for the next product, without changing the fo
 
 Build it once. Then evolve it under real pressure.
 
-Stop rebuilding the same system. Start maintaining one that actually survives use.
+Stop rebuilding the same system.
+
+Maintain one that actually survives use.
