@@ -3,12 +3,15 @@ title: "Renaming a GitHub Repo Silently Breaks AWS CodeBuild"
 description: "Renamed a GitHub repo. Pushed multiple commits. Nothing deployed. No errors anywhere. Turns out CodeBuild doesn't follow GitHub's repo redirects, and the webhook linkage breaks without telling you."
 date: 2026-04-21
 tags: ["aws", "infrastructure", "terraform"]
-draft: true
+heroImage: "renaming-github-repo-breaks-codebuild-hero.png"
+draft: false
 ---
 
 I pushed three commits over a few hours. Nothing deployed.
 
-No failed builds. No error emails. No Slack alerts. CodeBuild wasn't failing. It just wasn't running.
+There were no failures. The builds never started.
+
+No error emails. No Slack alerts. CodeBuild wasn't failing. It just wasn't running.
 
 The only thing that had changed was the repo name.
 
@@ -18,9 +21,9 @@ When you create a CodeBuild project linked to a GitHub repo, AWS stores the full
 
 Renaming a repo on GitHub creates a redirect from the old URL to the new one. `git push` and `git clone` follow that redirect. So does the browser. Everything looks normal.
 
-But the webhook doesn't survive the rename. GitHub removes it from the repo entirely. It doesn't move it, doesn't recreate it, doesn't error. It just disappears. The CodeBuild console still shows the old repo name in the source config, and Terraform still thinks the webhook exists under the old name, so nothing recreates it.
+But **the webhook doesn't survive the rename**. GitHub removes it from the repo entirely. It doesn't move it, doesn't recreate it, doesn't error. It just disappears. The CodeBuild console still shows the old repo name in the source config, and Terraform still thinks the webhook exists under the old name, so nothing recreates it.
 
-No webhook means no trigger. Pushes land fine. Nothing fires. The build never starts.
+**No webhook means no trigger.** Pushes land fine. Nothing fires. The build never starts.
 
 ## Symptoms
 
