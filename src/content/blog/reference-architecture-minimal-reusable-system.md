@@ -1,7 +1,7 @@
 ---
 title: "I Kept Rebuilding the Same System"
 description: "Every new project started with the same backend, the same infra, the same pipeline. I got tired of it, so I extracted the minimal patterns that actually matter into a reusable reference architecture."
-date: 2026-04-22
+date: 2026-04-29
 tags: ["architecture", "aws", "infrastructure"]
 draft: true
 ---
@@ -10,9 +10,15 @@ Every backend I've built in the last few years looks the same. Stateless API. Mu
 
 I kept building it from scratch each time.
 
+It wasn't hard. It was just repetitive.
+
 Not because the patterns changed. They didn't. I'd copy files between repos, rip out domain logic, adjust names, fix the parts that didn't survive the transplant. By the time the foundation worked, I'd spent days on plumbing that had nothing to do with the product.
 
-So I extracted it. Stripped out the domain logic. Removed everything that wasn't structural. What was left became [reference-architecture](https://github.com/jch254/reference-architecture).
+So I extracted it. Stripped out the domain logic.
+
+I didn't want a template. I wanted something I could evolve.
+
+I removed everything that wasn't structural. What was left became [reference-architecture](https://github.com/jch254/reference-architecture).
 
 ---
 
@@ -23,8 +29,9 @@ So I extracted it. Stripped out the domain logic. Removed everything that wasn't
 - Infrastructure that deploys from a single pipeline with no manual steps
 - A data model that isolates tenants from day one
 - A way to know the system actually works after deploy
+- A client surface (web or mobile) that can plug into it without changing the backend
 
-That's it. No message queues. No async pipelines. No event buses. No staging environment. No separate services for things that don't need to be separate.
+That's the system. No message queues. No async pipelines by default. If the system needs them later, add them then. No event buses. No staging environment. No separate services for things that don't need to be separate.
 
 I've built systems with all of those pieces. Most weren't needed at the start, and they created drag long before they created value.
 
@@ -32,7 +39,7 @@ I've built systems with all of those pieces. Most weren't needed at the start, a
 
 ## The layers
 
-Four layers. Each aligns with the one below it.
+Four layers. Each aligns with the one below it. The same structure now supports web and mobile clients without changing anything underneath.
 
 ```text
 /src/backend                → API (NestJS)
@@ -41,7 +48,7 @@ buildspec.yml               → CI/CD (CodeBuild)
 /infrastructure/terraform   → deployment (AWS + Cloudflare)
 ```
 
-The backend is a NestJS app with request context middleware that resolves the tenant from the `Host` header. Every request gets a `tenantSlug` and a `requestId`. Controllers delegate to services. Services talk to DynamoDB. Nothing else.
+The backend is a NestJS app with request context middleware that resolves the tenant from the `Host` header. Every request gets a `tenantSlug` and a `requestId`. Controllers delegate to services. Services talk to DynamoDB. Nothing else sits in that path.
 
 The Dockerfile is a multi-stage build. `node dist/main.js` runs the compiled output. Non-root user. Port 3000. Works locally in Docker Compose and in ECS Fargate in production. Same image, same behavior.
 
@@ -108,13 +115,19 @@ It tests tenant isolation by sending a request with a different `Host` header an
 
 The script exits non-zero on failure. CodeBuild treats that as a failed build. Deploy equals validated system.
 
+There's no separate concept of "it deployed successfully" and "it works". They're the same thing.
+
 One TypeScript file. Runs in 2-3 seconds. Every other post-deploy check I've used was either too heavy or too shallow.
 
 ---
 
 ## How I use it
 
-The repo stays clean. No domain logic, no product code. When I start a new project, I include the reference architecture as an `/example-project` folder. The new repo gets its own code, its own infra, its own pipeline. But the example project sits right there as a working reference for every pattern.
+The repo stays clean. No domain logic, no product code.
+
+Anything product-specific stays outside it. If something gets reused twice, it gets pulled back in.
+
+When I start a new project, I include the reference architecture as an `/example-project` folder. The new repo gets its own code, its own infra, its own pipeline. But the example project sits right there as a working reference for every pattern.
 
 Six months in, when I need to remember how tenant middleware was wired or how the DynamoDB keys work, I open `/example-project` and read the code. It's always the same minimal system.
 
@@ -122,11 +135,44 @@ The real speed comes from combining this with Copilot and Claude.
 
 I point the AI at the example project and tell it to scaffold a new module following the same patterns. It sees the controller structure, the service layer, the DynamoDB key builders, the analytics integration, the response wrapping. It produces code that matches. Not perfect every time, but structurally correct.
 
+The AI isn't guessing. It's copying patterns from a working system that already runs in production.
+
 Same for infrastructure. The Terraform in `/example-project` is a complete working deployment. The AI generates Terraform that fits the style because the patterns are already in the codebase. Correct variable naming. Correct tag structure. Correct IAM scoping. No long prompt explaining conventions.
 
 Frontend works the same way. The reference architecture includes a React demo UI served from the same container. When scaffolding a new frontend, the example project shows the API contract, how tenant context flows, how the build packages everything into one Docker image. Copilot reads that context and produces components that integrate correctly from the start.
 
 The workflow: create a repo, drop in the example project folder, point the AI at it, scaffold. Backend, infrastructure, frontend. The AI has a concrete reference instead of general training data.
+
+---
+
+## What changed after actually using it
+
+The first version of this was just extraction. Strip things out, keep what's essential, make it reusable.
+
+That's not what it is anymore.
+
+I built a real product on top of it, and then started feeding what held up back into the reference architecture.
+
+A few things changed.
+
+**Auth stopped being example code.**
+Magic links, token verification, session handling, rate limiting, deep links for mobile. The shape stayed simple, but it became something you can actually ship.
+
+**Mobile became a first-class client.**
+The system isn't backend + web anymore. It's backend + web + mobile, all using the same API and auth flow. That forced the boundaries to get cleaner.
+
+**The example project became the interface.**
+It's not documentation. It's not a demo. It's the contract.
+When I scaffold something new, I point the AI at the example project and it generates code that matches the system.
+
+**The architecture tightened under pressure.**
+Anything that didn't survive real usage got removed or simplified. Anything that caused friction got pulled into the reference layer.
+
+The difference isn't in what I added.
+
+It's in what survived being used.
+
+The system didn't get bigger. It got sharper.
 
 ---
 
@@ -140,6 +186,8 @@ Each layer lines up with the one below it. The app binds to port 3000. The Docke
 
 I've already used this for the next thing I'm building. Copied the repo, added domain logic, deployed. No infra redesign. No pipeline changes. Multi-tenant data model already there. Analytics already wired. Validation script adapted with a few extra assertions.
 
-I'm already using this as the base for the next product.
+I'm already using this as the base for the next product, without changing the foundation.
 
-Build it once. Stop rebuilding it.
+Build it once. Then evolve it under real pressure.
+
+Stop rebuilding the same system. Start maintaining one that actually survives use.
