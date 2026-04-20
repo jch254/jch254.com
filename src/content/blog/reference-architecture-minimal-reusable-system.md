@@ -29,7 +29,7 @@ I removed everything that wasn't structural. What was left became [reference-arc
 - Infrastructure that deploys from a single pipeline with no manual steps
 - A data model that isolates tenants from day one
 - A way to know the system actually works after deploy
-- A client surface (web or mobile) that can plug into it without changing the backend
+- A client surface (web or mobile) that can plug into it without changing the backend or the system
 
 That's the system. No message queues. No async pipelines by default. If the system needs them later, add them then. No event buses. No staging environment. No separate services for things that don't need to be separate.
 
@@ -39,7 +39,7 @@ I've built systems with all of those pieces. Most weren't needed at the start, a
 
 ## The layers
 
-Four layers. Each aligns with the one below it. The same structure now supports web and mobile clients without changing anything underneath.
+Four layers. Each aligns with the one below it. Clients sit on top of this as thin surfaces over the same system.
 
 ```text
 /src/backend                → API (NestJS)
@@ -47,6 +47,8 @@ Dockerfile                  → runtime
 buildspec.yml               → CI/CD (CodeBuild)
 /infrastructure/terraform   → deployment (AWS + Cloudflare)
 ```
+
+Web and mobile clients sit above this stack and talk to the same API. They don't introduce new layers, just different entry points.
 
 The backend is a NestJS app with request context middleware that resolves the tenant from the `Host` header. Every request gets a `tenantSlug` and a `requestId`. Controllers delegate to services. Services talk to DynamoDB. Nothing else sits in that path.
 
@@ -139,7 +141,7 @@ The AI isn't guessing. It's copying patterns from a working system that already 
 
 Same for infrastructure. The Terraform in `/example-project` is a complete working deployment. The AI generates Terraform that fits the style because the patterns are already in the codebase. Correct variable naming. Correct tag structure. Correct IAM scoping. No long prompt explaining conventions.
 
-Frontend works the same way. The reference architecture includes a React demo UI served from the same container. When scaffolding a new frontend, the example project shows the API contract, how tenant context flows, how the build packages everything into one Docker image. Copilot reads that context and produces components that integrate correctly from the start.
+Clients work the same way. The reference architecture includes a React demo UI served from the same container. Mobile uses the same API and auth flow. Both are thin layers over the same system. When scaffolding a new client, the example project shows the API contract, how tenant context flows, how the build packages everything into one Docker image. Copilot reads that context and produces components that integrate correctly from the start.
 
 The workflow: create a repo, drop in the example project folder, point the AI at it, scaffold. Backend, infrastructure, frontend. The AI has a concrete reference instead of general training data.
 
@@ -159,7 +161,7 @@ A few things changed.
 Magic links, token verification, session handling, rate limiting, deep links for mobile. The shape stayed simple, but it became something you can actually ship.
 
 **Mobile became a first-class client.**
-The system isn't backend + web anymore. It's backend + web + mobile, all using the same API and auth flow. That forced the boundaries to get cleaner.
+The system isn't backend + web anymore. It's backend + web + mobile, all using the same API and auth flow. That forced the boundaries to get cleaner. The backend didn't change to support it. That was the point.
 
 **The example project became the interface.**
 It's not documentation. It's not a demo. It's the contract.
