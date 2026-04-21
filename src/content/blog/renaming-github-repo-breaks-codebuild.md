@@ -145,6 +145,22 @@ This runs through the same pipeline I use across projects, which lives in [refer
 - Update the source URL in Terraform and recreate the webhook
 - Use `destroy -target` if Terraform state prevents webhook recreation
 
+## Update: Reproduction and Discussion
+
+After publishing this, I built a minimal reproduction and opened an issue with the Terraform AWS provider.
+
+- GitHub issue (Terraform AWS provider): [hashicorp/terraform-provider-aws#47546](https://github.com/hashicorp/terraform-provider-aws/issues/47546)
+- Minimal reproduction repo: [jch254/codebuild-webhook-rename-test-renamed-again](https://github.com/jch254/codebuild-webhook-rename-test-renamed-again)
+
+The behavior is reproducible:
+
+- Renaming a GitHub repo silently invalidates the CodeBuild webhook
+- Terraform does not detect any drift, even with refresh
+- Updating the repository URL does not restore the integration
+- Only recreating the webhook fixes it
+
+This looks like a cross-system lifecycle gap, not just a Terraform drift issue. The webhook is owned in GitHub but managed through CodeBuild.
+
 ---
 
 If you're interested in real-world AWS behaviour and tradeoffs, I wrote about redesigning Lush Aural Treats to cut a $1,000 AWS bill down to near zero: [Lush Aural Treats AWS Cost Redesign](/blog/lush-aural-treats-aws-cost-redesign/).
