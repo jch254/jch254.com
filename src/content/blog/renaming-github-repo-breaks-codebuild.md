@@ -21,7 +21,7 @@ When you create a CodeBuild project linked to a GitHub repo, AWS stores the full
 
 Renaming a repo on GitHub creates a redirect from the old URL to the new one. `git push` and `git clone` follow that redirect. So does the browser. Everything looks normal.
 
-But **the webhook doesn't survive the rename**. GitHub removes it from the repo entirely. It doesn't move it, doesn't recreate it, doesn't error. It just disappears. The CodeBuild console still shows the old repo name in the source config, and Terraform still thinks the webhook exists under the old name, so nothing recreates it.
+But **the webhook doesn't survive the rename cleanly**. GitHub may delete it, or leave it in a broken state. In my repro, it was either missing or present but returning HTTP 400. The CodeBuild console still showed the old repo name in the source config, and Terraform still believed the webhook existed because the provider read from AWS CodeBuild continued to report it as present.
 
 **No webhook means no trigger.** Pushes land fine. Nothing fires. The build never starts.
 
@@ -30,11 +30,12 @@ But **the webhook doesn't survive the rename**. GitHub removes it from the repo 
 - Pushes to the renamed repo don't trigger builds
 - The CodeBuild project shows no recent build history
 - `git push` works fine, no errors
-- The webhook is missing entirely from the renamed repo's GitHub Settings
+- The webhook may be missing from the renamed repo's GitHub Settings
+- The webhook may still appear in GitHub but return HTTP 400
 - The CodeBuild console still shows the old repo name in the source config
 - CloudWatch has no CodeBuild logs for the period
 
-The missing webhook is the key failure. It disappears during the rename, but Terraform still thinks it exists under the old repo name, so nothing recreates it.
+The webhook state is the key failure. After the rename, it may be deleted or left broken. Terraform still believes it exists based on the provider read from AWS CodeBuild, so nothing recreates it.
 
 ## The fix
 
@@ -51,7 +52,7 @@ Run `terraform plan`. If it shows an update, apply it.
 
 That alone is not enough.
 
-If the webhook disappeared during the rename, Terraform will still think it exists and won't recreate it.
+If the webhook was deleted or left broken during the rename, Terraform will still think it exists and won't recreate it.
 
 Force-replace it:
 
@@ -68,7 +69,7 @@ If you're not using Terraform, delete the webhook in GitHub and reconnect the so
 
 GitHub repo renames are supposed to be safe. Git operations keep working. Links redirect. Everything looks fine. Everything looks correct. Then you notice nothing is happening.
 
-The problem is that redirects do not propagate through integrations. Git follows them. Browsers follow them. AWS does not.
+The problem is that redirects do not propagate through integrations. Git follows them. Browsers follow them. AWS CodeBuild does not surface that loss of linkage through its API.
 
 You rename the repo with confidence, and nothing breaks visibly. The pipeline just stops running.
 
@@ -144,6 +145,7 @@ This runs through the same pipeline I use across projects, which lives in [refer
 - GitHub redirects do not extend to AWS integrations
 - Update the source URL in Terraform and recreate the webhook
 - Use `destroy -target` if Terraform state prevents webhook recreation
+- The webhook may still appear in GitHub but be non-functional and return HTTP 400
 
 ## Update: Reproduction and Discussion
 
@@ -155,11 +157,31 @@ After publishing this, I built a minimal reproduction and opened an issue with t
 The behavior is reproducible:
 
 - Renaming a GitHub repo silently invalidates the CodeBuild webhook
-- Terraform does not detect any drift, even with refresh
+- Terraform reports no drift (`terraform plan -refresh-only` shows no changes)
 - Updating the repository URL does not restore the integration
 - Only recreating the webhook fixes it
 
-This looks like a cross-system lifecycle gap, not just a Terraform drift issue. The webhook is owned in GitHub but managed through CodeBuild.
+Observed behavior from the repro:
+
+- The webhook may be deleted
+- The webhook may still exist in GitHub but return HTTP 400
+- CodeBuild receives no webhook events and triggers no builds
+
+The webhook lifecycle is not fully reconciled across GitHub, AWS CodeBuild, and Terraform.
+
+- GitHub removes or invalidates the webhook on repo rename
+- AWS CodeBuild continues to report the webhook as configured
+- Terraform reads state from AWS and therefore sees no drift
+- Updating the repository source (location) does not trigger webhook recreation
+
+AWS CodeBuild does not recreate the webhook when the source repository URL is updated.
+
+Expected behavior:
+
+- Webhook should be recreated when the repository source (location) changes
+- Missing or invalid webhook should be detected as drift
+
+This is effectively a silent external invalidation that is not surfaced through the AWS API.
 
 ---
 
