@@ -10,7 +10,7 @@ Every backend I've built in the last few years looks the same. Stateless API. Mu
 
 I kept building it from scratch each time.
 
-It wasn't hard. It was just repetitive.
+It wasn't hard. It was repetitive.
 
 Not because the patterns changed. They didn't. I'd copy files between repos, rip out domain logic, adjust names, fix the parts that didn't survive the transplant. By the time the foundation worked, I'd spent days on plumbing that had nothing to do with the product.
 
@@ -178,6 +178,8 @@ It's in what survived being used.
 
 The system didn't get bigger. It got sharper.
 
+Most of this lines up with the [Twelve-Factor App](https://12factor.net). Stateless processes. Config from the environment. Disposable containers. Logs as streams. One codebase, many deploys. That alignment wasn't planned. It fell out of building things that had to survive production. Where it goes further is shaped by what I kept hitting in real systems. Multi-tenancy is a first-class constraint, not something bolted on later. Async pipelines aren't the default. You add them when the workload needs them, not before. AWS-native infra is a deliberate choice, not portability theater. These came from running the system, not from reading about it.
+
 ---
 
 ## What this gives me
@@ -188,9 +190,7 @@ The pipeline is deterministic. Push to main, Docker build, Terraform apply, ECS 
 
 Each layer lines up with the one below it. The app binds to port 3000. The Dockerfile exposes 3000. The ECS task maps 3000. The security group allows 3000 from the VPC Link. The health check hits 3000. Boring. That's correct.
 
-I've already used this for the next thing I'm building. Copied the repo, added domain logic, deployed. No infra redesign. No pipeline changes. Multi-tenant data model already there. Analytics already wired. Validation script adapted with a few extra assertions.
-
-I'm already using this as the base for the next product, without changing the foundation.
+I'm already using this as the base for the next thing I'm building. Copied the repo, added domain logic, deployed. No infra redesign. No pipeline changes. Multi-tenant data model already there. Analytics already wired. Validation script adapted with a few extra assertions.
 
 Build it once. Then evolve it under real pressure.
 
