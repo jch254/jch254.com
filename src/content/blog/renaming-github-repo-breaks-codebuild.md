@@ -183,6 +183,12 @@ Expected behavior:
 
 This is effectively a silent external invalidation that is not surfaced through the AWS API.
 
+## Update: workaround confirmed
+
+After testing the recovery path again, the workaround is confirmed: update the repository source URL, then force-recreate the `aws_codebuild_webhook` resource.
+
+Terraform still does not detect the missing or broken webhook as drift, so the important step is recreating the webhook explicitly.
+
 ---
 
 If you're interested in real-world AWS behaviour and tradeoffs, I wrote about redesigning Lush Aural Treats to cut a $1,000 AWS bill down to near zero: [Lush Aural Treats AWS Cost Redesign](/blog/lush-aural-treats-aws-cost-redesign/).
