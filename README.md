@@ -49,12 +49,79 @@ Personal website and blog, built with [Astro](https://astro.build) + React + Typ
 
 ## Deployment
 
-Deployed to **GitHub Pages** via GitHub Actions:
+The site is served by **GitHub Pages** with the custom domain in `public/CNAME`.
+Primary deployment runs through **AWS CodeBuild**. The previous GitHub Actions
+workflow is kept as a disabled backup at
+`.github/workflows/deploy-gh-pages.yml.disabled`.
 
-1. In your repo, go to **Settings > Pages** and set the source to **GitHub Actions**
-2. Every push to `main` or `master` triggers the workflow in `.github/workflows/deploy-gh-pages.yml`
-3. The workflow installs dependencies, builds with Astro, and deploys the `dist/` output to GitHub Pages
-4. Custom domain is configured via `public/CNAME`
+Deploys use [`buildspec.yml`](buildspec.yml):
+
+1. CodeBuild clones `jch254/jch254.com`
+2. `pnpm install --frozen-lockfile` installs dependencies
+3. `pnpm run build` generates the Astro static site in `dist/`
+4. CodeBuild commits `dist/` to the `gh-pages` branch
+5. GitHub Pages serves the `gh-pages` branch
+
+### CodeBuild setup
+
+The CodeBuild project and service role are managed by Terraform in
+`infrastructure/`. In GitHub, set **Settings > Pages > Build and deployment**
+to deploy from the `gh-pages` branch, `/ (root)`.
+If automatic push deploys are enabled, the AWS account also needs CodeBuild's
+GitHub source connection/credentials configured for webhook creation.
+
+Terraform-managed CodeBuild environment variables:
+
+| Variable | Type | Description |
+| :------- | :--- | :---------- |
+| `GITHUB_TOKEN` | SSM Parameter Store | GitHub token used only to push `gh-pages` |
+| `GITHUB_REPOSITORY` | Plaintext | Defaults to `jch254/jch254.com` |
+| `PAGES_BRANCH` | Plaintext | Defaults to `gh-pages` |
+| `BUILD_OUTPUT_DIR` | Plaintext | Defaults to `dist` |
+| `GIT_COMMITTER_NAME` | Plaintext, optional | Commit author name for deploy commits |
+| `GIT_COMMITTER_EMAIL` | Plaintext, optional | Commit author email for deploy commits |
+
+SSM parameters managed as placeholders by Terraform:
+
+| Parameter | Description |
+| :------- | :---------- |
+| `/jch254dotcom/github-token` | GitHub token used by CodeBuild to push `gh-pages` |
+| `/jch254dotcom/cloudflare-api-token` | Cloudflare token used by Terraform |
+
+Terraform loads the Cloudflare token from SSM into `CLOUDFLARE_API_TOKEN`
+before running plan/apply; there is no plaintext Terraform variable for it.
+
+The GitHub token should be a fine-grained token scoped to this repository with
+**Contents: Read and write**. No Pages, Actions, admin, package, or workflow
+permissions are required for the branch-push deploy.
+
+Update the placeholder values in SSM:
+
+```bash
+aws ssm put-parameter \
+  --name /jch254dotcom/github-token \
+  --type SecureString \
+  --value "$GITHUB_TOKEN" \
+  --overwrite
+
+aws ssm put-parameter \
+  --name /jch254dotcom/cloudflare-api-token \
+  --type SecureString \
+  --value "$CLOUDFLARE_API_TOKEN" \
+  --overwrite
+```
+
+Manual deploy:
+
+```bash
+aws codebuild start-build --project-name jch254dotcom
+```
+
+To use the GitHub Actions backup later:
+
+1. Rename `.github/workflows/deploy-gh-pages.yml.disabled` back to `.github/workflows/deploy-gh-pages.yml`
+2. Set **Settings > Pages > Build and deployment** back to **GitHub Actions**
+3. Pause the CodeBuild trigger/project while the backup workflow is active
 
 ## Adding a Blog Post
 

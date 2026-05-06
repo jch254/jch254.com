@@ -1,0 +1,82 @@
+# Disabled backup workflow. Primary deployment is handled by the root
+# CodeBuild buildspec.yml. If GitHub Actions is needed as a backup later,
+# rename this file back to deploy-gh-pages.yml; it mirrors the CodeBuild
+# branch-push deploy and does not apply Terraform.
+
+name: Backup Deploy to GitHub Pages Branch
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: pages-branch
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_REPOSITORY: jch254/jch254.com
+      PAGES_BRANCH: gh-pages
+      BUILD_OUTPUT_DIR: dist
+      GIT_COMMITTER_NAME: jch254.com GitHub Actions
+      GIT_COMMITTER_EMAIL: deploy@jch254.com
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.32.0
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build site
+        run: pnpm run build
+
+      - name: Publish static output
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          COMMIT_SHA="${GITHUB_SHA}"
+          REPO_URL="https://github.com/${GITHUB_REPOSITORY}.git"
+          DEPLOY_DIR="$(mktemp -d)"
+
+          git config --global user.name "${GIT_COMMITTER_NAME}"
+          git config --global user.email "${GIT_COMMITTER_EMAIL}"
+          git config --global credential.helper '!f() { echo username=x-access-token; echo password="$GITHUB_TOKEN"; }; f'
+
+          if git ls-remote --exit-code --heads "$REPO_URL" "$PAGES_BRANCH" >/dev/null 2>&1; then
+            git clone --depth 1 --branch "$PAGES_BRANCH" "$REPO_URL" "$DEPLOY_DIR"
+          else
+            git clone --depth 1 "$REPO_URL" "$DEPLOY_DIR"
+            cd "$DEPLOY_DIR"
+            git switch --orphan "$PAGES_BRANCH"
+          fi
+
+          cd "$DEPLOY_DIR"
+          find . -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
+          cp -R "$GITHUB_WORKSPACE/$BUILD_OUTPUT_DIR/." .
+          touch .nojekyll
+
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No site changes to deploy."
+          else
+            git commit -m "Deploy jch254.com ${COMMIT_SHA}"
+            git push origin "$PAGES_BRANCH"
+          fi

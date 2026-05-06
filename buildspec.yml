@@ -1,0 +1,69 @@
+version: 0.2
+
+env:
+  variables:
+    GITHUB_REPOSITORY: "jch254/jch254.com"
+    PAGES_BRANCH: "gh-pages"
+    BUILD_OUTPUT_DIR: "dist"
+  exported-variables:
+    - COMMIT_SHA
+    - PAGES_BRANCH
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 22
+    commands:
+      - echo Installing Node dependencies...
+      - corepack enable
+      - corepack prepare pnpm@10.32.0 --activate
+      - pnpm config set store-dir /root/.pnpm-store
+      - pnpm install --frozen-lockfile
+
+  pre_build:
+    commands:
+      - echo Preparing GitHub Pages deployment...
+      - 'test -n "$GITHUB_TOKEN" || { echo "GITHUB_TOKEN is required"; exit 1; }'
+      - export COMMIT_SHA="${CODEBUILD_RESOLVED_SOURCE_VERSION:-$(git rev-parse HEAD)}"
+      - git config --global user.name "${GIT_COMMITTER_NAME:-jch254.com CodeBuild}"
+      - git config --global user.email "${GIT_COMMITTER_EMAIL:-deploy@jch254.com}"
+      - git config --global credential.helper '!f() { echo username=x-access-token; echo password="$GITHUB_TOKEN"; }; f'
+
+  build:
+    commands:
+      - echo Building Astro site...
+      - pnpm run build
+
+  post_build:
+    commands:
+      - echo Publishing static output to GitHub Pages branch...
+      - |
+        set -euo pipefail
+
+        REPO_URL="https://github.com/${GITHUB_REPOSITORY}.git"
+        DEPLOY_DIR="$(mktemp -d)"
+
+        if git ls-remote --exit-code --heads "$REPO_URL" "$PAGES_BRANCH" >/dev/null 2>&1; then
+          git clone --depth 1 --branch "$PAGES_BRANCH" "$REPO_URL" "$DEPLOY_DIR"
+        else
+          git clone --depth 1 "$REPO_URL" "$DEPLOY_DIR"
+          cd "$DEPLOY_DIR"
+          git switch --orphan "$PAGES_BRANCH"
+        fi
+
+        cd "$DEPLOY_DIR"
+        find . -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
+        cp -R "$CODEBUILD_SRC_DIR/$BUILD_OUTPUT_DIR/." .
+        touch .nojekyll
+
+        git add -A
+        if git diff --cached --quiet; then
+          echo "No site changes to deploy."
+        else
+          git commit -m "Deploy jch254.com ${COMMIT_SHA}"
+          git push origin "$PAGES_BRANCH"
+        fi
+
+cache:
+  paths:
+    - "/root/.pnpm-store/**/*"
