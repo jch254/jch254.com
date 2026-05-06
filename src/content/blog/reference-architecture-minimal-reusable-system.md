@@ -1,7 +1,7 @@
 ---
 title: "I Stopped Rebuilding the Same System"
 description: "Over ten years, very different projects slowly converged into the same operational shape. I stopped treating that as coincidence and extracted the patterns into a reusable platform."
-date: 2026-05-08
+date: 2026-05-15
 tags: ["architecture", "aws", "infrastructure"]
 draft: true
 ---
