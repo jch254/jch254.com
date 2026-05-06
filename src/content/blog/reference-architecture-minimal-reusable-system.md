@@ -124,6 +124,12 @@ Cloudflare reads outputs from AWS remote state and creates DNS records. Cloudfla
 
 The system stays small enough that I can still hold the whole thing in my head.
 
+Another thing that mattered over time was keeping repos self-contained.
+
+The app, infrastructure, deployment pipeline, runtime, and validation all live together. If you clone the repo, you can understand how the system runs and how it deploys without chasing dependencies across multiple internal platforms.
+
+Shared pieces only get extracted once they survive repeated use across projects. Terraform modules, SES infrastructure, auth patterns. The projects stay independently deployable systems.
+
 That matters more than people admit.
 
 ---
