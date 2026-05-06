@@ -1,64 +1,130 @@
 ---
-title: "I Kept Rebuilding the Same System"
-description: "Every new project started with the same backend, the same infra, the same pipeline. I got tired of it, so I extracted the minimal patterns that actually matter into a reusable reference architecture."
-date: 2026-04-29
+title: "I Stopped Rebuilding the Same System"
+description: "Over ten years, very different projects slowly converged into the same operational shape. I stopped treating that as coincidence and extracted the patterns into a reusable platform."
+date: 2026-05-08
 tags: ["architecture", "aws", "infrastructure"]
 draft: true
 ---
 
-Every backend I've built in the last few years looks the same. Stateless API. Multi-tenant data model. Docker container. Terraform. Push to main, deploy to ECS, wait for stabilization.
+Over the last ten years, nearly every system I built kept converging into the same shape.
 
-I kept building it from scratch each time.
+It didn't matter whether the project was a Spotify analytics tool, a Pokemon Go API, a Messenger bot, a GTD app, or an email-driven music sharing platform. After enough iterations, they all ended up looking similar underneath.
 
-It wasn't hard. It was repetitive.
+Stateless API. Docker container. Terraform. Multi-tenant data model. CI/CD pipeline. Push to main, deploy to ECS, wait for stabilization.
 
-Not because the patterns changed. They didn't. I'd copy files between repos, rip out domain logic, adjust names, fix the parts that didn't survive the transplant. By the time the foundation worked, I'd spent days on plumbing that had nothing to do with the product.
+For years I kept rebuilding that stack from scratch.
 
-So I extracted it. Stripped out the domain logic.
+Not because the patterns changed. They mostly didn't. I'd copy infrastructure between repos, strip out domain logic, rename things, then spend days reconnecting plumbing I already understood.
 
-I didn't want a template. I wanted something I could evolve.
+The systems were different.
 
-I removed everything that wasn't structural. What was left became [reference-architecture](https://github.com/jch254/reference-architecture).
+The operational shape wasn't.
+
+A lot of the earlier open source repos came from patterns I was already using professionally. I generalized them, cleaned them up, and published them. Over time those repos started converging too.
+
+The old serverless repos. The ECS infrastructure repos. Docker build environments. CI/CD tooling. Terraform modules. Different generations of the same system.
+
+Eventually I stopped treating that convergence as accidental.
+
+I extracted the common structure into [reference-architecture](https://github.com/jch254/reference-architecture).
+
+Not a template. A system I could keep evolving under real usage.
+
+---
+
+## The convergence happened slowly
+
+The earlier projects solved isolated problems.
+
+One repo handled Serverless APIs. Another handled Dockerized CI builds. Another focused on ECS autoscaling. Another was a React starter kit with auth already wired in.
+
+At the time they felt separate.
+
+Looking back, they were all solving the same operational problems from different angles.
+
+- How do you deploy safely?
+- How do you keep environments consistent?
+- How do you isolate tenants?
+- How do you structure infrastructure so you can reuse it later?
+- How do you stop every new project becoming a pile of slightly different decisions?
+
+Over time the abstractions compressed.
+
+The Docker build repos turned into one build model.
+
+The Terraform repos turned into reusable modules.
+
+The deployment patterns standardized.
+
+The auth flows standardized.
+
+The infrastructure got smaller.
+
+I removed things more often than I added them.
+
+That was the real direction of the system.
 
 ---
 
 ## What I actually needed
 
+After enough projects, the list became pretty small.
+
 - A backend that handles requests, resolves the tenant, and talks to a database
-- A runtime that works the same locally and in production
-- Infrastructure that deploys from a single pipeline with no manual steps
+- A runtime that behaves the same locally and in production
+- Infrastructure that deploys from one pipeline with no manual steps
 - A data model that isolates tenants from day one
 - A way to know the system actually works after deploy
-- A client surface (web or mobile) that can plug into it without changing the backend or the system
+- A client surface that can sit on top without changing the backend
 
 That's the system.
 
-No message queues. No async pipelines by default. If the system needs them later, add them then. No event buses. No staging environment. No separate services for things that don't need to be separate.
+No queues by default. No event buses. No staging environment. No extra services for problems that don't exist yet.
 
-I've built systems with all of those pieces. Most weren't needed at the start, and they created drag long before they created value.
+I've built systems with all of those pieces before. Most created operational drag long before they created value.
+
+The decisions were mostly about what to remove.
 
 ---
 
 ## The layers
 
-Four layers. Each aligns with the one below it. Clients sit on top of this as thin surfaces over the same system.
+Four layers. Each lines up with the one below it.
 
 ```text
 /src/backend                → API (NestJS)
 Dockerfile                  → runtime
 buildspec.yml               → CI/CD (CodeBuild)
 /infrastructure/terraform   → deployment (AWS + Cloudflare)
-```
+````
 
-Web and mobile clients sit above this stack and talk to the same API. They don't introduce new layers, just different entry points.
+Web and mobile clients sit above the same API. They don't introduce new layers. Just different entry points.
 
-The backend is a NestJS app with request context middleware that resolves the tenant from the `Host` header. Every request gets a `tenantSlug` and a `requestId`. Controllers delegate to services. Services talk to DynamoDB. Nothing else sits in that path.
+The backend is a NestJS app with request context middleware that resolves the tenant from the `Host` header. Every request gets a `tenantSlug` and a `requestId`.
 
-The Dockerfile is a multi-stage build. `node dist/main.js` runs the compiled output. Non-root user. Port 3000. Works locally in Docker Compose and in ECS Fargate in production. Same image, same behavior.
+Controllers delegate to services. Services talk to DynamoDB. Nothing else sits in the request path.
 
-The buildspec does five things: install, build, push Docker image to ECR, run Terraform, wait for ECS to stabilize. Then it applies the Cloudflare DNS layer and runs system validation. If any step fails, the build fails.
+The Dockerfile is a multi-stage build. `node dist/main.js` runs the compiled output. Non-root user. Port 3000. Same image locally and in ECS Fargate.
 
-Infrastructure is two Terraform layers. AWS handles ECS, API Gateway, DynamoDB, ECR, Cloud Map, and IAM. Cloudflare reads outputs from AWS via remote state and creates DNS records. Cloudflare handles TLS termination.
+The build pipeline does five things.
+
+* Install dependencies
+* Build the app
+* Push the image to ECR
+* Run Terraform
+* Wait for ECS stabilization
+
+Then it applies the Cloudflare DNS layer and runs validation against the live system. If any step fails, the build fails.
+
+Infrastructure is split into two Terraform layers.
+
+AWS handles ECS, API Gateway, DynamoDB, ECR, Cloud Map, and IAM.
+
+Cloudflare reads outputs from AWS remote state and creates DNS records. Cloudflare handles TLS termination.
+
+The system stays small enough that I can still hold the whole thing in my head.
+
+That matters more than people admit.
 
 ---
 
@@ -73,7 +139,7 @@ PK = TENANT#<tenantId>
 SK = EXAMPLE#<entityId>
 ```
 
-Every query is scoped to a tenant partition. No scans. No GSIs. Cross-tenant access is impossible because the partition key enforces it.
+Every query stays inside a tenant partition. No scans. No cross-tenant queries.
 
 Analytics events use the same table:
 
@@ -82,118 +148,236 @@ PK = TENANT#<tenantId>
 SK = EVENT#<timestamp>#<eventName>#<requestId>
 ```
 
-Append-only. No updates, no deletes. The analytics service resolves the tenant and request ID from the request context and writes via `putItem`. No buffering, no retries, no additional infrastructure.
+Append-only. No updates. No deletes.
 
-Analytics and domain data share the same table, the same Terraform resource, the same IAM policy. One table, one permission boundary, one billing mode.
+The analytics service resolves tenant and request ID from the request context and writes directly with `putItem`.
+
+No buffering layer. No retry workers. No extra infrastructure.
+
+Analytics and domain data share the same table, the same IAM policy, and the same Terraform resource.
+
+One table. One permission boundary.
 
 ---
 
 ## What I removed
 
-The decisions were about what to take out.
+Most architecture discussions focus on what got added.
 
-**Async pipelines.** Early versions had background processing. I removed it. If the system needs async later, add it then. Starting with it meant carrying complexity for a scenario that hadn't arrived.
+The useful decisions were usually the opposite.
 
-**DTOs and validation frameworks.** The controller checks `if (!body.name)` and throws a `BadRequestException`. Inline validation. No class-validator decorators, no transformation pipes, no DTO classes. The right level of indirection for this: none.
+### Async pipelines
 
-**Abstractions over DynamoDB.** The `DynamoDbService` is flat. `getItem`, `putItem`, `updateItem`, `query`, `deleteItem`. It wraps the SDK client and nothing else. No repository pattern. No ORM.
+Early versions had background processing.
 
-**Staging environments.** One environment. One deploy target. System validation runs against the live URL after deploy. If it's broken, the build fails. Staging adds a second environment to maintain without adding confidence.
+I removed it.
 
-**Unnecessary infrastructure.** No ALB. API Gateway connects to ECS via VPC Link and Cloud Map. Public subnets only, no NAT gateway. Security groups restrict ingress to port 3000 from the VPC Link. Circuit breaker with rollback. Rolling deploys with a health check grace period.
+If the system eventually needs queues or workers, I can add them later. Carrying async infrastructure from day one meant operational complexity for workloads that didn't exist yet.
+
+### DTOs and validation frameworks
+
+The controller checks `if (!body.name)` and throws a `BadRequestException`.
+
+That's enough here.
+
+No decorators. No transformation pipes. No validation class hierarchy.
+
+The right abstraction level for this system is very low.
+
+### Abstractions over DynamoDB
+
+The `DynamoDbService` is flat.
+
+* `getItem`
+* `putItem`
+* `updateItem`
+* `query`
+* `deleteItem`
+
+It wraps the SDK client and nothing else.
+
+No ORM. No repository pattern.
+
+### Staging environments
+
+One environment. One deploy target.
+
+After deployment, validation runs against the live URL. If validation fails, the build fails.
+
+I spent years maintaining staging environments that drifted from production and still failed to catch real issues.
+
+I trust live validation more.
+
+### Infrastructure layers
+
+No ALB.
+
+API Gateway connects directly to ECS through VPC Link and Cloud Map.
+
+Public subnets only. No NAT gateway.
+
+Security groups restrict ingress to port 3000 from the VPC Link.
+
+Rolling deploys. Circuit breaker enabled. Health check grace period configured.
+
+Boring infrastructure survives longer.
 
 ---
 
 ## The validation layer
 
-After every deploy, a validation script runs against the live system. No test frameworks. No mocks. Just `fetch` calls against real endpoints.
+After every deploy, a validation script runs against the live system.
+
+No mocks. No test harness. Just `fetch` against real endpoints.
 
 ```text
 GET  /api/health        → status is "ok"
-POST /api/example       → item created, response shape correct
-GET  /api/example       → created item present in list
+POST /api/example       → item created
+GET  /api/example       → item visible
 DELETE /api/example/:id → cleanup
 ```
 
-It tests tenant isolation by sending a request with a different `Host` header and verifying the created item isn't visible. If the proxy strips the override, the test skips instead of failing.
+It also checks tenant isolation by overriding the `Host` header and verifying the created item is not visible across tenants.
 
-The script exits non-zero on failure. CodeBuild treats that as a failed build. Deploy equals validated system.
+If validation fails, the build fails.
 
-There's no separate concept of "it deployed successfully" and "it works". They're the same thing.
+There is no separate concept of "deployment succeeded" and "the system works".
 
-One TypeScript file. Runs in 2-3 seconds. Every other post-deploy check I've used was either too heavy or too shallow.
+They are the same thing.
 
----
+The whole validation layer is one TypeScript file. It runs in a few seconds.
 
-## How I use it
-
-The repo stays clean. No domain logic, no product code.
-
-Anything product-specific stays outside it. If something gets reused twice, it gets pulled back in.
-
-When I start a new project, I include the reference architecture as an `/example-project` folder. The new repo gets its own code, its own infra, its own pipeline. But the example project sits right there as a working reference for every pattern.
-
-Six months in, when I need to remember how tenant middleware was wired or how the DynamoDB keys work, I open `/example-project` and read the code. It's always the same minimal system.
-
-The real speed comes from combining this with Copilot and Claude.
-
-I point the AI at the example project and tell it to scaffold a new module following the same patterns. It sees the controller structure, the service layer, the DynamoDB key builders, the analytics integration, the response wrapping. It produces code that matches. Not perfect every time, but structurally correct.
-
-The AI isn't guessing. It's copying patterns from a working system that already runs in production.
-
-Same for infrastructure. The Terraform in `/example-project` is a complete working deployment. The AI generates Terraform that fits the style because the patterns are already in the codebase. Correct variable naming. Correct tag structure. Correct IAM scoping. No long prompt explaining conventions.
-
-Clients work the same way. The system doesn't care whether the request comes from a browser or a phone. The reference architecture includes a React demo UI served from the same container. Mobile uses the same API and auth flow. Both are thin layers over the same system. When scaffolding a new client, the example project shows the API contract, how tenant context flows, how the build packages everything into one Docker image. Copilot reads that context and produces components that integrate correctly from the start.
-
-The workflow: create a repo, drop in the example project folder, point the AI at it, scaffold. Backend, infrastructure, frontend. The AI has a concrete reference instead of general training data.
+Every heavier post-deploy system I built before this created more maintenance than confidence.
 
 ---
 
-## What changed after actually using it
+## The AI part changed the equation
 
-The first version of this was just extraction. Strip things out, keep what's essential, make it reusable.
+This architecture existed before AI tooling.
 
-That's not what it is anymore.
+AI made it much more valuable.
 
-I built a real product on top of it, and then started feeding what held up back into the reference architecture.
+The repo stopped being documentation. It became operational context.
 
-A few things changed.
+When I start a new project, I point Copilot or Claude at the example project and tell it to scaffold a module that follows the same patterns.
 
-**Auth stopped being example code.**
-Magic links, token verification, session handling, rate limiting, deep links for mobile. The shape stayed simple, but it became something you can actually ship.
+The AI sees:
 
-**Mobile became a first-class client.**
-The system isn't backend + web anymore. It's backend + web + mobile, all using the same API and auth flow. That forced the boundaries to get cleaner. The backend didn't change to support it. That was the point.
+* controller structure
+* DynamoDB key builders
+* request context flow
+* response envelopes
+* Terraform conventions
+* deployment patterns
+* auth flows
+* analytics integration
 
-**The example project became the interface.**
-It's not documentation. It's not a demo. It's the contract.
-When I scaffold something new, I point the AI at the example project and it generates code that matches the system.
+The generated code is structurally correct because the patterns already exist in working systems.
 
-**The architecture tightened under pressure.**
-Anything that didn't survive real usage got removed or simplified. Anything that caused friction got pulled into the reference layer.
+The AI is not inventing architecture.
 
-The difference isn't in what I added.
+It's copying from a real operational baseline.
 
-It's in what survived being used.
+The same thing happens with infrastructure.
 
-The system didn't get bigger. It got sharper.
+The Terraform already exists. The naming conventions already exist. IAM structure already exists. ECS wiring already exists.
 
-Most of this lines up with the [Twelve-Factor App](https://12factor.net). Stateless processes. Config from the environment. Disposable containers. Logs as streams. One codebase, many deploys. That alignment wasn't planned. It fell out of building things that had to survive production. Where it goes further is shaped by what I kept hitting in real systems. Multi-tenancy is a first-class constraint, not something bolted on later. Async pipelines aren't the default. You add them when the workload needs them, not before. AWS-native infra is a deliberate choice, not portability theater. These came from running the system, not from reading about it.
+I don't need giant prompts explaining conventions because the conventions are embedded in the repo itself.
+
+AI tooling works best against systems that are internally consistent.
+
+The architecture matters more now, not less.
+
+Good patterns compound because the AI keeps reusing them correctly.
 
 ---
 
-## What this gives me
+## What changed after real usage
 
-Everything in the repo exists because it's needed, not because it might be useful.
+The first version of this was mostly extraction.
 
-The pipeline is deterministic. Push to main, Docker build, Terraform apply, ECS stabilize, Cloudflare apply, validate. Same steps every time. No branching logic. No conditional deploys.
+Remove domain logic. Keep the structure. Make it reusable.
 
-Each layer lines up with the one below it. The app binds to port 3000. The Dockerfile exposes 3000. The ECS task maps 3000. The security group allows 3000 from the VPC Link. The health check hits 3000. Boring. That's correct.
+That changed once I started building real products on top of it.
 
-I'm already using this as the base for the next thing I'm building. Copied the repo, added domain logic, deployed. No infra redesign. No pipeline changes. Multi-tenant data model already there. Analytics already wired. Validation script adapted with a few extra assertions.
+I had already spent years building reusable Terraform modules, CI/CD pipelines, and ECS infrastructure patterns across different projects.
 
-Build it once. Then evolve it under real pressure.
+The modern shape really solidified while building an email-driven album sharing platform. Multi-tenancy, inbound email handling, deployment flow, analytics, auth, and client boundaries all started collapsing into the same operational model.
 
-Stop rebuilding the same system.
+That became the basis for `reference-architecture`.
 
-Maintain one that actually survives use.
+From there I used the reference architecture to scaffold newer systems, including a GTD app with web and mobile clients sharing the same backend and auth flow.
+
+As the apps expanded, shared infrastructure kept getting pulled outward into reusable platform layers.
+
+SES inbound routing. Terraform modules. Shared deployment patterns. Common auth flows.
+
+Anything that survived repeated real usage moved down into the platform.
+
+Auth stopped being demo code.
+
+Magic links, session handling, mobile deep links, token verification, rate limiting. The implementation stayed small, but it became production code.
+
+Mobile became a first-class client.
+
+The backend did not need special mobile infrastructure. That was the point. Web and mobile stayed thin layers over the same API.
+
+The architecture got tighter under pressure.
+
+Anything that created friction got simplified or removed.
+
+The system didn't really get bigger.
+
+It got sharper.
+
+---
+
+## Why the architecture converged
+
+A lot of this lines up naturally with the Twelve-Factor App model.
+
+Stateless processes. Config from environment variables. Disposable containers. Logs as streams.
+
+That part wasn't planned. Those patterns survived because they reduced operational pain.
+
+Other decisions came from repeatedly building systems in AWS.
+
+Multi-tenancy became a first-class constraint because retrofitting tenant isolation later is painful.
+
+Async infrastructure stopped being the default because most early workloads did not justify it.
+
+AWS-native infrastructure became a deliberate choice because portability layers usually added complexity without solving real problems.
+
+The architecture wasn't designed upfront.
+
+It slowly compressed under real usage.
+
+---
+
+## What this gives me now
+
+The pipeline is deterministic.
+
+Push to main. Build Docker image. Terraform apply. ECS stabilization. Cloudflare apply. Validation.
+
+Same steps every time.
+
+Each layer aligns with the next.
+
+The app binds to port 3000. The Dockerfile exposes 3000. ECS maps 3000. Security groups allow 3000. Health checks hit 3000.
+
+Simple systems are easier to reason about. Easier to debug. Easier for AI tooling to work against.
+
+Most importantly, new projects no longer start from infrastructure decisions.
+
+They start from product logic.
+
+The operational substrate already exists.
+
+After ten years of rebuilding variations of the same backend, infrastructure, and deployment pipeline, I stopped treating them as separate projects.
+
+Now there is one operational system.
+
+New apps inherit it.
+
+It keeps evolving under real pressure.
