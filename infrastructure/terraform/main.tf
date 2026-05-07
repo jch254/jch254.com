@@ -34,6 +34,9 @@ locals {
   codebuild_role_arn       = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${var.codebuild_project_name}-codebuild"
   codebuild_event_rule_arn = "arn:aws:events:${var.aws_region}:${data.aws_caller_identity.current.account_id}:rule/${var.codebuild_project_name}-*"
 
+  build_notifier_region              = coalesce(var.build_notifier_region, var.aws_region)
+  build_notifier_lambda_function_arn = "arn:aws:lambda:${local.build_notifier_region}:${data.aws_caller_identity.current.account_id}:function:${var.build_notifier_lambda_function_name}"
+
   cloudflare_dns_records = {
     apex_github = {
       content = "jch254.github.io"
@@ -283,6 +286,15 @@ resource "aws_iam_role_policy" "codebuild_deploy" {
           ]
           Resource = local.codebuild_event_rule_arn
         },
+        {
+          Effect = "Allow"
+          Action = [
+            "lambda:AddPermission",
+            "lambda:RemovePermission",
+            "lambda:GetPolicy",
+          ]
+          Resource = local.build_notifier_lambda_function_arn
+        },
       ],
       local.codebuild_cache_statements,
     )
@@ -309,7 +321,7 @@ module "codebuild_deploy_project" {
   create_log_group                   = true
   webhook_enabled                    = var.codebuild_webhook_enabled
   environment                        = var.environment
-  build_notifier_lambda_function_arn = var.build_notifier_lambda_function_arn
+  build_notifier_lambda_function_arn = local.build_notifier_lambda_function_arn
   build_notifier_app_url             = "https://${var.domain}"
   build_notifier_github_repo_url     = trimsuffix(var.codebuild_source_location, ".git")
 
