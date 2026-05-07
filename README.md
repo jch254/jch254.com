@@ -68,6 +68,10 @@ Deploys use [`buildspec.yml`](buildspec.yml):
 The CodeBuild project and service role are managed by Terraform in
 `infrastructure/`. In GitHub, set **Settings > Pages > Build and deployment**
 to deploy from the `gh-pages` branch, `/ (root)`.
+If the live site stays stale while `gh-pages` contains the expected HTML, check
+that Pages is not still set to **GitHub Actions** / workflow mode. The minimal
+CodeBuild deploy token cannot change this setting; use the GitHub UI or a
+temporary admin/Pages-write token for that one-time switch.
 If automatic push deploys are enabled, the AWS account also needs CodeBuild's
 GitHub source connection/credentials configured for webhook creation.
 

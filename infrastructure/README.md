@@ -55,6 +55,10 @@ Remote state is stored in S3: `s3://jch254-terraform-remote-state/jch254dotcom-p
 applied by CodeBuild using `infrastructure/deploy-infrastructure.bash`.
 The root `buildspec.yml` installs dependencies, applies Terraform, then builds
 the Astro site and publishes `dist/` to the GitHub Pages branch.
+GitHub Pages must be configured to deploy from the `gh-pages` branch, `/ (root)`.
+If Pages is still in GitHub Actions/workflow mode, CodeBuild can update the
+branch successfully while the public site continues serving the previous
+workflow artifact.
 If `codebuild_webhook_enabled` is `true`, the AWS account must already have
 CodeBuild GitHub source credentials/connection configured so AWS can create the
 repository webhook.
