@@ -48,7 +48,8 @@ Remote state is stored in S3: `s3://jch254-terraform-remote-state/jch254dotcom-p
 
 ## Deployment
 
-Infrastructure is applied by CodeBuild using `infrastructure/deploy-infrastructure.bash`.
+`infrastructure/terraform` is the runnable Terraform root. Infrastructure is
+applied by CodeBuild using `infrastructure/deploy-infrastructure.bash`.
 The root `buildspec.yml` installs dependencies, applies Terraform, then builds
 the Astro site and publishes `dist/` to the GitHub Pages branch.
 If `codebuild_webhook_enabled` is `true`, the AWS account must already have
@@ -81,7 +82,7 @@ artifacts and does not apply Terraform.
 ## Local usage
 
 ```bash
-cd infrastructure
+cd infrastructure/terraform
 
 # Authenticate with AWS (requires access to the S3 state bucket)
 aws sso login  # or export AWS_* env vars
@@ -135,5 +136,5 @@ terraform import cloudflare_ruleset.response_headers <zone_id>/<ruleset_id>
 ```
 
 Existing root-level DNS record state is mapped into the shared DNS module by
-`moved.tf`; do not remove those moved blocks until after the migration has been
-applied everywhere that still has the old addresses in state.
+`terraform/moved.tf`; do not remove those moved blocks until after the migration
+has been applied everywhere that still has the old addresses in state.

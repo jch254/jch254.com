@@ -2,7 +2,7 @@
 
 echo Deploying infrastructure via Terraform...
 
-cd infrastructure
+cd infrastructure/terraform
 terraform init \
   -reconfigure \
   -backend-config "bucket=${REMOTE_STATE_BUCKET}" \
