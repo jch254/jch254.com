@@ -29,16 +29,17 @@ The response-header ruleset remains local because there is not yet a shared
 Cloudflare response-header module in `terraform-modules`.
 
 **CodeBuild deployment** (`aws_codebuild_project`)
-- `jch254dotcom` builds the Astro site from GitHub
+- `jch254dotcom` applies Terraform, then builds the Astro site from GitHub
 - deploy output is pushed to the `gh-pages` branch
-- `GITHUB_TOKEN` is read from SSM Parameter Store
+- `GITHUB_TOKEN` is read from SSM Parameter Store by `buildspec.yml`
+- `CLOUDFLARE_API_TOKEN` is read from SSM Parameter Store by `buildspec.yml`
 
 **SSM token placeholders** (`ssm-parameter-placeholder`)
 - `/jch254dotcom/github-token`
 - `/jch254dotcom/cloudflare-api-token`
 
-Terraform does not take a plaintext `cloudflare_api_token` variable. Load
-`CLOUDFLARE_API_TOKEN` from SSM before running Terraform so the provider can
+Terraform does not take a plaintext `cloudflare_api_token` variable. CodeBuild
+loads `CLOUDFLARE_API_TOKEN` from SSM before running Terraform so the provider can
 authenticate without storing the decrypted token in Terraform state.
 
 ## State
@@ -47,8 +48,9 @@ Remote state is stored in S3: `s3://jch254-terraform-remote-state/jch254dotcom-p
 
 ## Deployment
 
-Infrastructure is applied with Terraform from this directory. The CodeBuild
-project then handles site deployment using the root `buildspec.yml`.
+Infrastructure is applied by CodeBuild using `infrastructure/deploy-infrastructure.bash`.
+The root `buildspec.yml` installs dependencies, applies Terraform, then builds
+the Astro site and publishes `dist/` to the GitHub Pages branch.
 If `codebuild_webhook_enabled` is `true`, the AWS account must already have
 CodeBuild GitHub source credentials/connection configured so AWS can create the
 repository webhook.
@@ -84,33 +86,31 @@ cd infrastructure
 # Authenticate with AWS (requires access to the S3 state bucket)
 aws sso login  # or export AWS_* env vars
 
+# For the first local/bootstrap apply, export a real Cloudflare token directly.
+export CLOUDFLARE_API_TOKEN="..."
+
+terraform init
+terraform plan
+terraform apply
+
+# After Terraform creates the placeholder parameters, overwrite them with real values.
 aws ssm put-parameter \
+  --region ap-southeast-4 \
   --name /jch254dotcom/github-token \
   --type SecureString \
   --value "$GITHUB_TOKEN" \
   --overwrite
 
 aws ssm put-parameter \
+  --region ap-southeast-4 \
   --name /jch254dotcom/cloudflare-api-token \
   --type SecureString \
   --value "$CLOUDFLARE_API_TOKEN" \
   --overwrite
-
-export CLOUDFLARE_API_TOKEN="$(
-  aws ssm get-parameter \
-    --name /jch254dotcom/cloudflare-api-token \
-    --with-decryption \
-    --query Parameter.Value \
-    --output text
-)"
-
-terraform init
-terraform plan
-terraform apply
 ```
 
-If the SSM placeholders do not exist yet, apply the two placeholder modules
-first, update both parameter values, then run the full plan/apply.
+After the bootstrap apply, CodeBuild reads both tokens from SSM through the
+root `buildspec.yml`.
 
 ## Reusable module candidates
 

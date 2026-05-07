@@ -10,6 +10,8 @@ provider "aws" {
 
 provider "cloudflare" {}
 
+data "aws_caller_identity" "current" {}
+
 data "cloudflare_zone" "zone" {
   filter = {
     name = var.domain
@@ -27,6 +29,11 @@ locals {
     ) : (
     local.codebuild_cache_bucket_name != "" ? "arn:aws:s3:::${local.codebuild_cache_bucket_name}/*" : ""
   )
+  remote_state_object_arn  = "arn:aws:s3:::${var.remote_state_bucket}/${var.remote_state_key}"
+  codebuild_project_arn    = "arn:aws:codebuild:${var.aws_region}:${data.aws_caller_identity.current.account_id}:project/${var.codebuild_project_name}"
+  codebuild_role_arn       = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${var.codebuild_project_name}-codebuild"
+  codebuild_event_rule_arn = "arn:aws:events:${var.aws_region}:${data.aws_caller_identity.current.account_id}:rule/${var.codebuild_project_name}-*"
+
   cloudflare_dns_records = {
     apex_github = {
       content = "jch254.github.io"
@@ -173,9 +180,22 @@ resource "aws_iam_role_policy" "codebuild_deploy" {
         {
           Effect = "Allow"
           Action = [
+            "logs:DescribeLogGroups",
             "logs:CreateLogGroup",
+            "logs:DeleteLogGroup",
             "logs:CreateLogStream",
             "logs:PutLogEvents",
+            "logs:PutRetentionPolicy",
+            "logs:ListTagsForResource",
+            "logs:TagResource",
+            "logs:UntagResource",
+          ]
+          Resource = "*"
+        },
+        {
+          Effect = "Allow"
+          Action = [
+            "ssm:DescribeParameters",
           ]
           Resource = "*"
         },
@@ -184,8 +204,84 @@ resource "aws_iam_role_policy" "codebuild_deploy" {
           Action = [
             "ssm:GetParameter",
             "ssm:GetParameters",
+            "ssm:PutParameter",
+            "ssm:DeleteParameter",
+            "ssm:AddTagsToResource",
+            "ssm:RemoveTagsFromResource",
+            "ssm:ListTagsForResource",
           ]
-          Resource = module.github_token_parameter.arn
+          Resource = [
+            module.github_token_parameter.arn,
+            module.cloudflare_api_token_parameter.arn,
+          ]
+        },
+        {
+          Effect = "Allow"
+          Action = [
+            "s3:GetBucketLocation",
+            "s3:ListBucket",
+          ]
+          Resource = "arn:aws:s3:::${var.remote_state_bucket}"
+        },
+        {
+          Effect = "Allow"
+          Action = [
+            "s3:GetObject",
+            "s3:PutObject",
+            "s3:DeleteObject",
+          ]
+          Resource = local.remote_state_object_arn
+        },
+        {
+          Effect = "Allow"
+          Action = [
+            "iam:CreateRole",
+            "iam:DeleteRole",
+            "iam:GetRole",
+            "iam:UpdateRole",
+            "iam:ListRolePolicies",
+            "iam:GetRolePolicy",
+            "iam:PutRolePolicy",
+            "iam:DeleteRolePolicy",
+            "iam:PassRole",
+            "iam:ListInstanceProfilesForRole",
+            "iam:TagRole",
+            "iam:UntagRole",
+          ]
+          Resource = local.codebuild_role_arn
+        },
+        {
+          Effect = "Allow"
+          Action = [
+            "codebuild:CreateProject",
+            "codebuild:DeleteProject",
+            "codebuild:UpdateProject",
+            "codebuild:BatchGetProjects",
+            "codebuild:CreateWebhook",
+            "codebuild:DeleteWebhook",
+            "codebuild:UpdateWebhook",
+          ]
+          Resource = local.codebuild_project_arn
+        },
+        {
+          Effect   = "Allow"
+          Action   = ["sts:GetCallerIdentity"]
+          Resource = "*"
+        },
+        {
+          Effect = "Allow"
+          Action = [
+            "events:PutRule",
+            "events:DeleteRule",
+            "events:DescribeRule",
+            "events:PutTargets",
+            "events:RemoveTargets",
+            "events:ListTargetsByRule",
+            "events:ListTagsForResource",
+            "events:TagResource",
+            "events:UntagResource",
+          ]
+          Resource = local.codebuild_event_rule_arn
         },
       ],
       local.codebuild_cache_statements,
@@ -229,7 +325,9 @@ module "codebuild_deploy_project" {
   ]]
 
   environment_variables = [
-    { name = "GITHUB_TOKEN", value = module.github_token_parameter.name, type = "PARAMETER_STORE" },
+    { name = "AWS_DEFAULT_REGION", value = var.aws_region },
+    { name = "REMOTE_STATE_BUCKET", value = var.remote_state_bucket },
+    { name = "TF_STATE_KEY", value = var.remote_state_key },
     { name = "GITHUB_REPOSITORY", value = var.github_repository },
     { name = "PAGES_BRANCH", value = var.pages_branch },
     { name = "BUILD_OUTPUT_DIR", value = var.build_output_dir },

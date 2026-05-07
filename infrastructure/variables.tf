@@ -49,19 +49,31 @@ variable "codebuild_build_compute_type" {
 variable "codebuild_build_docker_image" {
   description = "Docker image to use as the CodeBuild build environment."
   type        = string
-  default     = "aws/codebuild/standard"
+  default     = "jch254/docker-node-terraform-aws"
 }
 
 variable "codebuild_build_docker_tag" {
   description = "Docker image tag to use as the CodeBuild build environment."
   type        = string
-  default     = "7.0"
+  default     = "22.x-docker"
 }
 
 variable "codebuild_cache_bucket" {
   description = "Optional S3 bucket/prefix for CodeBuild dependency cache."
   type        = string
   default     = "jch254-codebuild-cache/jch254dotcom"
+}
+
+variable "remote_state_bucket" {
+  description = "S3 bucket used for Terraform remote state."
+  type        = string
+  default     = "jch254-terraform-remote-state"
+}
+
+variable "remote_state_key" {
+  description = "S3 key used for this repo's Terraform remote state."
+  type        = string
+  default     = "jch254dotcom-prod-infrastructure"
 }
 
 variable "github_token_parameter_name" {

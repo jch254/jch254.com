@@ -2,18 +2,26 @@ version: 0.2
 
 env:
   variables:
+    AWS_DEFAULT_REGION: "ap-southeast-4"
+    REMOTE_STATE_BUCKET: "jch254-terraform-remote-state"
+    TF_STATE_KEY: "jch254dotcom-prod-infrastructure"
     GITHUB_REPOSITORY: "jch254/jch254.com"
     PAGES_BRANCH: "gh-pages"
     BUILD_OUTPUT_DIR: "dist"
+  parameter-store:
+    GITHUB_TOKEN: "/jch254dotcom/github-token"
+    CLOUDFLARE_API_TOKEN: "/jch254dotcom/cloudflare-api-token"
   exported-variables:
+    - COMMIT_MESSAGE
     - COMMIT_SHA
     - PAGES_BRANCH
 
 phases:
   install:
-    runtime-versions:
-      nodejs: 22
     commands:
+      - echo Setting up Terraform plugin cache...
+      - export TF_PLUGIN_CACHE_DIR="$HOME/.terraform.d/plugin-cache"
+      - mkdir -p "$TF_PLUGIN_CACHE_DIR"
       - echo Installing Node dependencies...
       - corepack enable
       - corepack prepare pnpm@10.32.0 --activate
@@ -22,8 +30,10 @@ phases:
 
   pre_build:
     commands:
-      - echo Preparing GitHub Pages deployment...
+      - echo Preparing deployment...
       - 'test -n "$GITHUB_TOKEN" || { echo "GITHUB_TOKEN is required"; exit 1; }'
+      - 'test -n "$CLOUDFLARE_API_TOKEN" || { echo "CLOUDFLARE_API_TOKEN is required"; exit 1; }'
+      - export COMMIT_MESSAGE="$(git log -1 --pretty=%s 2>/dev/null || echo '')"
       - export COMMIT_SHA="${CODEBUILD_RESOLVED_SOURCE_VERSION:-$(git rev-parse HEAD)}"
       - git config --global user.name "${GIT_COMMITTER_NAME:-jch254.com CodeBuild}"
       - git config --global user.email "${GIT_COMMITTER_EMAIL:-deploy@jch254.com}"
@@ -31,6 +41,8 @@ phases:
 
   build:
     commands:
+      - echo Deploying infrastructure...
+      - bash ./infrastructure/deploy-infrastructure.bash
       - echo Building Astro site...
       - pnpm run build
 
@@ -66,4 +78,5 @@ phases:
 
 cache:
   paths:
+    - "/root/.terraform.d/plugin-cache/**/*"
     - "/root/.pnpm-store/**/*"
