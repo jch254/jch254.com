@@ -1,0 +1,201 @@
+<!DOCTYPE html><html lang="en" class="scroll-smooth"> <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="canonical" href="https://jch254.com/blog/email-driven-multi-tenant-ingestion-pipeline/"><link rel="alternate" type="application/rss+xml" title="Jordan Hornblow" href="/rss.xml"><!-- Primary Meta Tags --><title>Building an Email-Driven Multi-Tenant Ingestion Pipeline | Jordan Hornblow</title><meta name="title" content="Building an Email-Driven Multi-Tenant Ingestion Pipeline | Jordan Hornblow"><meta name="description" content="Most write interfaces are HTTP forms posting JSON. For Lush Aural Treats, submissions enter through email. Here's the architecture behind a tenant-aware ingestion pipeline where the inbox is the API."><meta name="generator" content="Astro v6.0.2"><!-- Open Graph / Facebook --><meta property="og:type" content="article"><meta property="article:published_time" content="2026-04-01T00:00:00.000Z"><meta property="og:url" content="https://jch254.com/blog/email-driven-multi-tenant-ingestion-pipeline/"><meta property="og:title" content="Building an Email-Driven Multi-Tenant Ingestion Pipeline | Jordan Hornblow"><meta property="og:description" content="Most write interfaces are HTTP forms posting JSON. For Lush Aural Treats, submissions enter through email. Here's the architecture behind a tenant-aware ingestion pipeline where the inbox is the API."><meta property="og:image" content="https://jch254.com/_astro/email-driven-multi-tenant-ingestion-pipeline-hero.DnsINUGo.png"><!-- Twitter --><meta property="twitter:card" content="summary_large_image"><meta property="twitter:url" content="https://jch254.com/blog/email-driven-multi-tenant-ingestion-pipeline/"><meta property="twitter:title" content="Building an Email-Driven Multi-Tenant Ingestion Pipeline | Jordan Hornblow"><meta property="twitter:description" content="Most write interfaces are HTTP forms posting JSON. For Lush Aural Treats, submissions enter through email. Here's the architecture behind a tenant-aware ingestion pipeline where the inbox is the API."><meta property="twitter:image" content="https://jch254.com/_astro/email-driven-multi-tenant-ingestion-pipeline-hero.DnsINUGo.png"><!-- JSON-LD Structured Data --><script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Building an Email-Driven Multi-Tenant Ingestion Pipeline | Jordan Hornblow","description":"Most write interfaces are HTTP forms posting JSON. For Lush Aural Treats, submissions enter through email. Here's the architecture behind a tenant-aware ingestion pipeline where the inbox is the API.","image":"https://jch254.com/_astro/email-driven-multi-tenant-ingestion-pipeline-hero.DnsINUGo.png","datePublished":"2026-04-01T00:00:00.000Z","url":"https://jch254.com/blog/email-driven-multi-tenant-ingestion-pipeline/","author":{"@type":"Person","name":"Jordan Hornblow","url":"https://jch254.com"},"publisher":{"@type":"Person","name":"Jordan Hornblow","url":"https://jch254.com"}}</script><!-- Fonts (non-render-blocking) --><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"><link rel="stylesheet" href="/_astro/Footer.CJpWUrUY.css"></head> <body class="bg-brand-bg text-brand-text font-sans min-h-screen antialiased">  <header class="relative overflow-hidden pb-10 pt-16 md:pt-24" data-astro-cid-bbe6dxrz> <!-- Matrix-style background --> <div class="absolute inset-0 z-0" data-astro-cid-bbe6dxrz> <div class="matrix-bg absolute inset-0 opacity-50" data-astro-cid-bbe6dxrz></div> <div class="absolute inset-0 bg-gradient-to-b from-transparent via-brand-bg/60 to-brand-bg" data-astro-cid-bbe6dxrz></div> </div> <div class="relative z-10 mx-auto max-w-2xl px-6 text-center" data-astro-cid-bbe6dxrz>  <a href="/" class="mb-6 inline-block text-4xl font-extrabold tracking-tight md:text-5xl hover:text-brand-accent transition-colors" data-astro-cid-bbe6dxrz>
+Jordan Hornblow
+</a>  <!-- CTA + Social Icons --> <div class="flex flex-wrap items-center justify-center gap-4" data-astro-cid-bbe6dxrz> <a href="https://603.nz" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 rounded-full bg-brand-accent px-6 py-2.5 text-sm font-semibold text-brand-bg transition hover:bg-brand-accent-hover" data-astro-cid-bbe6dxrz> <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" data-astro-cid-bbe6dxrz> <path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" data-astro-cid-bbe6dxrz></path> </svg>
+PROJECTS
+</a> <a href="/resume" class="inline-flex items-center gap-2 rounded-full border border-brand-border px-6 py-2.5 text-sm font-semibold text-brand-text transition hover:border-brand-accent hover:text-white" data-astro-cid-bbe6dxrz> <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" data-astro-cid-bbe6dxrz> <path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" data-astro-cid-bbe6dxrz></path> </svg>
+RESUME
+</a> <a href="/blog" class="inline-flex items-center gap-2 rounded-full border border-brand-border px-6 py-2.5 text-sm font-semibold text-brand-text transition hover:border-brand-accent hover:text-white" data-astro-cid-bbe6dxrz> <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" data-astro-cid-bbe6dxrz> <path stroke-linecap="round" stroke-linejoin="round" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" data-astro-cid-bbe6dxrz></path> </svg>
+BLOG
+</a> <!-- Social icons: own row on mobile, inline on md+ --> <div class="flex basis-full justify-center gap-4 md:basis-auto" data-astro-cid-bbe6dxrz> <!-- GitHub --> <a href="https://github.com/jch254" target="_blank" rel="noopener noreferrer" class="text-brand-muted transition hover:text-white" aria-label="GitHub" data-astro-cid-bbe6dxrz> <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" data-astro-cid-bbe6dxrz><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" data-astro-cid-bbe6dxrz></path></svg> </a> <!-- LinkedIn --> <a href="https://linkedin.com/in/jch254" target="_blank" rel="noopener noreferrer" class="text-brand-muted transition hover:text-white" aria-label="LinkedIn" data-astro-cid-bbe6dxrz> <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" data-astro-cid-bbe6dxrz><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" data-astro-cid-bbe6dxrz></path></svg> </a> <!-- Email --> <a href="mailto:jordan@jch254.com" class="text-brand-muted transition hover:text-white" aria-label="Email" data-astro-cid-bbe6dxrz> <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" data-astro-cid-bbe6dxrz><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" data-astro-cid-bbe6dxrz></path></svg> </a> </div> </div> </div> </header> <nav class="mx-auto max-w-2xl px-6 py-3 text-sm text-brand-muted" aria-label="Breadcrumb"> <ol class="flex items-center gap-1.5"> <li class="flex items-center gap-1.5">  <a href="/" class="transition hover:text-white">Jordan Hornblow</a> </li><li class="flex items-center gap-1.5"> <span class="text-brand-border">&rsaquo;</span> <a href="/blog" class="transition hover:text-white">Blog</a> </li><li class="flex items-center gap-1.5"> <span class="text-brand-border">&rsaquo;</span> <span class="text-brand-text">Post</span> </li> </ol> </nav> <main class="mx-auto max-w-2xl px-6 pb-16"> <article> <header class="mb-8"> <h1 class="mb-3 text-2xl font-extrabold leading-tight tracking-tight md:text-3xl"> Building an Email-Driven Multi-Tenant Ingestion Pipeline </h1> <div class="flex flex-wrap items-center gap-3 text-sm text-brand-muted"> <time datetime="2026-04-01T00:00:00.000Z"> 1 April 2026 </time>  <span class="text-brand-border">·</span> <div class="flex flex-wrap gap-1.5"> <span class="rounded-full bg-brand-accent/10 px-2.5 py-0.5 text-xs font-medium text-brand-accent"> aws </span><span class="rounded-full bg-brand-accent/10 px-2.5 py-0.5 text-xs font-medium text-brand-accent"> architecture </span><span class="rounded-full bg-brand-accent/10 px-2.5 py-0.5 text-xs font-medium text-brand-accent"> serverless </span> </div>  </div> </header> <figure class="mb-8"> <div class="overflow-hidden rounded-xl"> <img src="/_astro/email-driven-multi-tenant-ingestion-pipeline-hero.DnsINUGo.png" alt="Building an Email-Driven Multi-Tenant Ingestion Pipeline" class="mx-auto max-h-72 md:max-h-96 w-auto rounded-xl"> </div>  </figure> <div class="prose prose-invert max-w-none prose-headings:font-bold prose-headings:tracking-tight prose-a:text-brand-accent prose-a:underline prose-a:decoration-brand-accent/40 hover:prose-a:decoration-brand-accent prose-strong:text-white prose-code:text-brand-accent prose-code:bg-brand-card prose-code:rounded prose-code:px-1.5 prose-code:py-0.5 prose-code:text-sm prose-pre:bg-brand-card prose-pre:border prose-pre:border-brand-border [&_pre_code]:bg-transparent [&_pre_code]:p-0 [&_pre_code]:rounded-none prose-blockquote:border-brand-accent prose-li:marker:text-brand-accent"> <p>Most systems expose a write API over HTTP. This one uses email instead.</p>
+<p><a href="https://lushauraltreats.com" rel="noopener noreferrer" target="_blank">Lush Aural Treats</a> submissions enter the system through email.</p>
+<p>A user sends a message containing a link to an album. The system parses the email, validates the sender, resolves the tenant, enriches the metadata, and persists the album. The frontend surfaces it in the exchange feed.</p>
+<p><strong>Email becomes the ingestion API.</strong></p>
+<p>In a <a href="/blog/lush-aural-treats-aws-cost-redesign">previous post</a>, I covered the infrastructure side: how a $1,000 AWS bill forced a complete architecture redesign. This post covers the application side: the ingestion pipeline that processes submissions and why building it as multi-tenant from day one was worth the effort.</p>
+<hr>
+<h2 id="the-goal-zero-friction-submissions">The goal: zero-friction submissions</h2>
+<p>The product constraint was simple. Submitting an album should be as frictionless as possible.</p>
+<p>Traditional approaches introduce overhead that doesn’t serve the user:</p>
+<ul>
+<li><strong>Authentication flows.</strong> Sign up, verify email, log in, stay logged in. All of that for a single album link.</li>
+<li><strong>Form validation UX.</strong> Client-side validation, error states, loading spinners, success toasts.</li>
+<li><strong>Mobile friction.</strong> Tiny input fields, soft keyboards, slow page loads on cellular.</li>
+<li><strong>Another UI surface to maintain.</strong> Another page, another component, another thing that can break.</li>
+</ul>
+<p>Email avoids all of it by turning identity into the interface. Authorised senders can submit from any device without visiting the site. Each exchange has a membership list. If your email is on it, you can submit. No login, no password, no session.</p>
+<p>A submission looks like this:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>To: collective@parse.lushauraltreats.com</span></span>
+<span class="line"><span>Subject: https://open.spotify.com/album/&#x3C;id></span></span></code></pre>
+<p>The subject line contains the album URL. No attachments, no body parsing, no structured payload. The email itself is the request.</p>
+<hr>
+<h2 id="system-overview">System overview</h2>
+<h3 id="architecture-at-a-glance">Architecture at a glance</h3>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>Email → SES → Lambda → NestJS → DynamoDB → Frontend</span></span></code></pre>
+<p>Once the email arrives it moves through a small ingestion pipeline. The pipeline validates the submission, resolves the tenant, enriches the album metadata, and persists it to the exchange feed.</p>
+<p>Each stage does one thing:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>Email</span></span>
+<span class="line"><span>  ↓</span></span>
+<span class="line"><span>SES (receive)</span></span>
+<span class="line"><span>  ↓</span></span>
+<span class="line"><span>Lambda (forward to API)</span></span>
+<span class="line"><span>  ↓</span></span>
+<span class="line"><span>NestJS application</span></span>
+<span class="line"><span>  ├─ Resolve tenant</span></span>
+<span class="line"><span>  ├─ Validate sender</span></span>
+<span class="line"><span>  ├─ Extract + validate link</span></span>
+<span class="line"><span>  ├─ Deduplicate</span></span>
+<span class="line"><span>  ├─ Enrich metadata (Spotify API)</span></span>
+<span class="line"><span>  └─ Persist album</span></span>
+<span class="line"><span>  ↓</span></span>
+<span class="line"><span>Frontend read model</span></span></code></pre>
+<p>Six things happen:</p>
+<ol>
+<li>SES receives the email and triggers a Lambda</li>
+<li>The Lambda forwards the payload to the application as an HTTP POST</li>
+<li>The application resolves the tenant and validates the sender against the membership list</li>
+<li>It extracts and validates the album link from the subject line</li>
+<li>Spotify enrichment fetches metadata (titles, artwork, genres)</li>
+<li>The album is persisted to DynamoDB</li>
+</ol>
+<p>The controller returns a 202 immediately. Enrichment and persistence continue asynchronously inside the service layer after the HTTP response is sent. The sender gets an acknowledgement email right away, then a second email with the result once processing finishes.</p>
+<p>The frontend reads from DynamoDB via the albums API. No websockets, no push notifications, no real-time sync. Just a read model that reflects the current state of the exchange.</p>
+<hr>
+<h2 id="email-ingestion">Email ingestion</h2>
+<p>Inbound email is routed through SES to a Lambda function. The Lambda is a thin HTTP bridge. It extracts three fields from the SES event and POSTs them to the application:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="json"><code><span class="line"><span style="color:#E1E4E8">{</span></span>
+<span class="line"><span style="color:#79B8FF">  "from"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"user@example.com"</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#79B8FF">  "subject"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"https://open.spotify.com/album/..."</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#79B8FF">  "to"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"collective@parse.lushauraltreats.com"</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span></code></pre>
+<p>That’s all the Lambda does. No parsing, no validation, no business logic. It translates an SES event into an HTTP request.</p>
+<p>The NestJS application receives the payload and runs the pipeline. The first step is link extraction. Only the subject line matters. No multipart parsing, no attachment handling, no content decoding.</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>albumUrl = extractMusicLink(subject)</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>if (!albumUrl) {</span></span>
+<span class="line"><span>  rejectSubmission()</span></span>
+<span class="line"><span>  return</span></span>
+<span class="line"><span>}</span></span></code></pre>
+<p>Early rejection keeps the pipeline clean. If the subject line isn’t a recognisable album URL, the submission is dropped immediately.</p>
+<hr>
+<h2 id="sender-validation">Sender validation</h2>
+<p>Not anyone can submit. Each exchange maintains a membership list stored in DynamoDB as <code>MEMBER#</code> records under the tenant partition. The security service checks whether the sender’s email appears in that list before the pipeline continues.</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>securityCheck = validateSender(tenantSlug, senderEmail)</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>if (!securityCheck.allowed) {</span></span>
+<span class="line"><span>  rejectWithReason(securityCheck.reason)</span></span>
+<span class="line"><span>  return</span></span>
+<span class="line"><span>}</span></span></code></pre>
+<p>Rate limiting runs alongside the membership check. Each member has a submission cap per rolling period to prevent flooding. The rate limit records use DynamoDB’s TTL to auto-expire after each period ends.</p>
+<p>In development, tenants with no member records allow all senders. In production, every exchange requires explicit membership.</p>
+<hr>
+<h2 id="normalising-album-links">Normalising album links</h2>
+<p>Album URLs appear in different formats depending on how they’re shared. Copy from the Spotify app, the web player, or a share sheet and you get different strings for the same album:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>https://open.spotify.com/album/&#x3C;id></span></span>
+<span class="line"><span>https://open.spotify.com/album/&#x3C;id>?si=abc123</span></span>
+<span class="line"><span>https://spotify.link/&#x3C;shortcode></span></span></code></pre>
+<p>Short links (<code>spotify.link</code>) are resolved by following the redirect to get the full <code>open.spotify.com</code> URL. Query parameters are stripped. The result is a consistent URL that can be used for deduplication and API lookups.</p>
+<p>Not glamorous, but essential. Without it, the same album submitted twice via different URL formats would be stored as two separate entries.</p>
+<p>The system also validates the content type. Only albums are accepted. Tracks and playlists get rejected with a descriptive error message sent back to the submitter.</p>
+<hr>
+<h2 id="tenant-resolution">Tenant resolution</h2>
+<p>Lush Aural Treats is a <strong>multi-tenant system</strong>. Every submission must resolve to a tenant before being persisted. There is no default fallback.</p>
+<p>It started as a single tenant. The original feed lived on the apex domain at lushauraltreats.com. As the product evolved, the apex became a landing page linking out to separate exchanges. The original feed moved to Lush Collective under collective.lushauraltreats.com.</p>
+<p>The email address is the routing key. Each tenant has its own submission address:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>collective@parse.lushauraltreats.com  → TENANT#collective</span></span>
+<span class="line"><span>demo@parse.lushauraltreats.com        → TENANT#demo</span></span></code></pre>
+<p>The local part maps directly to a tenant slug. No lookup table, no API call. The routing information is in the address itself.</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>tenant = extractLocalPart(toAddress)</span></span></code></pre>
+<p>For the web frontend, the application resolves tenant from the hostname instead. A middleware extracts the subdomain:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>collective.lushauraltreats.com  → slug = "collective"</span></span>
+<span class="line"><span>demo.lushauraltreats.com        → slug = "demo"</span></span></code></pre>
+<p>Either way, tenant resolution happens at the start of the pipeline. Everything downstream already knows which tenant it’s dealing with.</p>
+<hr>
+<h2 id="dynamodb-data-model">DynamoDB data model</h2>
+<p>Albums are stored in DynamoDB using a <strong>single-table design</strong>.</p>
+<p>The primary key identifies each album:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>PK: ALBUM#&#x3C;spotify_album_id></span></span>
+<span class="line"><span>SK: META</span></span></code></pre>
+<p>A global secondary index (GSI) partitions albums by tenant:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>GSI1PK: TENANT#collective</span></span>
+<span class="line"><span>GSI1SK: &#x3C;created_at></span></span></code></pre>
+<p>This gives two access patterns from one table.</p>
+<p><strong>Direct lookup</strong> uses the primary key. Given a Spotify album ID, fetch the full record in a single read. This powers deduplication checks and individual album pages.</p>
+<p><strong>Tenant feed</strong> uses the GSI. The most common read operation is “fetch recent albums for an exchange”:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>GSI1PK = TENANT#collective</span></span>
+<span class="line"><span>ScanIndexForward = false</span></span></code></pre>
+<p>One query, sorted by date, scoped to a single tenant. No joins, no secondary filtering. DynamoDB returns exactly what the frontend needs, in the order it needs it.</p>
+<p>Other entity types share the same table: tenants (<code>TENANT#&#x3C;slug></code> / <code>META</code>), members (<code>TENANT#&#x3C;slug></code> / <code>MEMBER#&#x3C;email></code>), and rate limit counters (<code>RATE_LIMIT#&#x3C;tenant>#&#x3C;email></code> / <code>&#x3C;period></code>). Different key prefixes, same table.</p>
+<p>Because albums are append-only, the model maps well to DynamoDB’s strengths. That property removes a large class of concurrency and consistency problems. No updates to existing items, no complex transactions, no read-modify-write cycles. Write an album, read it back later. That’s the entire data flow.</p>
+<hr>
+<h2 id="idempotency">Idempotency</h2>
+<p>SES can deliver the same email more than once. Without idempotency checks, the same album shows up twice in the feed.</p>
+<p>Two checks run before persisting:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>if (existsBySpotifyId(albumId, tenant)) {</span></span>
+<span class="line"><span>  return  // duplicate submission</span></span>
+<span class="line"><span>}</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>if (existsByTitleAndArtist(title, artist, tenant)) {</span></span>
+<span class="line"><span>  return  // different edition, same album</span></span>
+<span class="line"><span>}</span></span></code></pre>
+<p>The first catches exact duplicates, same Spotify ID submitted twice. The second catches different editions or regional releases where the Spotify ID differs but the album is effectively the same.</p>
+<p>No distributed locks, no deduplication queues. Two conditional checks at the persistence boundary.</p>
+<hr>
+<h2 id="metadata-enrichment">Metadata enrichment</h2>
+<p>Once the link passes validation and deduplication, the background pipeline kicks in. For Spotify submissions, the application calls the Spotify API (client credentials flow) to fetch album metadata: title, artist, artwork, release date, track count, genres.</p>
+<p>This metadata is stored alongside the album record and powers the frontend display. Without it, each album in the feed would be a bare URL.</p>
+<p>If the Spotify API call fails, the album is still persisted with whatever information is available. Enrichment failure doesn’t block submission. The album shows up in the feed either way.</p>
+<hr>
+<h2 id="why-multi-tenant-from-the-start">Why multi-tenant from the start</h2>
+<p>Most side projects start single-tenant and retrofit multi-tenancy later. I went the other way.</p>
+<p>In this system the overhead was small:</p>
+<ul>
+<li>A <code>resolveTenant()</code> function that returns a slug</li>
+<li>A tenant-prefixed partition key in DynamoDB</li>
+<li>A routing decision at ingestion time</li>
+</ul>
+<p>Three small additions, but they keep the data model explicit and make adding new exchanges trivial. In return:</p>
+<p><strong>Cleaner domain model.</strong> Every entity belongs to a tenant. There’s no ambiguity about scope or ownership. The data model is explicit about boundaries from the start.</p>
+<p><strong>Simple routing.</strong> New tenants don’t require new infrastructure, new databases, or new deployments. They need a new GSI partition key value and a DNS record.</p>
+<p><strong>Adding tenants is additive.</strong> When I added the Demo Exchange, the work was: pick a slug, configure a route, deploy. No migration, no refactor, no downtime.</p>
+<p>I’ve seen what the alternative looks like. A single-tenant DynamoDB table where every query assumes one dataset. Adding a second tenant means rewriting partition keys, backfilling every existing record with a tenant prefix, and checking every API endpoint for data leakage. One missed filter and tenant A sees tenant B’s albums.</p>
+<p>Cheaper to model it correctly from the start than to retrofit it later.</p>
+<hr>
+<h2 id="the-complete-picture">The complete picture</h2>
+<p>The pieces fit together into a single pipeline.</p>
+<p>The full flow:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>User sends email</span></span>
+<span class="line"><span>  ↓</span></span>
+<span class="line"><span>SES receives at &#x3C;slug>@parse.lushauraltreats.com</span></span>
+<span class="line"><span>  ↓</span></span>
+<span class="line"><span>Lambda forwards { from, to, subject } to API</span></span>
+<span class="line"><span>  ↓</span></span>
+<span class="line"><span>Application: resolve tenant from to-address</span></span>
+<span class="line"><span>  ↓</span></span>
+<span class="line"><span>Validate sender against membership list</span></span>
+<span class="line"><span>  ↓</span></span>
+<span class="line"><span>Extract album link from subject, validate platform</span></span>
+<span class="line"><span>  ↓</span></span>
+<span class="line"><span>Deduplication check (Spotify ID + title/artist)</span></span>
+<span class="line"><span>  ↓</span></span>
+<span class="line"><span>Return 202, send acknowledgement email</span></span>
+<span class="line"><span>  ↓</span></span>
+<span class="line"><span>Background: Spotify enrichment → persist to DynamoDB</span></span>
+<span class="line"><span>  ↓</span></span>
+<span class="line"><span>Send result email to submitter</span></span>
+<span class="line"><span>  ↓</span></span>
+<span class="line"><span>Frontend queries DynamoDB → renders feed</span></span></code></pre>
+<p>Each step does one thing. The entire pipeline from email to UI is a straight line.</p>
+<p>No message queues. No event buses. No saga orchestrators. The Lambda forwards, the application processes, DynamoDB stores. If validation fails, the sender gets an error email explaining what went wrong. If it succeeds, they get a confirmation with the album details.</p>
+<p>At a glance, the system looks simple. That’s intentional.</p>
+<hr>
+<h2 id="lessons-learned">Lessons learned</h2>
+<p>After running the pipeline in production, a few things stood out.</p>
+<p><strong>Email works well as an ingestion interface</strong> when the payload is simple. A subject line containing a URL is about as minimal as input gets. No schema versioning, no content negotiation, no API contracts to maintain. The tradeoff is that you can’t do anything complex with it. For album links, that’s fine.</p>
+<p><strong>Minimal inputs simplify everything downstream.</strong> One URL in, one canonical form out. Validation is a single function. Parsing is a single function. The entire ingestion layer fits in a few hundred lines. Simple inputs create simple systems.</p>
+<p><strong>Multi-tenant modelling is easier at the start.</strong> Once the key structure includes a tenant prefix, every query is automatically scoped. It’s the kind of decision that costs almost nothing to make on day one and costs a lot to make on day one hundred.</p>
+<p><strong>Ingestion pipelines don’t need to be complicated.</strong> There’s a temptation to reach for Step Functions, SQS, SNS, EventBridge, the full AWS eventing toolkit. For a pipeline with simple validation and a single persistence target, a Lambda bridge and an application service are enough. Add complexity when the requirements demand it, not before.</p>
+<hr>
+<h2 id="closing-thoughts">Closing thoughts</h2>
+<p>Together with the <a href="/blog/lush-aural-treats-aws-cost-redesign">infrastructure redesign</a>, these two posts cover both sides of the Lush Aural Treats architecture. The first dealt with infrastructure and cost. This one covers application design and data flow.</p>
+<p>The interesting part isn’t the components. It’s that a single email drives the entire system, from ingestion to UI.</p> </div> </article> <!-- Back link --> <div class="mt-12 border-t border-brand-border pt-6"> <a href="/blog" class="inline-flex items-center gap-2 text-sm font-semibold text-brand-accent transition hover:text-brand-accent-hover"> <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"> <path stroke-linecap="round" stroke-linejoin="round" d="M7 16l-4-4m0 0l4-4m-4 4h18"></path> </svg>
+Back to all posts
+</a> </div> </main> <footer class="border-t border-brand-border py-8"> <div class="mx-auto max-w-2xl px-6 text-center text-sm text-brand-muted"> <p>&copy; 2026 Jordan Hornblow. Built with <a href="https://astro.build" target="_blank" rel="noopener noreferrer" class="text-brand-accent underline decoration-brand-accent/40 hover:decoration-brand-accent">Astro</a>. <a href="https://github.com/jch254/jch254.com" target="_blank" rel="noopener noreferrer" class="text-brand-accent underline decoration-brand-accent/40 hover:decoration-brand-accent">GitHub</a>. <a href="/rss.xml" target="_blank" rel="noopener noreferrer" class="text-brand-accent underline decoration-brand-accent/40 hover:decoration-brand-accent">RSS</a>.</p> </div> </footer>  </body></html>

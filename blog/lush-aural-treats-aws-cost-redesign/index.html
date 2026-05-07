@@ -1,0 +1,249 @@
+<!DOCTYPE html><html lang="en" class="scroll-smooth"> <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="canonical" href="https://jch254.com/blog/lush-aural-treats-aws-cost-redesign/"><link rel="alternate" type="application/rss+xml" title="Jordan Hornblow" href="/rss.xml"><!-- Primary Meta Tags --><title>How a $1,000 AWS Bill Made Me Redesign My ECS Architecture | Jordan Hornblow</title><meta name="title" content="How a $1,000 AWS Bill Made Me Redesign My ECS Architecture | Jordan Hornblow"><meta name="description" content="I deployed a standard ECS architecture for Lush Aural Treats and didn't watch the bill. NAT gateways and ALBs quietly ate $1,000. Here's how I redesigned the whole thing to cost almost nothing."><meta name="generator" content="Astro v6.0.2"><!-- Open Graph / Facebook --><meta property="og:type" content="article"><meta property="article:published_time" content="2026-03-25T00:00:00.000Z"><meta property="og:url" content="https://jch254.com/blog/lush-aural-treats-aws-cost-redesign/"><meta property="og:title" content="How a $1,000 AWS Bill Made Me Redesign My ECS Architecture | Jordan Hornblow"><meta property="og:description" content="I deployed a standard ECS architecture for Lush Aural Treats and didn't watch the bill. NAT gateways and ALBs quietly ate $1,000. Here's how I redesigned the whole thing to cost almost nothing."><meta property="og:image" content="https://jch254.com/_astro/lush-aural-treats-aws-cost-redesign-hero.DlJfOzE6.png"><!-- Twitter --><meta property="twitter:card" content="summary_large_image"><meta property="twitter:url" content="https://jch254.com/blog/lush-aural-treats-aws-cost-redesign/"><meta property="twitter:title" content="How a $1,000 AWS Bill Made Me Redesign My ECS Architecture | Jordan Hornblow"><meta property="twitter:description" content="I deployed a standard ECS architecture for Lush Aural Treats and didn't watch the bill. NAT gateways and ALBs quietly ate $1,000. Here's how I redesigned the whole thing to cost almost nothing."><meta property="twitter:image" content="https://jch254.com/_astro/lush-aural-treats-aws-cost-redesign-hero.DlJfOzE6.png"><!-- JSON-LD Structured Data --><script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"How a $1,000 AWS Bill Made Me Redesign My ECS Architecture | Jordan Hornblow","description":"I deployed a standard ECS architecture for Lush Aural Treats and didn't watch the bill. NAT gateways and ALBs quietly ate $1,000. Here's how I redesigned the whole thing to cost almost nothing.","image":"https://jch254.com/_astro/lush-aural-treats-aws-cost-redesign-hero.DlJfOzE6.png","datePublished":"2026-03-25T00:00:00.000Z","url":"https://jch254.com/blog/lush-aural-treats-aws-cost-redesign/","author":{"@type":"Person","name":"Jordan Hornblow","url":"https://jch254.com"},"publisher":{"@type":"Person","name":"Jordan Hornblow","url":"https://jch254.com"}}</script><!-- Fonts (non-render-blocking) --><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"><link rel="stylesheet" href="/_astro/Footer.CJpWUrUY.css"></head> <body class="bg-brand-bg text-brand-text font-sans min-h-screen antialiased">  <header class="relative overflow-hidden pb-10 pt-16 md:pt-24" data-astro-cid-bbe6dxrz> <!-- Matrix-style background --> <div class="absolute inset-0 z-0" data-astro-cid-bbe6dxrz> <div class="matrix-bg absolute inset-0 opacity-50" data-astro-cid-bbe6dxrz></div> <div class="absolute inset-0 bg-gradient-to-b from-transparent via-brand-bg/60 to-brand-bg" data-astro-cid-bbe6dxrz></div> </div> <div class="relative z-10 mx-auto max-w-2xl px-6 text-center" data-astro-cid-bbe6dxrz>  <a href="/" class="mb-6 inline-block text-4xl font-extrabold tracking-tight md:text-5xl hover:text-brand-accent transition-colors" data-astro-cid-bbe6dxrz>
+Jordan Hornblow
+</a>  <!-- CTA + Social Icons --> <div class="flex flex-wrap items-center justify-center gap-4" data-astro-cid-bbe6dxrz> <a href="https://603.nz" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 rounded-full bg-brand-accent px-6 py-2.5 text-sm font-semibold text-brand-bg transition hover:bg-brand-accent-hover" data-astro-cid-bbe6dxrz> <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" data-astro-cid-bbe6dxrz> <path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" data-astro-cid-bbe6dxrz></path> </svg>
+PROJECTS
+</a> <a href="/resume" class="inline-flex items-center gap-2 rounded-full border border-brand-border px-6 py-2.5 text-sm font-semibold text-brand-text transition hover:border-brand-accent hover:text-white" data-astro-cid-bbe6dxrz> <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" data-astro-cid-bbe6dxrz> <path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" data-astro-cid-bbe6dxrz></path> </svg>
+RESUME
+</a> <a href="/blog" class="inline-flex items-center gap-2 rounded-full border border-brand-border px-6 py-2.5 text-sm font-semibold text-brand-text transition hover:border-brand-accent hover:text-white" data-astro-cid-bbe6dxrz> <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" data-astro-cid-bbe6dxrz> <path stroke-linecap="round" stroke-linejoin="round" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" data-astro-cid-bbe6dxrz></path> </svg>
+BLOG
+</a> <!-- Social icons: own row on mobile, inline on md+ --> <div class="flex basis-full justify-center gap-4 md:basis-auto" data-astro-cid-bbe6dxrz> <!-- GitHub --> <a href="https://github.com/jch254" target="_blank" rel="noopener noreferrer" class="text-brand-muted transition hover:text-white" aria-label="GitHub" data-astro-cid-bbe6dxrz> <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" data-astro-cid-bbe6dxrz><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" data-astro-cid-bbe6dxrz></path></svg> </a> <!-- LinkedIn --> <a href="https://linkedin.com/in/jch254" target="_blank" rel="noopener noreferrer" class="text-brand-muted transition hover:text-white" aria-label="LinkedIn" data-astro-cid-bbe6dxrz> <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" data-astro-cid-bbe6dxrz><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" data-astro-cid-bbe6dxrz></path></svg> </a> <!-- Email --> <a href="mailto:jordan@jch254.com" class="text-brand-muted transition hover:text-white" aria-label="Email" data-astro-cid-bbe6dxrz> <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" data-astro-cid-bbe6dxrz><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" data-astro-cid-bbe6dxrz></path></svg> </a> </div> </div> </div> </header> <nav class="mx-auto max-w-2xl px-6 py-3 text-sm text-brand-muted" aria-label="Breadcrumb"> <ol class="flex items-center gap-1.5"> <li class="flex items-center gap-1.5">  <a href="/" class="transition hover:text-white">Jordan Hornblow</a> </li><li class="flex items-center gap-1.5"> <span class="text-brand-border">&rsaquo;</span> <a href="/blog" class="transition hover:text-white">Blog</a> </li><li class="flex items-center gap-1.5"> <span class="text-brand-border">&rsaquo;</span> <span class="text-brand-text">Post</span> </li> </ol> </nav> <main class="mx-auto max-w-2xl px-6 pb-16"> <article> <header class="mb-8"> <h1 class="mb-3 text-2xl font-extrabold leading-tight tracking-tight md:text-3xl"> How a $1,000 AWS Bill Made Me Redesign My ECS Architecture </h1> <div class="flex flex-wrap items-center gap-3 text-sm text-brand-muted"> <time datetime="2026-03-25T00:00:00.000Z"> 25 March 2026 </time>  <span class="text-brand-border">·</span> <div class="flex flex-wrap gap-1.5"> <span class="rounded-full bg-brand-accent/10 px-2.5 py-0.5 text-xs font-medium text-brand-accent"> aws </span><span class="rounded-full bg-brand-accent/10 px-2.5 py-0.5 text-xs font-medium text-brand-accent"> infrastructure </span><span class="rounded-full bg-brand-accent/10 px-2.5 py-0.5 text-xs font-medium text-brand-accent"> cost optimisation </span> </div>  </div> </header> <figure class="mb-8"> <div class="overflow-hidden rounded-xl"> <img src="/_astro/lush-aural-treats-aws-cost-redesign-hero.DlJfOzE6.png" alt="How a $1,000 AWS Bill Made Me Redesign My ECS Architecture" class="mx-auto max-h-72 md:max-h-96 w-auto rounded-xl"> </div> <figcaption class="mt-2 text-center text-sm text-brand-muted"> API Gateway HTTP API + VPC Link + AWS Cloud Map architecture transformation </figcaption> </figure> <div class="prose prose-invert max-w-none prose-headings:font-bold prose-headings:tracking-tight prose-a:text-brand-accent prose-a:underline prose-a:decoration-brand-accent/40 hover:prose-a:decoration-brand-accent prose-strong:text-white prose-code:text-brand-accent prose-code:bg-brand-card prose-code:rounded prose-code:px-1.5 prose-code:py-0.5 prose-code:text-sm prose-pre:bg-brand-card prose-pre:border prose-pre:border-brand-border [&_pre_code]:bg-transparent [&_pre_code]:p-0 [&_pre_code]:rounded-none prose-blockquote:border-brand-accent prose-li:marker:text-brand-accent"> <p>I’ve been building on AWS for over a decade. I know how the pricing works. I’ve designed cost-conscious architectures for companies that process millions of requests. I still managed to rack up a <strong>$1,000 AWS bill</strong> on a side project.</p>
+<p>The project is <a href="https://lushauraltreats.com" rel="noopener noreferrer" target="_blank">Lush Aural Treats</a>, a music-focused API service running on ECS Fargate. Nothing exotic. Standard containerised workload, standard AWS architecture. The kind of setup you’d find in any “deploy to ECS” tutorial.</p>
+<p>That’s exactly the problem.</p>
+<h2 id="tldr">TL;DR</h2>
+<p>I accidentally spent ~$1,000 running a small ECS project on AWS.</p>
+<p>The main culprits:</p>
+<ul>
+<li>NAT Gateway</li>
+<li>Application Load Balancer</li>
+</ul>
+<p>Original architecture:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>Cloudflare → ALB → ECS Fargate → NAT Gateway</span></span></code></pre>
+<p>New architecture:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>Cloudflare → API Gateway → Cloud Map → ECS Fargate</span></span></code></pre>
+<p>Baseline infrastructure cost dropped from ~$50/month to near zero.</p>
+<p>The next step would be replacing Fargate with Lambda for event-driven workloads. Haven’t done that yet, but it’s on the list.</p>
+<h2 id="the-standard-architecture">The “standard” architecture</h2>
+<p>When I deployed Lush Aural Treats, I reached for the usual AWS primitives:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>Cloudflare</span></span>
+<span class="line"><span>   ↓</span></span>
+<span class="line"><span>ALB</span></span>
+<span class="line"><span>   ↓</span></span>
+<span class="line"><span>ECS Fargate (private subnet)</span></span>
+<span class="line"><span>   ↓</span></span>
+<span class="line"><span>NAT Gateway</span></span>
+<span class="line"><span>   ↓</span></span>
+<span class="line"><span>Internet APIs (Spotify, etc.)</span></span></code></pre>
+<p><strong>VPC with public and private subnets.</strong> ECS tasks in the private subnet. An <strong>Application Load Balancer</strong> in the public subnet to route traffic in. A <strong>NAT gateway</strong> so the containers could reach external APIs. Cloudflare in front for DNS and CDN.</p>
+<p>Textbook stuff. AWS themselves recommend this pattern. Deploy it, move on, build features.</p>
+<p>I moved on. I built features. I didn’t look at the bill.</p>
+<h2 id="the-bill">The bill</h2>
+<p>A few months later, I checked AWS Cost Explorer and the number staring back at me was roughly <strong>$1,000</strong>. For a side project. Running a handful of containers. Serving modest traffic.</p>
+<p>My first thought was that something was misconfigured. A runaway task, maybe. A logging pipeline gone haywire. But the breakdown told a different story.</p>
+<h2 id="investigating-the-cost">Investigating the cost</h2>
+<p>The expensive parts weren’t compute. They almost never are.</p>
+<p><img alt="The expensive parts weren&amp;#x27;t compute. They almost never are." loading="lazy" decoding="async"  width="1536" height="1024" src="/_astro/invisible-cost-surface.aGQ8Nx7L_sJIox.webp" ></p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Service</th><th>What I expected</th><th>What actually happened</th></tr></thead><tbody><tr><td><strong>NAT Gateway</strong></td><td>A few dollars</td><td>~$32/month base + data processing fees</td></tr><tr><td><strong>ALB</strong></td><td>Cheap</td><td>~$16/month base + LCU charges</td></tr><tr><td><strong>CloudWatch Logs</strong></td><td>Negligible</td><td>Log ingestion costs added up</td></tr><tr><td><strong>Data Transfer</strong></td><td>Minimal</td><td>NAT processing + cross-AZ traffic</td></tr><tr><td><strong>ECS Tasks</strong></td><td>The main cost</td><td>Actually the cheapest part</td></tr></tbody></table>
+<p>The <strong>NAT gateway</strong> was the killer. It charges $0.045/hr in most regions, <em>plus</em> a per-GB data processing fee. If your containers are doing anything chatty (pulling images, polling APIs, downloading packages) that data processing fee compounds fast. Spotify API polling, container image pulls, health checks, dependency fetches. All of it flowing through NAT.</p>
+<p>The <strong>ALB</strong> has its own baseline cost. Even idle, you’re paying ~$16/month before a single request hits it. Add LCU-based charges for actual traffic and it’s more.</p>
+<p><strong>CloudWatch Logs</strong> sneak up on you. Ingestion is priced per GB. If your containers are verbose (and most are by default), you’re paying for every line.</p>
+<p>Then there’s <strong>cross-AZ data transfer</strong>. The ALB distributes across availability zones. Each cross-AZ hop costs money. Not a lot per request, but it adds up when you’re not paying attention.</p>
+<p>None of these are bugs. This is just how AWS pricing works for “standard” architectures. Nobody warns you in the getting-started guides.</p>
+<p>The surprising part was that compute wasn’t the problem. Most of the cost came from always-on infrastructure: the NAT gateway and Application Load Balancer.</p>
+<h2 id="rethinking-the-architecture">Rethinking the architecture</h2>
+<p>The goal was simple:</p>
+<ul>
+<li><strong>Keep ECS Fargate.</strong> It works, I like it, the containerised workflow is solid.</li>
+<li><strong>Remove the NAT gateway.</strong> The single biggest cost driver.</li>
+<li><strong>Remove the ALB.</strong> Unnecessary overhead for my use case.</li>
+<li><strong>Keep service discovery.</strong> Traffic still needs to find the right container.</li>
+</ul>
+<p>What replaces them?</p>
+<p><strong>API Gateway HTTP API + VPC Link + AWS Cloud Map.</strong></p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>Cloudflare</span></span>
+<span class="line"><span>   ↓</span></span>
+<span class="line"><span>API Gateway HTTP API</span></span>
+<span class="line"><span>   ↓</span></span>
+<span class="line"><span>VPC Link</span></span>
+<span class="line"><span>   ↓</span></span>
+<span class="line"><span>Cloud Map</span></span>
+<span class="line"><span>   ↓</span></span>
+<span class="line"><span>ECS Fargate (public subnet)</span></span></code></pre>
+<h2 id="why-this-works">Why this works</h2>
+<p><strong>API Gateway HTTP API</strong> is AWS’s lighter, cheaper alternative to REST API Gateway. Routing, throttling, auth. Pricing is pure pay-per-request: <strong>$1 per million requests</strong>. No hourly baseline. If nothing hits it, you pay nothing.</p>
+<p><strong>VPC Link</strong> connects API Gateway directly into your VPC without a public-facing load balancer. It replaces the ALB.</p>
+<p><strong>AWS Cloud Map</strong> handles service discovery. When ECS tasks launch, they register themselves in Cloud Map automatically. API Gateway resolves the service through Cloud Map to find the running container. No load balancer required.</p>
+<p><strong>ECS tasks move to a public subnet</strong> with a public IP. They reach external APIs directly. No NAT gateway. Security groups still control inbound access. The containers aren’t exposed to the internet because API Gateway is the only ingress path through the VPC Link.</p>
+<p>Most engineers haven’t seen this pattern. Cloud Map has been around for years but rarely shows up in tutorials. Not glamorous. Just works.</p>
+<h2 id="cost-comparison">Cost comparison</h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Component</th><th>Old</th><th>New</th></tr></thead><tbody><tr><td>ALB</td><td>~$16/month</td><td>$0</td></tr><tr><td>NAT Gateway</td><td>~$32/month + data processing</td><td>$0</td></tr><tr><td>API Gateway</td><td>—</td><td>~$1/million requests</td></tr><tr><td>Cloud Map</td><td>—</td><td>$0.10/discovery query (negligible)</td></tr><tr><td><strong>Total baseline</strong></td><td><strong>~$50+/month before traffic</strong></td><td><strong>Near zero</strong></td></tr></tbody></table>
+<p>The old architecture had a <strong>$50+/month floor</strong> just for existing. The new one is effectively <strong>zero</strong>. You only pay for what you use.</p>
+<p>Over the months I wasn’t paying attention, that $50+/month baseline plus NAT data processing fees and log ingestion quietly compounded into a four-figure bill. The kind of number that makes you rethink your entire approach to AWS side projects.</p>
+<h2 id="the-cloudflare-bonus">The Cloudflare bonus</h2>
+<p>Cloudflare was already in front of everything, so the final stack picks up a few things for free:</p>
+<ul>
+<li><strong>WAF</strong> at the edge</li>
+<li><strong>CDN</strong> for static responses</li>
+<li><strong>DDoS protection</strong> (Cloudflare absorbs volumetric attacks)</li>
+<li><strong>Cheap API routing</strong> via API Gateway</li>
+</ul>
+<p>Cloudflare, API Gateway HTTP API, VPC Link, Cloud Map, ECS Fargate. That’s the entire production path. Five components. No load balancer, no NAT gateway, no idle costs.</p>
+<p>Pretty modern infrastructure pattern. Simple enough to reason about, cheap enough to forget about.</p>
+<h2 id="tradeoffs">Tradeoffs</h2>
+<p>There are downsides.</p>
+<p><strong>Fewer routing features.</strong> ALBs give you path-based routing, host-based routing, weighted target groups, sticky sessions. API Gateway HTTP API is simpler. Fine for my use case. If you need advanced L7 routing, you’ll miss the ALB.</p>
+<p><strong>Less mature ecosystem.</strong> Thousands of tutorials exist for ALB + ECS. VPC Link + Cloud Map has far fewer. When something breaks, you’re reading AWS docs, not Stack Overflow.</p>
+<p><strong>API Gateway limits.</strong> 10 MB payload limit. 30-second timeout for HTTP APIs. Integration quirks. Know them before you commit.</p>
+<p>For what Lush Aural Treats needs (a few API endpoints, modest traffic, external API integration) this is more than enough. Also fine for microservices, small SaaS products, and side projects where the alternative is quietly haemorrhaging money on idle infrastructure.</p>
+<h2 id="whats-next-replacing-fargate-with-lambda">What’s next: replacing Fargate with Lambda</h2>
+<p>Once the architecture was simplified, it became obvious that the ECS service itself might also be overkill for this workload.</p>
+<p>Fargate still means always-running compute. Even a small task (0.25 vCPU, 0.5 GB memory) costs ~$8-12/month just to exist. For a low-traffic side project, that’s still paying for idle.</p>
+<p>The Lush Aural Treats submission flow is event-driven by nature. An email arrives with an album link in the subject line. The system parses the link, fetches metadata, stores the submission, notifies users. Not a long-running server workload. A series of discrete events. Would map naturally to Lambda.</p>
+<p>The architecture would become:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>Cloudflare</span></span>
+<span class="line"><span>   ↓</span></span>
+<span class="line"><span>API Gateway HTTP API</span></span>
+<span class="line"><span>   ↓</span></span>
+<span class="line"><span>Lambda</span></span>
+<span class="line"><span>   ↓</span></span>
+<span class="line"><span>S3 / DynamoDB / SES</span></span></code></pre>
+<p>This would remove <strong>four components</strong> at once: ECS cluster, Fargate tasks, Cloud Map, and VPC Link. The entire system would become event-driven. No orchestration. No service discovery. No container management.</p>
+<p>For the email-based flow:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>SES inbound email</span></span>
+<span class="line"><span>   ↓</span></span>
+<span class="line"><span>Lambda</span></span>
+<span class="line"><span>   ↓</span></span>
+<span class="line"><span>Parse subject link → Fetch metadata → Store in DynamoDB → Notify via SES</span></span></code></pre>
+<p>For the web interface, API Gateway routes directly to Lambda. Same pattern, different trigger.</p>
+<h3 id="what-the-costs-would-look-like">What the costs would look like</h3>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Component</th><th>Fargate (Version 2)</th><th>Lambda (Version 3)</th></tr></thead><tbody><tr><td>Compute</td><td>~$8–12/month</td><td>Often &#x3C; $1/month</td></tr><tr><td>API Gateway HTTP API</td><td>~$1/million requests</td><td>~$1/million requests</td></tr><tr><td>Cloud Map + VPC Link</td><td>~$0.10</td><td>$0</td></tr><tr><td><strong>Total</strong></td><td><strong>~$10–13/month</strong></td><td><strong>Effectively free-tier</strong></td></tr></tbody></table>
+<p>For low-traffic workloads, a Lambda version would fit inside the free tier. Fractions of a cent per invocation instead of dollars per month for idle containers.</p>
+<h3 id="why-i-havent-migrated-yet">Why I haven’t migrated yet</h3>
+<p>Fargate still makes sense for parts of the system that don’t fit Lambda:</p>
+<ul>
+<li><strong>Long-running workers.</strong> Lambda has a 15-minute execution limit. Background jobs that take longer need a container.</li>
+<li><strong>Heavy dependencies.</strong> Some workloads have large runtime environments that push against Lambda’s package size limits or cold start times.</li>
+<li><strong>Persistent connections.</strong> WebSockets, long-polling, connection pooling. Containers handle these natively. Lambda doesn’t.</li>
+<li><strong>Local development.</strong> Running a container locally mirrors production almost exactly. Lambda local dev tooling exists but adds friction.</li>
+</ul>
+<p>For the request-driven API endpoints and the email processing pipeline, Lambda would win. For everything else, Fargate would stay. I’ll probably get around to this at some point, but the current architecture is already cheap enough that it’s not urgent.</p>
+<h3 id="cold-starts">Cold starts</h3>
+<p>Lambda cold starts are real. Typically ~100-300ms for Node.js or Python. For an API serving real users, that’s noticeable on the first request after idle. Provisioned concurrency fixes it but adds cost, which defeats the purpose.</p>
+<p>For Lush Aural Treats the traffic is bursty and infrequent enough that occasional cold starts are fine. If this were a user-facing app with latency SLAs, I’d think harder about it.</p>
+<h3 id="the-potential-three-stage-evolution">The potential three-stage evolution</h3>
+<p>Looking back (and forward), the architecture has evolved through two stages with a third on the horizon:</p>
+<p><strong>Version 1, Standard AWS:</strong></p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>Cloudflare → ALB → ECS Fargate → NAT Gateway</span></span></code></pre>
+<p>Cost surprise. ~$50+/month baseline before a single request. $1,000 bill.</p>
+<p><strong>Version 2, Lean ECS (current):</strong></p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>Cloudflare → API Gateway → VPC Link → Cloud Map → ECS Fargate</span></span></code></pre>
+<p>Much cheaper. Near-zero baseline for routing. Still paying for always-on compute.</p>
+<p><strong>Version 3, Fully Serverless (future):</strong></p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>Cloudflare → API Gateway → Lambda</span></span></code></pre>
+<p>Near-zero baseline cost. Pay only for what runs.</p>
+<p>Each version removed components and cost. Each got simpler. Usually a good sign.</p>
+<h2 id="the-lesson">The lesson</h2>
+<p>AWS’s “standard” architectures are optimised for enterprise resilience, not cost. NAT gateways, ALBs, multi-AZ redundancy. They exist because large organisations need them and can afford them. When you copy-paste that architecture into a side project, you inherit the cost profile without needing the resilience.</p>
+<p>The infrastructure that runs your side project shouldn’t cost more than the side project earns. If it does, the architecture is wrong. Not the project.</p>
+<p>I should have caught this earlier. I didn’t. The rebuild is simpler, cheaper, and honestly better than what I had before. Sometimes the expensive mistakes teach you the most.</p> </div> </article> <!-- Back link --> <div class="mt-12 border-t border-brand-border pt-6"> <a href="/blog" class="inline-flex items-center gap-2 text-sm font-semibold text-brand-accent transition hover:text-brand-accent-hover"> <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"> <path stroke-linecap="round" stroke-linejoin="round" d="M7 16l-4-4m0 0l4-4m-4 4h18"></path> </svg>
+Back to all posts
+</a> </div> </main> <footer class="border-t border-brand-border py-8"> <div class="mx-auto max-w-2xl px-6 text-center text-sm text-brand-muted"> <p>&copy; 2026 Jordan Hornblow. Built with <a href="https://astro.build" target="_blank" rel="noopener noreferrer" class="text-brand-accent underline decoration-brand-accent/40 hover:decoration-brand-accent">Astro</a>. <a href="https://github.com/jch254/jch254.com" target="_blank" rel="noopener noreferrer" class="text-brand-accent underline decoration-brand-accent/40 hover:decoration-brand-accent">GitHub</a>. <a href="/rss.xml" target="_blank" rel="noopener noreferrer" class="text-brand-accent underline decoration-brand-accent/40 hover:decoration-brand-accent">RSS</a>.</p> </div> </footer>  </body></html>

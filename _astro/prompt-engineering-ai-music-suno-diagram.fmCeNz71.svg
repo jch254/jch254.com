@@ -1,0 +1,64 @@
+<svg width="760" height="340" viewBox="0 0 760 340" xmlns="http://www.w3.org/2000/svg">
+
+<style>
+.box { fill:#0f172a; stroke:#64748b; stroke-width:1.5; rx:10 }
+.label { fill:#e2e8f0; font-family:monospace; font-size:14px }
+.title { fill:#e2e8f0; font-family:monospace; font-size:18px; font-weight:bold }
+.arrow { stroke:#64748b; stroke-width:2; marker-end:url(#arrow) }
+.grid { fill:#334155; opacity:0.25 }
+</style>
+
+<defs>
+
+<marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+<path d="M0,0 L0,6 L9,3 z" fill="#64748b"></path>
+</marker>
+
+<!-- dot grid pattern -->
+<pattern id="dotGrid" width="24" height="24" patternUnits="userSpaceOnUse">
+<circle cx="2" cy="2" r="1.2" class="grid"></circle>
+</pattern>
+
+</defs>
+
+<!-- background grid -->
+<rect width="100%" height="100%" fill="url(#dotGrid)"></rect>
+
+<!-- title -->
+<text x="380" y="32" text-anchor="middle" class="title">
+Prompt Tokens → Model Conditioning → Generated Track
+</text>
+
+<!-- prompt box -->
+<rect x="40" y="90" width="220" height="180" class="box"></rect>
+
+<text x="150" y="115" text-anchor="middle" class="label">Prompt Signals</text>
+
+<text x="150" y="150" text-anchor="middle" class="label">Drums: 808 slides</text>
+<text x="150" y="170" text-anchor="middle" class="label">Triplet hi-hats</text>
+
+<text x="150" y="200" text-anchor="middle" class="label">Melody: bell melody</text>
+
+<text x="150" y="230" text-anchor="middle" class="label">Vocals: autotune rap</text>
+
+<!-- model box -->
+<rect x="300" y="90" width="180" height="180" class="box"></rect>
+
+<text x="390" y="155" text-anchor="middle" class="label">Music Model</text>
+<text x="390" y="185" text-anchor="middle" class="label">latent conditioning</text>
+
+<!-- output box -->
+<rect x="520" y="90" width="200" height="180" class="box"></rect>
+
+<text x="620" y="115" text-anchor="middle" class="label">Generated Track</text>
+
+<text x="620" y="150" text-anchor="middle" class="label">Trap drums</text>
+<text x="620" y="175" text-anchor="middle" class="label">Bell melody</text>
+<text x="620" y="200" text-anchor="middle" class="label">Autotune vocals</text>
+<text x="620" y="225" text-anchor="middle" class="label">Verse / Hook</text>
+
+<!-- arrows -->
+<line x1="260" y1="180" x2="300" y2="180" class="arrow"></line>
+<line x1="480" y1="180" x2="520" y2="180" class="arrow"></line>
+
+</svg>

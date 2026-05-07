@@ -1,0 +1,199 @@
+<!DOCTYPE html><html lang="en" class="scroll-smooth"> <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="canonical" href="https://jch254.com/blog/beyond-vibe-coding/"><link rel="alternate" type="application/rss+xml" title="Jordan Hornblow" href="/rss.xml"><!-- Primary Meta Tags --><title>Beyond Vibe Coding: Using AI as an Engineering Collaborator | Jordan Hornblow</title><meta name="title" content="Beyond Vibe Coding: Using AI as an Engineering Collaborator | Jordan Hornblow"><meta name="description" content="Most AI dev content is about vibe coding or tool comparisons. Here's the structured workflow I've been using across real projects, and why it actually works."><meta name="generator" content="Astro v6.0.2"><!-- Open Graph / Facebook --><meta property="og:type" content="article"><meta property="article:published_time" content="2026-03-17T00:00:00.000Z"><meta property="og:url" content="https://jch254.com/blog/beyond-vibe-coding/"><meta property="og:title" content="Beyond Vibe Coding: Using AI as an Engineering Collaborator | Jordan Hornblow"><meta property="og:description" content="Most AI dev content is about vibe coding or tool comparisons. Here's the structured workflow I've been using across real projects, and why it actually works."><meta property="og:image" content="https://jch254.com/_astro/beyond-vibe-coding.D6HTHzP8.png"><!-- Twitter --><meta property="twitter:card" content="summary_large_image"><meta property="twitter:url" content="https://jch254.com/blog/beyond-vibe-coding/"><meta property="twitter:title" content="Beyond Vibe Coding: Using AI as an Engineering Collaborator | Jordan Hornblow"><meta property="twitter:description" content="Most AI dev content is about vibe coding or tool comparisons. Here's the structured workflow I've been using across real projects, and why it actually works."><meta property="twitter:image" content="https://jch254.com/_astro/beyond-vibe-coding.D6HTHzP8.png"><!-- JSON-LD Structured Data --><script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Beyond Vibe Coding: Using AI as an Engineering Collaborator | Jordan Hornblow","description":"Most AI dev content is about vibe coding or tool comparisons. Here's the structured workflow I've been using across real projects, and why it actually works.","image":"https://jch254.com/_astro/beyond-vibe-coding.D6HTHzP8.png","datePublished":"2026-03-17T00:00:00.000Z","url":"https://jch254.com/blog/beyond-vibe-coding/","author":{"@type":"Person","name":"Jordan Hornblow","url":"https://jch254.com"},"publisher":{"@type":"Person","name":"Jordan Hornblow","url":"https://jch254.com"}}</script><!-- Fonts (non-render-blocking) --><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"><link rel="stylesheet" href="/_astro/Footer.CJpWUrUY.css"></head> <body class="bg-brand-bg text-brand-text font-sans min-h-screen antialiased">  <header class="relative overflow-hidden pb-10 pt-16 md:pt-24" data-astro-cid-bbe6dxrz> <!-- Matrix-style background --> <div class="absolute inset-0 z-0" data-astro-cid-bbe6dxrz> <div class="matrix-bg absolute inset-0 opacity-50" data-astro-cid-bbe6dxrz></div> <div class="absolute inset-0 bg-gradient-to-b from-transparent via-brand-bg/60 to-brand-bg" data-astro-cid-bbe6dxrz></div> </div> <div class="relative z-10 mx-auto max-w-2xl px-6 text-center" data-astro-cid-bbe6dxrz>  <a href="/" class="mb-6 inline-block text-4xl font-extrabold tracking-tight md:text-5xl hover:text-brand-accent transition-colors" data-astro-cid-bbe6dxrz>
+Jordan Hornblow
+</a>  <!-- CTA + Social Icons --> <div class="flex flex-wrap items-center justify-center gap-4" data-astro-cid-bbe6dxrz> <a href="https://603.nz" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 rounded-full bg-brand-accent px-6 py-2.5 text-sm font-semibold text-brand-bg transition hover:bg-brand-accent-hover" data-astro-cid-bbe6dxrz> <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" data-astro-cid-bbe6dxrz> <path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" data-astro-cid-bbe6dxrz></path> </svg>
+PROJECTS
+</a> <a href="/resume" class="inline-flex items-center gap-2 rounded-full border border-brand-border px-6 py-2.5 text-sm font-semibold text-brand-text transition hover:border-brand-accent hover:text-white" data-astro-cid-bbe6dxrz> <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" data-astro-cid-bbe6dxrz> <path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" data-astro-cid-bbe6dxrz></path> </svg>
+RESUME
+</a> <a href="/blog" class="inline-flex items-center gap-2 rounded-full border border-brand-border px-6 py-2.5 text-sm font-semibold text-brand-text transition hover:border-brand-accent hover:text-white" data-astro-cid-bbe6dxrz> <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" data-astro-cid-bbe6dxrz> <path stroke-linecap="round" stroke-linejoin="round" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" data-astro-cid-bbe6dxrz></path> </svg>
+BLOG
+</a> <!-- Social icons: own row on mobile, inline on md+ --> <div class="flex basis-full justify-center gap-4 md:basis-auto" data-astro-cid-bbe6dxrz> <!-- GitHub --> <a href="https://github.com/jch254" target="_blank" rel="noopener noreferrer" class="text-brand-muted transition hover:text-white" aria-label="GitHub" data-astro-cid-bbe6dxrz> <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" data-astro-cid-bbe6dxrz><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" data-astro-cid-bbe6dxrz></path></svg> </a> <!-- LinkedIn --> <a href="https://linkedin.com/in/jch254" target="_blank" rel="noopener noreferrer" class="text-brand-muted transition hover:text-white" aria-label="LinkedIn" data-astro-cid-bbe6dxrz> <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" data-astro-cid-bbe6dxrz><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" data-astro-cid-bbe6dxrz></path></svg> </a> <!-- Email --> <a href="mailto:jordan@jch254.com" class="text-brand-muted transition hover:text-white" aria-label="Email" data-astro-cid-bbe6dxrz> <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" data-astro-cid-bbe6dxrz><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" data-astro-cid-bbe6dxrz></path></svg> </a> </div> </div> </div> </header> <nav class="mx-auto max-w-2xl px-6 py-3 text-sm text-brand-muted" aria-label="Breadcrumb"> <ol class="flex items-center gap-1.5"> <li class="flex items-center gap-1.5">  <a href="/" class="transition hover:text-white">Jordan Hornblow</a> </li><li class="flex items-center gap-1.5"> <span class="text-brand-border">&rsaquo;</span> <a href="/blog" class="transition hover:text-white">Blog</a> </li><li class="flex items-center gap-1.5"> <span class="text-brand-border">&rsaquo;</span> <span class="text-brand-text">Post</span> </li> </ol> </nav> <main class="mx-auto max-w-2xl px-6 pb-16"> <article> <header class="mb-8"> <h1 class="mb-3 text-2xl font-extrabold leading-tight tracking-tight md:text-3xl"> Beyond Vibe Coding: Using AI as an Engineering Collaborator </h1> <div class="flex flex-wrap items-center gap-3 text-sm text-brand-muted"> <time datetime="2026-03-17T00:00:00.000Z"> 17 March 2026 </time>  <span class="text-brand-border">·</span> <div class="flex flex-wrap gap-1.5"> <span class="rounded-full bg-brand-accent/10 px-2.5 py-0.5 text-xs font-medium text-brand-accent"> ai </span><span class="rounded-full bg-brand-accent/10 px-2.5 py-0.5 text-xs font-medium text-brand-accent"> software engineering </span><span class="rounded-full bg-brand-accent/10 px-2.5 py-0.5 text-xs font-medium text-brand-accent"> developer tools </span> </div>  </div> </header> <figure class="mb-8"> <div class="overflow-hidden rounded-xl"> <img src="/_astro/beyond-vibe-coding.D6HTHzP8.png" alt="Beyond Vibe Coding: Using AI as an Engineering Collaborator" class="mx-auto max-h-72 md:max-h-96 w-auto rounded-xl"> </div>  </figure> <div class="prose prose-invert max-w-none prose-headings:font-bold prose-headings:tracking-tight prose-a:text-brand-accent prose-a:underline prose-a:decoration-brand-accent/40 hover:prose-a:decoration-brand-accent prose-strong:text-white prose-code:text-brand-accent prose-code:bg-brand-card prose-code:rounded prose-code:px-1.5 prose-code:py-0.5 prose-code:text-sm prose-pre:bg-brand-card prose-pre:border prose-pre:border-brand-border [&_pre_code]:bg-transparent [&_pre_code]:p-0 [&_pre_code]:rounded-none prose-blockquote:border-brand-accent prose-li:marker:text-brand-accent"> <p>Most writing about AI-assisted development falls into two camps: vibe-coding hype (“I built an app in 30 minutes with ChatGPT”) or shallow tool comparisons (Copilot vs Cursor vs Claude). Neither is particularly useful if you’re building real systems.</p>
+<p>Over the last few projects I’ve been experimenting with a different approach: treating AI less like a magic code generator and more like a technical collaborator across the full development lifecycle.</p>
+<p>The difference matters. Vibe coding is blind prompting and hoping for the best. What I’m describing is closer to AI-assisted systems engineering.</p>
+<p>The most effective way I’ve found to use AI in development isn’t generating software from scratch. It’s using it as a continuous feedback system across the entire build cycle.</p>
+<p>The workflow that’s worked best for me is simple: <strong>design → implement → audit → refine</strong></p>
+<h2 id="the-problem-with-vibe-coding">The problem with vibe coding</h2>
+<p>Vibe coding works for prototypes and throwaway demos.</p>
+<p>It falls apart the moment you need:</p>
+<ul>
+<li>Scalable architecture</li>
+<li>Proper error handling</li>
+<li>Concurrency safety</li>
+<li>Production infrastructure</li>
+<li>Anything that has to work next week</li>
+</ul>
+<p>Prompting an LLM to “build me an app” gives you something that looks right. Looking right and being right are different things entirely.</p>
+<p>Anyone who’s shipped production software knows this.</p>
+<h2 id="the-workflow-design--implement--audit--refine">The workflow: design → implement → audit → refine</h2>
+<p>The workflow looks simple, but each stage uses AI in a different way.</p>
+<p>I’ve been using this loop on a couple of recent projects, from refining my portfolio site to building a more complex backend system. In both cases the pattern held: design the architecture myself, use AI to stress-test assumptions, implement quickly with an AI coding assistant, then run an audit pass before refining the product.</p>
+<p>What’s been working for me is a simple four-stage loop where AI plays a different role at each step. The human stays in control of architecture and direction. The AI accelerates everything else.</p>
+<h2 id="a-real-example">A real example</h2>
+<p>Here’s a simplified example of the audit stage.</p>
+<p>Given a service that processes asynchronous jobs, I’ll run a prompt like:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>Audit this codebase for:</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>1. Async / concurrency bugs</span></span>
+<span class="line"><span>2. Resource leaks</span></span>
+<span class="line"><span>3. Lifecycle issues</span></span>
+<span class="line"><span>4. Cache misuse</span></span>
+<span class="line"><span>5. Error handling gaps</span></span></code></pre>
+<p>Typical things it will flag:</p>
+<ul>
+<li>Inconsistent async interfaces between services</li>
+<li>Temporary files not being cleaned up</li>
+<li>Missing retry logic for external APIs</li>
+<li>Dependency initialisation happening at request time</li>
+</ul>
+<p>None of these are glamorous problems, but they’re exactly the kind of issues that cause production incidents later.</p>
+<p>Catching them early is where the real value comes from.</p>
+<h3 id="1-architecture-stage-design-the-system">1. Architecture stage: design the system</h3>
+<p>The goal here is to stress-test your design before writing too much code.</p>
+<p>You still do the core engineering thinking: service boundaries, data models, pipelines, infrastructure. That part is human-driven.</p>
+<p>The goal isn’t to have AI design the system. It’s to <strong>pressure-test assumptions and identify problems early</strong>.</p>
+<p>Once you have a design, you feed it into an AI model and ask it to poke holes in it.</p>
+<p>Structured prompts work best here:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>Review this architecture for:</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>1. Scalability bottlenecks</span></span>
+<span class="line"><span>2. Failure modes</span></span>
+<span class="line"><span>3. Missing components</span></span>
+<span class="line"><span>4. Observability gaps</span></span>
+<span class="line"><span>5. Security risks</span></span></code></pre>
+<p>This is basically <strong>free architecture review</strong>.</p>
+<p>Large language models are surprisingly good at pattern recognition across systems. They’ll flag things like missing retry logic, async interface mismatches, lifecycle issues with external services, or temporary resource handling problems you might not catch until production.</p>
+<p>The key is being specific. Open-ended prompts like “review my code” get vague answers. Structured prompts get actionable feedback.</p>
+<h3 id="2-implementation-stage-accelerate-coding">2. Implementation stage: accelerate coding</h3>
+<p>The goal here is to turn clear architecture into working code as fast as possible.</p>
+<p>Once architecture is clear, an AI coding assistant becomes the accelerator. In practice this usually means tools like Copilot Pro or similar environments where you can switch between different models (Claude, GPT/Codex, etc.) depending on the task.</p>
+<p>Different models have different strengths. Some are better at reasoning about architecture, others are better at producing clean implementations. Switching between them during the loop often produces better results than relying on a single assistant.</p>
+<p>In my workflow I tend to use two modes:</p>
+<ul>
+<li><strong>Ask mode</strong> when I want to reason about an approach or sanity-check a design</li>
+<li><strong>Agent mode</strong> when I want the assistant to execute well-scoped implementation tasks</li>
+</ul>
+<p>Some environments also include a planning mode where the model proposes a structured change before modifying the codebase. I occasionally use this when a task spans multiple files or services. It’s useful as a quick sanity check before letting the agent execute larger changes.</p>
+<p>The critical difference from vibe coding is that you’re directing the implementation, not asking for random code.</p>
+<p>Instead of:</p>
+<blockquote>
+<p>“build me a web app”</p>
+</blockquote>
+<p>You prompt something like:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>Implement an async worker that:</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>- pulls jobs from a queue</span></span>
+<span class="line"><span>- processes them through a pipeline</span></span>
+<span class="line"><span>- retries failures safely</span></span>
+<span class="line"><span>- writes results to storage</span></span></code></pre>
+<p>That’s a specific, well-scoped task with clear boundaries.</p>
+<p>AI assistants excel at this. They can produce clean implementations when the architecture and constraints are already clear.</p>
+<p>In this stage, AI tools work best as <strong>pair programmers, not system designers</strong>.</p>
+<p>The division of labour is simple:</p>
+<ul>
+<li><strong>Human</strong> → architecture and system direction</li>
+<li><strong>AI</strong> → implementation speed and iteration</li>
+</ul>
+<p>The architecture still needs to come from you.</p>
+<h3 id="3-audit-stage-automated-code-review">3. Audit stage: automated code review</h3>
+<p>The goal here is to catch bugs and design issues before they reach production.</p>
+<p>This is where the workflow gets powerful.</p>
+<p>Once you have working code, you run a structured audit:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>Audit this codebase for:</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>1. Async bugs</span></span>
+<span class="line"><span>2. Resource leaks</span></span>
+<span class="line"><span>3. Race conditions</span></span>
+<span class="line"><span>4. Cache misuse</span></span>
+<span class="line"><span>5. Error handling gaps</span></span>
+<span class="line"><span>6. Security vulnerabilities</span></span></code></pre>
+<p>The model effectively becomes a codebase reviewer.</p>
+<p>I’ve had it catch real issues this way:</p>
+<ul>
+<li>Inconsistent async interfaces</li>
+<li>Missing cleanup of temporary resources</li>
+<li>Poorly handled dependency initialisation</li>
+<li>Hidden coupling between services</li>
+<li>Cache lifecycle bugs</li>
+</ul>
+<p>Issues that would normally surface as production incidents get caught during the review loop instead.</p>
+<p>They won’t catch everything, but they catch enough issues to justify the five minutes it takes to run the audit.</p>
+<p>It’s essentially an automated engineering sanity check.</p>
+<h3 id="4-refinement-stage-product-and-ux-iteration">4. Refinement stage: product and UX iteration</h3>
+<p>The goal here is to polish everything around the code: copy, structure, documentation.</p>
+<p>AI isn’t just useful for code. Because the system already exists at this point, the AI’s job is mostly to improve clarity and usability rather than invent new functionality.</p>
+<p>On my portfolio site I used the same iterative loop for:</p>
+<ul>
+<li>Copy refinement</li>
+<li>UI structure improvements</li>
+<li>Design hierarchy</li>
+<li>Project positioning</li>
+<li>Documentation</li>
+</ul>
+<p>The workflow was: design review → copy improvement → structure improvement.</p>
+<p>This stage tends to produce lots of small improvements that add up quickly. Iterating with AI on the non-code aspects of a project is underrated. It’s fast, and it gives you a second perspective that’s often surprisingly useful.</p>
+<h2 id="the-full-loop">The full loop</h2>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>┌─────────────────────────┐</span></span>
+<span class="line"><span>│       Architecture      │  ← design the system</span></span>
+<span class="line"><span>└────────────┬────────────┘</span></span>
+<span class="line"><span>             ↓</span></span>
+<span class="line"><span>┌─────────────────────────┐</span></span>
+<span class="line"><span>│      Implementation     │  ← directed tasks</span></span>
+<span class="line"><span>└────────────┬────────────┘</span></span>
+<span class="line"><span>             ↓</span></span>
+<span class="line"><span>┌─────────────────────────┐</span></span>
+<span class="line"><span>│          Audit          │  ← automated code review</span></span>
+<span class="line"><span>└────────────┬────────────┘</span></span>
+<span class="line"><span>             ↓</span></span>
+<span class="line"><span>┌─────────────────────────┐</span></span>
+<span class="line"><span>│       Refinement        │  ← UX, copy, documentation</span></span>
+<span class="line"><span>└────────────┬────────────┘</span></span>
+<span class="line"><span>             ↺ iterate</span></span></code></pre>
+<p>Each cycle tightens the system.</p>
+<p>Architecture mistakes get caught early. Implementation is faster because direction is clear. Audits catch bugs before they ship. Refinement polishes the product.</p>
+<p>Then you loop back and do it again.</p>
+<p>This is fundamentally different from:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>think → prompt → ship → pray</span></span></code></pre>
+<h2 id="what-changed-in-practice">What changed in practice</h2>
+<p>After using this workflow across a few recent projects, the biggest difference wasn’t that AI wrote the code.</p>
+<p>It was that problems surfaced earlier.</p>
+<p>Architecture issues that normally appear weeks later show up during design review. Implementation moves faster because the direction is clear. And the audit stage regularly catches small bugs and lifecycle issues before they ever reach production.</p>
+<p>The end result isn’t “AI-built software”.</p>
+<p>It’s simply tighter engineering loops.</p>
+<h2 id="what-ai-is-actually-good-at">What AI is actually good at</h2>
+<p>After running this workflow across multiple projects, here’s where AI consistently delivers:</p>
+<ul>
+<li><strong>Architecture critique</strong>: identifying bottlenecks, failure modes, and missing components</li>
+<li><strong>Code review</strong>: pattern matching across files, catching resource leaks and concurrency issues</li>
+<li><strong>Implementation speed</strong>: producing clean code when given specific, well-scoped tasks</li>
+<li><strong>Copy and UX refinement</strong>: iterating on language, structure, and presentation</li>
+</ul>
+<h2 id="what-its-not-good-at">What it’s not good at</h2>
+<ul>
+<li><strong>System design decisions</strong>: it can critique architecture, but it shouldn’t be making the architectural calls. That requires context it doesn’t have.</li>
+<li><strong>Domain modelling</strong>: it doesn’t understand your business, your users, or your constraints the way you do.</li>
+<li><strong>Trade-offs between technologies</strong>: it can list pros and cons, but it can’t weigh them against your operational reality.</li>
+<li><strong>Long-term thinking</strong>: it optimises for the current prompt, not for where your system needs to be in six months.</li>
+</ul>
+<p>AI has no operational accountability. It doesn’t run your systems in production.</p>
+<p>It can highlight issues, but it doesn’t truly understand the context of a system the way an engineer does.</p>
+<p>That’s exactly why the human stays in the driver’s seat.</p>
+<h2 id="the-real-productivity-boost">The real productivity boost</h2>
+<p>The biggest benefit of this workflow isn’t that AI writes the code.</p>
+<p>It’s that it shortens the feedback loop.</p>
+<p>Instead of discovering architectural issues weeks later, you surface them early. Instead of waiting for a code review, you run an automated audit. Instead of rewriting documentation from scratch, you iterate on it interactively.</p>
+<p>Used this way, AI becomes less of a novelty and more of a continuous engineering feedback system.</p>
+<h2 id="the-takeaway">The takeaway</h2>
+<p>The narrative around AI development often focuses on replacing engineers.</p>
+<p>In practice, the most effective use I’ve found is much simpler: treat AI as a collaborative reviewer that helps you iterate faster on systems you’re already building.</p>
+<p>The result isn’t “AI building the software.”</p>
+<p>It’s better engineering loops.</p>
+<p>AI isn’t most useful when it’s generating software. It’s most useful when it tightens the feedback loop around engineering decisions.</p>
+<p>And in complex systems, tighter feedback loops are where the real productivity gains come from.</p>
+<p>If you’re doing serious engineering work with AI tools, stop vibe coding.</p>
+<p>Design the system.
+Implement it.
+Audit it.
+Refine it.
+Repeat.</p>
+<p>That loop is where the actual value is.</p> </div> </article> <!-- Back link --> <div class="mt-12 border-t border-brand-border pt-6"> <a href="/blog" class="inline-flex items-center gap-2 text-sm font-semibold text-brand-accent transition hover:text-brand-accent-hover"> <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"> <path stroke-linecap="round" stroke-linejoin="round" d="M7 16l-4-4m0 0l4-4m-4 4h18"></path> </svg>
+Back to all posts
+</a> </div> </main> <footer class="border-t border-brand-border py-8"> <div class="mx-auto max-w-2xl px-6 text-center text-sm text-brand-muted"> <p>&copy; 2026 Jordan Hornblow. Built with <a href="https://astro.build" target="_blank" rel="noopener noreferrer" class="text-brand-accent underline decoration-brand-accent/40 hover:decoration-brand-accent">Astro</a>. <a href="https://github.com/jch254/jch254.com" target="_blank" rel="noopener noreferrer" class="text-brand-accent underline decoration-brand-accent/40 hover:decoration-brand-accent">GitHub</a>. <a href="/rss.xml" target="_blank" rel="noopener noreferrer" class="text-brand-accent underline decoration-brand-accent/40 hover:decoration-brand-accent">RSS</a>.</p> </div> </footer>  </body></html>

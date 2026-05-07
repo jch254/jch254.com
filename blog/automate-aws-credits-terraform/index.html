@@ -1,0 +1,251 @@
+<!DOCTYPE html><html lang="en" class="scroll-smooth"> <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="canonical" href="https://jch254.com/blog/automate-aws-credits-terraform/"><link rel="alternate" type="application/rss+xml" title="Jordan Hornblow" href="/rss.xml"><!-- Primary Meta Tags --><title>Automating the $100 of AWS Credits Available to New Accounts | Jordan Hornblow</title><meta name="title" content="Automating the $100 of AWS Credits Available to New Accounts | Jordan Hornblow"><meta name="description" content="New AWS accounts get $100 in credits for completing five Explore activities. Four of them can be fully automated with Terraform. Here's how."><meta name="generator" content="Astro v6.0.2"><!-- Open Graph / Facebook --><meta property="og:type" content="article"><meta property="article:published_time" content="2026-03-08T00:00:00.000Z"><meta property="og:url" content="https://jch254.com/blog/automate-aws-credits-terraform/"><meta property="og:title" content="Automating the $100 of AWS Credits Available to New Accounts | Jordan Hornblow"><meta property="og:description" content="New AWS accounts get $100 in credits for completing five Explore activities. Four of them can be fully automated with Terraform. Here's how."><meta property="og:image" content="https://jch254.com/_astro/automate-aws-credits-terraform-hero.DQX5FnU7.png"><!-- Twitter --><meta property="twitter:card" content="summary_large_image"><meta property="twitter:url" content="https://jch254.com/blog/automate-aws-credits-terraform/"><meta property="twitter:title" content="Automating the $100 of AWS Credits Available to New Accounts | Jordan Hornblow"><meta property="twitter:description" content="New AWS accounts get $100 in credits for completing five Explore activities. Four of them can be fully automated with Terraform. Here's how."><meta property="twitter:image" content="https://jch254.com/_astro/automate-aws-credits-terraform-hero.DQX5FnU7.png"><!-- JSON-LD Structured Data --><script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Automating the $100 of AWS Credits Available to New Accounts | Jordan Hornblow","description":"New AWS accounts get $100 in credits for completing five Explore activities. Four of them can be fully automated with Terraform. Here's how.","image":"https://jch254.com/_astro/automate-aws-credits-terraform-hero.DQX5FnU7.png","datePublished":"2026-03-08T00:00:00.000Z","url":"https://jch254.com/blog/automate-aws-credits-terraform/","author":{"@type":"Person","name":"Jordan Hornblow","url":"https://jch254.com"},"publisher":{"@type":"Person","name":"Jordan Hornblow","url":"https://jch254.com"}}</script><!-- Fonts (non-render-blocking) --><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"><link rel="stylesheet" href="/_astro/Footer.CJpWUrUY.css"></head> <body class="bg-brand-bg text-brand-text font-sans min-h-screen antialiased">  <header class="relative overflow-hidden pb-10 pt-16 md:pt-24" data-astro-cid-bbe6dxrz> <!-- Matrix-style background --> <div class="absolute inset-0 z-0" data-astro-cid-bbe6dxrz> <div class="matrix-bg absolute inset-0 opacity-50" data-astro-cid-bbe6dxrz></div> <div class="absolute inset-0 bg-gradient-to-b from-transparent via-brand-bg/60 to-brand-bg" data-astro-cid-bbe6dxrz></div> </div> <div class="relative z-10 mx-auto max-w-2xl px-6 text-center" data-astro-cid-bbe6dxrz>  <a href="/" class="mb-6 inline-block text-4xl font-extrabold tracking-tight md:text-5xl hover:text-brand-accent transition-colors" data-astro-cid-bbe6dxrz>
+Jordan Hornblow
+</a>  <!-- CTA + Social Icons --> <div class="flex flex-wrap items-center justify-center gap-4" data-astro-cid-bbe6dxrz> <a href="https://603.nz" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 rounded-full bg-brand-accent px-6 py-2.5 text-sm font-semibold text-brand-bg transition hover:bg-brand-accent-hover" data-astro-cid-bbe6dxrz> <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" data-astro-cid-bbe6dxrz> <path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" data-astro-cid-bbe6dxrz></path> </svg>
+PROJECTS
+</a> <a href="/resume" class="inline-flex items-center gap-2 rounded-full border border-brand-border px-6 py-2.5 text-sm font-semibold text-brand-text transition hover:border-brand-accent hover:text-white" data-astro-cid-bbe6dxrz> <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" data-astro-cid-bbe6dxrz> <path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" data-astro-cid-bbe6dxrz></path> </svg>
+RESUME
+</a> <a href="/blog" class="inline-flex items-center gap-2 rounded-full border border-brand-border px-6 py-2.5 text-sm font-semibold text-brand-text transition hover:border-brand-accent hover:text-white" data-astro-cid-bbe6dxrz> <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" data-astro-cid-bbe6dxrz> <path stroke-linecap="round" stroke-linejoin="round" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" data-astro-cid-bbe6dxrz></path> </svg>
+BLOG
+</a> <!-- Social icons: own row on mobile, inline on md+ --> <div class="flex basis-full justify-center gap-4 md:basis-auto" data-astro-cid-bbe6dxrz> <!-- GitHub --> <a href="https://github.com/jch254" target="_blank" rel="noopener noreferrer" class="text-brand-muted transition hover:text-white" aria-label="GitHub" data-astro-cid-bbe6dxrz> <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" data-astro-cid-bbe6dxrz><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" data-astro-cid-bbe6dxrz></path></svg> </a> <!-- LinkedIn --> <a href="https://linkedin.com/in/jch254" target="_blank" rel="noopener noreferrer" class="text-brand-muted transition hover:text-white" aria-label="LinkedIn" data-astro-cid-bbe6dxrz> <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" data-astro-cid-bbe6dxrz><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" data-astro-cid-bbe6dxrz></path></svg> </a> <!-- Email --> <a href="mailto:jordan@jch254.com" class="text-brand-muted transition hover:text-white" aria-label="Email" data-astro-cid-bbe6dxrz> <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" data-astro-cid-bbe6dxrz><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" data-astro-cid-bbe6dxrz></path></svg> </a> </div> </div> </div> </header> <nav class="mx-auto max-w-2xl px-6 py-3 text-sm text-brand-muted" aria-label="Breadcrumb"> <ol class="flex items-center gap-1.5"> <li class="flex items-center gap-1.5">  <a href="/" class="transition hover:text-white">Jordan Hornblow</a> </li><li class="flex items-center gap-1.5"> <span class="text-brand-border">&rsaquo;</span> <a href="/blog" class="transition hover:text-white">Blog</a> </li><li class="flex items-center gap-1.5"> <span class="text-brand-border">&rsaquo;</span> <span class="text-brand-text">Post</span> </li> </ol> </nav> <main class="mx-auto max-w-2xl px-6 pb-16"> <article> <header class="mb-8"> <h1 class="mb-3 text-2xl font-extrabold leading-tight tracking-tight md:text-3xl"> Automating the $100 of AWS Credits Available to New Accounts </h1> <div class="flex flex-wrap items-center gap-3 text-sm text-brand-muted"> <time datetime="2026-03-08T00:00:00.000Z"> 8 March 2026 </time>  <span class="text-brand-border">·</span> <div class="flex flex-wrap gap-1.5"> <span class="rounded-full bg-brand-accent/10 px-2.5 py-0.5 text-xs font-medium text-brand-accent"> aws </span><span class="rounded-full bg-brand-accent/10 px-2.5 py-0.5 text-xs font-medium text-brand-accent"> terraform </span><span class="rounded-full bg-brand-accent/10 px-2.5 py-0.5 text-xs font-medium text-brand-accent"> infrastructure </span> </div>  </div> </header> <figure class="mb-8"> <div class="overflow-hidden rounded-xl"> <img src="/_astro/automate-aws-credits-terraform-hero.DQX5FnU7.png" alt="Automating the $100 of AWS Credits Available to New Accounts" class="mx-auto max-h-72 md:max-h-96 w-auto rounded-xl"> </div>  </figure> <div class="prose prose-invert max-w-none prose-headings:font-bold prose-headings:tracking-tight prose-a:text-brand-accent prose-a:underline prose-a:decoration-brand-accent/40 hover:prose-a:decoration-brand-accent prose-strong:text-white prose-code:text-brand-accent prose-code:bg-brand-card prose-code:rounded prose-code:px-1.5 prose-code:py-0.5 prose-code:text-sm prose-pre:bg-brand-card prose-pre:border prose-pre:border-brand-border [&_pre_code]:bg-transparent [&_pre_code]:p-0 [&_pre_code]:rounded-none prose-blockquote:border-brand-accent prose-li:marker:text-brand-accent"> <p>When you create a new AWS account, you’re offered <strong>$100 in credits</strong> for completing five “Explore AWS” activities, things like launching an EC2 instance, creating a Lambda function, and setting up a budget. Each one is worth $20.</p>
+<p>I looked at the list and thought: can I just automate all of this with Terraform? Turns out, four out of five can be fully automated. The fifth (Bedrock) specifically requires the AWS Console UI. Not ideal, but five minutes of clicking isn’t going to kill anyone.</p>
+<h2 id="what-terraform-handles">What Terraform handles</h2>
+<p>Four of the five activities are straightforward Terraform resources. No tricks, no workarounds:</p>
+<ol>
+<li><strong>Launch an instance using EC2</strong>: a single <code>t3.micro</code> is enough to trigger the credit. <code>aws_instance</code> resource, done.</li>
+<li><strong>Set up a cost budget using AWS Budgets</strong>: entirely declarative via <code>aws_budgets_budget</code>. Set a $10 monthly budget and move on.</li>
+<li><strong>Create a web app using AWS Lambda</strong>: a minimal Python function via <code>aws_lambda_function</code>. Doesn’t need to do anything useful. Just needs to exist.</li>
+<li><strong>Create an Aurora or RDS database</strong>: <code>aws_db_instance</code> with MySQL. This is the slowest part (~5 minutes to provision), but <code>skip_final_snapshot = true</code> and <code>deletion_protection = false</code> mean <code>terraform destroy</code> cleans it up fast.</li>
+</ol>
+<p>The Terraform config runs entirely in <code>us-east-1</code> using the default VPC. No need to worry about service availability in other regions. RDS password is auto-generated via <code>random_password</code> and never touches disk or git.</p>
+<h2 id="the-one-you-have-to-do-manually-bedrock">The one you have to do manually: Bedrock</h2>
+<p>The Bedrock credit activity is titled “Use a foundation model in the <strong>Amazon Bedrock console</strong>”. Emphasis on <em>console</em>. It specifically requires interaction via the Bedrock playground UI, not an API call. No amount of Terraform or CLI invocations will satisfy it.</p>
+<p>Here’s what to do:</p>
+<ol>
+<li>Go to <strong>AWS Console → Amazon Bedrock → Playgrounds → Chat</strong> (in <code>us-east-1</code>)</li>
+<li>Click <strong>Start activity</strong> on the Bedrock credit</li>
+<li>Select a model from <strong>Anthropic, DeepSeek, OpenAI, or Qwen3</strong> (Nova Micro does not qualify)</li>
+<li>Submit any prompt and view the response</li>
+<li>Step through the tutorial prompts to complete</li>
+</ol>
+<p><img alt="Bedrock playground showing a UI issue on step 2 of the tutorial. The Next button appears stuck, but this doesn&amp;#x27;t block the credit award" loading="lazy" decoding="async"  width="2678" height="1315" src="/_astro/automate-aws-credits-bedrock.BLHPBkaJ_PKGwA.webp" ></p>
+<p>The tutorial UI has a bug where it won’t let you advance past step 2 of Task 2. Doesn’t matter. The credit is awarded based on the underlying API call, not whether you clicked through the full tutorial. Submit a prompt, see a response, credit triggers.</p>
+<p>Takes about two minutes. Not worth losing sleep over.</p>
+<h2 id="running-it">Running it</h2>
+<p>Grab the full Terraform config from <a href="https://gist.github.com/jch254/8cc251ffd7c7c4ed6fafa505ce808eb3" rel="noopener noreferrer" target="_blank">this gist</a>, then:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#B392F0">terraform</span><span style="color:#9ECBFF"> init</span></span>
+<span class="line"><span style="color:#B392F0">terraform</span><span style="color:#9ECBFF"> apply</span></span>
+<span class="line"><span style="color:#6A737D"># complete the Bedrock console activity manually</span></span>
+<span class="line"><span style="color:#6A737D"># wait for credits to register, then:</span></span>
+<span class="line"><span style="color:#B392F0">terraform</span><span style="color:#9ECBFF"> destroy</span></span></code></pre>
+<p>Provision, claim, destroy. $80 in credits for a single <code>terraform apply</code>, plus $20 more for two minutes in the Bedrock playground. Not bad.</p>
+<p><img alt="Explore AWS credits dashboard, 4 of 5 activities completed, $80 of $100 earned. EC2 is still &quot;In progress&quot; and should clear once the instance has been running for a few minutes." loading="lazy" decoding="async"  width="1316" height="934" src="/_astro/automate-aws-credits-earned.BSo-aI7z_QgGmk.webp" ></p>
+<p>The EC2 credit shows as “In progress” immediately after apply. It takes a few minutes to register once the instance is running. Leave it a bit before running <code>terraform destroy</code>.</p>
+<h2 id="full-terraform-code">Full Terraform code</h2>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="hcl"><code><span class="line"><span style="color:#6A737D"># ============================================================</span></span>
+<span class="line"><span style="color:#6A737D"># AWS Credits - Standalone Terraform</span></span>
+<span class="line"><span style="color:#6A737D"># Run locally to trigger the 5 Explore AWS credit activities.</span></span>
+<span class="line"><span style="color:#6A737D">#</span></span>
+<span class="line"><span style="color:#6A737D"># Usage:</span></span>
+<span class="line"><span style="color:#6A737D">#   cd scripts/aws-credits</span></span>
+<span class="line"><span style="color:#6A737D">#   terraform init</span></span>
+<span class="line"><span style="color:#6A737D">#   terraform apply</span></span>
+<span class="line"><span style="color:#6A737D">#   terraform destroy   ← run once credits are awarded</span></span>
+<span class="line"><span style="color:#6A737D">#</span></span>
+<span class="line"><span style="color:#6A737D"># DO NOT COMMIT THIS FILE (add to .gitignore if needed)</span></span>
+<span class="line"><span style="color:#6A737D"># ============================================================</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#B392F0">terraform</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#E1E4E8">  required_version</span><span style="color:#F97583"> =</span><span style="color:#9ECBFF"> ">= 1.0"</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#B392F0">  required_providers</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#E1E4E8">    aws</span><span style="color:#F97583"> =</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#E1E4E8">      source  </span><span style="color:#F97583">=</span><span style="color:#9ECBFF"> "hashicorp/aws"</span></span>
+<span class="line"><span style="color:#E1E4E8">      version </span><span style="color:#F97583">=</span><span style="color:#9ECBFF"> "~> 5.0"</span></span>
+<span class="line"><span style="color:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#E1E4E8">    archive</span><span style="color:#F97583"> =</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#E1E4E8">      source  </span><span style="color:#F97583">=</span><span style="color:#9ECBFF"> "hashicorp/archive"</span></span>
+<span class="line"><span style="color:#E1E4E8">      version </span><span style="color:#F97583">=</span><span style="color:#9ECBFF"> "~> 2.0"</span></span>
+<span class="line"><span style="color:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#E1E4E8">    random</span><span style="color:#F97583"> =</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#E1E4E8">      source  </span><span style="color:#F97583">=</span><span style="color:#9ECBFF"> "hashicorp/random"</span></span>
+<span class="line"><span style="color:#E1E4E8">      version </span><span style="color:#F97583">=</span><span style="color:#9ECBFF"> "~> 3.0"</span></span>
+<span class="line"><span style="color:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#E1E4E8">  }</span></span>
+<span class="line"><span style="color:#6A737D">  # Local state only - not stored remotely</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#B392F0">provider</span><span style="color:#79B8FF"> "aws"</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#E1E4E8">  region</span><span style="color:#F97583"> =</span><span style="color:#9ECBFF"> "us-east-1"</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#B392F0">locals</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#E1E4E8">  name</span><span style="color:#F97583"> =</span><span style="color:#9ECBFF"> "aws-credits"</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D"># ──────────────────────────────────────────────────────────────</span></span>
+<span class="line"><span style="color:#6A737D"># Shared: default VPC and subnets</span></span>
+<span class="line"><span style="color:#6A737D"># ──────────────────────────────────────────────────────────────</span></span>
+<span class="line"><span style="color:#B392F0">data</span><span style="color:#79B8FF"> "aws_vpc"</span><span style="color:#79B8FF"> "default"</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#E1E4E8">  default</span><span style="color:#F97583"> =</span><span style="color:#79B8FF"> true</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#B392F0">data</span><span style="color:#79B8FF"> "aws_subnets"</span><span style="color:#79B8FF"> "default"</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#B392F0">  filter</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#E1E4E8">    name</span><span style="color:#F97583">   =</span><span style="color:#9ECBFF"> "vpc-id"</span></span>
+<span class="line"><span style="color:#E1E4E8">    values</span><span style="color:#F97583"> =</span><span style="color:#E1E4E8"> [data</span><span style="color:#F97583">.</span><span style="color:#E1E4E8">aws_vpc</span><span style="color:#F97583">.</span><span style="color:#E1E4E8">default</span><span style="color:#F97583">.</span><span style="color:#E1E4E8">id]</span></span>
+<span class="line"><span style="color:#E1E4E8">  }</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D"># ──────────────────────────────────────────────────────────────</span></span>
+<span class="line"><span style="color:#6A737D"># 1. EC2 instance  →  $20 credit: "Launch an instance using EC2"</span></span>
+<span class="line"><span style="color:#6A737D"># ──────────────────────────────────────────────────────────────</span></span>
+<span class="line"><span style="color:#B392F0">data</span><span style="color:#79B8FF"> "aws_ami"</span><span style="color:#79B8FF"> "amazon_linux"</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#E1E4E8">  most_recent</span><span style="color:#F97583"> =</span><span style="color:#79B8FF"> true</span></span>
+<span class="line"><span style="color:#E1E4E8">  owners</span><span style="color:#F97583">      =</span><span style="color:#E1E4E8"> [</span><span style="color:#9ECBFF">"amazon"</span><span style="color:#E1E4E8">]</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#B392F0">  filter</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#E1E4E8">    name</span><span style="color:#F97583">   =</span><span style="color:#9ECBFF"> "name"</span></span>
+<span class="line"><span style="color:#E1E4E8">    values</span><span style="color:#F97583"> =</span><span style="color:#E1E4E8"> [</span><span style="color:#9ECBFF">"al2023-ami-*-x86_64"</span><span style="color:#E1E4E8">]</span></span>
+<span class="line"><span style="color:#E1E4E8">  }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#B392F0">  filter</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#E1E4E8">    name</span><span style="color:#F97583">   =</span><span style="color:#9ECBFF"> "state"</span></span>
+<span class="line"><span style="color:#E1E4E8">    values</span><span style="color:#F97583"> =</span><span style="color:#E1E4E8"> [</span><span style="color:#9ECBFF">"available"</span><span style="color:#E1E4E8">]</span></span>
+<span class="line"><span style="color:#E1E4E8">  }</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#B392F0">resource</span><span style="color:#79B8FF"> "aws_security_group"</span><span style="color:#79B8FF"> "ec2"</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#E1E4E8">  name</span><span style="color:#F97583">        =</span><span style="color:#9ECBFF"> "</span><span style="color:#F97583">${</span><span style="color:#E1E4E8">local</span><span style="color:#F97583">.</span><span style="color:#E1E4E8">name</span><span style="color:#F97583">}</span><span style="color:#9ECBFF">-ec2-sg"</span></span>
+<span class="line"><span style="color:#E1E4E8">  description</span><span style="color:#F97583"> =</span><span style="color:#9ECBFF"> "Temporary SG for credits EC2 instance"</span></span>
+<span class="line"><span style="color:#E1E4E8">  vpc_id</span><span style="color:#F97583">      =</span><span style="color:#E1E4E8"> data</span><span style="color:#F97583">.</span><span style="color:#E1E4E8">aws_vpc</span><span style="color:#F97583">.</span><span style="color:#E1E4E8">default</span><span style="color:#F97583">.</span><span style="color:#E1E4E8">id</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#B392F0">  egress</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#E1E4E8">    from_port</span><span style="color:#F97583">   =</span><span style="color:#79B8FF"> 0</span></span>
+<span class="line"><span style="color:#E1E4E8">    to_port</span><span style="color:#F97583">     =</span><span style="color:#79B8FF"> 0</span></span>
+<span class="line"><span style="color:#E1E4E8">    protocol</span><span style="color:#F97583">    =</span><span style="color:#9ECBFF"> "-1"</span></span>
+<span class="line"><span style="color:#E1E4E8">    cidr_blocks</span><span style="color:#F97583"> =</span><span style="color:#E1E4E8"> [</span><span style="color:#9ECBFF">"0.0.0.0/0"</span><span style="color:#E1E4E8">]</span></span>
+<span class="line"><span style="color:#E1E4E8">  }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">  tags</span><span style="color:#F97583"> =</span><span style="color:#E1E4E8"> { Name </span><span style="color:#F97583">=</span><span style="color:#9ECBFF"> "</span><span style="color:#F97583">${</span><span style="color:#E1E4E8">local</span><span style="color:#F97583">.</span><span style="color:#E1E4E8">name</span><span style="color:#F97583">}</span><span style="color:#9ECBFF">-ec2"</span><span style="color:#E1E4E8"> }</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#B392F0">resource</span><span style="color:#79B8FF"> "aws_instance"</span><span style="color:#79B8FF"> "credits"</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#E1E4E8">  ami</span><span style="color:#F97583">                    =</span><span style="color:#E1E4E8"> data</span><span style="color:#F97583">.</span><span style="color:#E1E4E8">aws_ami</span><span style="color:#F97583">.</span><span style="color:#E1E4E8">amazon_linux</span><span style="color:#F97583">.</span><span style="color:#E1E4E8">id</span></span>
+<span class="line"><span style="color:#E1E4E8">  instance_type</span><span style="color:#F97583">          =</span><span style="color:#9ECBFF"> "t3.micro"</span></span>
+<span class="line"><span style="color:#E1E4E8">  subnet_id</span><span style="color:#F97583">              =</span><span style="color:#E1E4E8"> data</span><span style="color:#F97583">.</span><span style="color:#E1E4E8">aws_subnets</span><span style="color:#F97583">.</span><span style="color:#E1E4E8">default</span><span style="color:#F97583">.</span><span style="color:#E1E4E8">ids[</span><span style="color:#79B8FF">0</span><span style="color:#E1E4E8">]</span></span>
+<span class="line"><span style="color:#E1E4E8">  vpc_security_group_ids</span><span style="color:#F97583"> =</span><span style="color:#E1E4E8"> [aws_security_group</span><span style="color:#F97583">.</span><span style="color:#E1E4E8">ec2</span><span style="color:#F97583">.</span><span style="color:#E1E4E8">id]</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">  tags</span><span style="color:#F97583"> =</span><span style="color:#E1E4E8"> { Name </span><span style="color:#F97583">=</span><span style="color:#9ECBFF"> "</span><span style="color:#F97583">${</span><span style="color:#E1E4E8">local</span><span style="color:#F97583">.</span><span style="color:#E1E4E8">name</span><span style="color:#F97583">}</span><span style="color:#9ECBFF">-ec2"</span><span style="color:#E1E4E8"> }</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D"># ──────────────────────────────────────────────────────────────</span></span>
+<span class="line"><span style="color:#6A737D"># 2. AWS Budgets  →  $20 credit: "Set up a cost budget using AWS Budgets"</span></span>
+<span class="line"><span style="color:#6A737D"># ──────────────────────────────────────────────────────────────</span></span>
+<span class="line"><span style="color:#B392F0">resource</span><span style="color:#79B8FF"> "aws_budgets_budget"</span><span style="color:#79B8FF"> "credits"</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#E1E4E8">  name</span><span style="color:#F97583">         =</span><span style="color:#9ECBFF"> "</span><span style="color:#F97583">${</span><span style="color:#E1E4E8">local</span><span style="color:#F97583">.</span><span style="color:#E1E4E8">name</span><span style="color:#F97583">}</span><span style="color:#9ECBFF">-budget"</span></span>
+<span class="line"><span style="color:#E1E4E8">  budget_type</span><span style="color:#F97583">  =</span><span style="color:#9ECBFF"> "COST"</span></span>
+<span class="line"><span style="color:#E1E4E8">  limit_amount</span><span style="color:#F97583"> =</span><span style="color:#9ECBFF"> "10"</span></span>
+<span class="line"><span style="color:#E1E4E8">  limit_unit</span><span style="color:#F97583">   =</span><span style="color:#9ECBFF"> "USD"</span></span>
+<span class="line"><span style="color:#E1E4E8">  time_unit</span><span style="color:#F97583">    =</span><span style="color:#9ECBFF"> "MONTHLY"</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D"># ──────────────────────────────────────────────────────────────</span></span>
+<span class="line"><span style="color:#6A737D"># 3. Lambda  →  $20 credit: "Create a web app using AWS Lambda"</span></span>
+<span class="line"><span style="color:#6A737D"># ──────────────────────────────────────────────────────────────</span></span>
+<span class="line"><span style="color:#B392F0">data</span><span style="color:#79B8FF"> "archive_file"</span><span style="color:#79B8FF"> "lambda"</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#E1E4E8">  type</span><span style="color:#F97583">        =</span><span style="color:#9ECBFF"> "zip"</span></span>
+<span class="line"><span style="color:#E1E4E8">  output_path</span><span style="color:#F97583"> =</span><span style="color:#9ECBFF"> "</span><span style="color:#F97583">${</span><span style="color:#E1E4E8">path</span><span style="color:#F97583">.</span><span style="color:#E1E4E8">module</span><span style="color:#F97583">}</span><span style="color:#9ECBFF">/lambda.zip"</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#B392F0">  source</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#E1E4E8">    content</span><span style="color:#F97583">  =</span><span style="color:#F97583"> &#x3C;&#x3C;-PY</span></span>
+<span class="line"><span style="color:#9ECBFF">      def handler(event, context):</span></span>
+<span class="line"><span style="color:#9ECBFF">          return {"statusCode": 200, "body": "OK"}</span></span>
+<span class="line"><span style="color:#F97583">    PY</span></span>
+<span class="line"><span style="color:#E1E4E8">    filename</span><span style="color:#F97583"> =</span><span style="color:#9ECBFF"> "index.py"</span></span>
+<span class="line"><span style="color:#E1E4E8">  }</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#B392F0">resource</span><span style="color:#79B8FF"> "aws_iam_role"</span><span style="color:#79B8FF"> "lambda"</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#E1E4E8">  name</span><span style="color:#F97583"> =</span><span style="color:#9ECBFF"> "</span><span style="color:#F97583">${</span><span style="color:#E1E4E8">local</span><span style="color:#F97583">.</span><span style="color:#E1E4E8">name</span><span style="color:#F97583">}</span><span style="color:#9ECBFF">-lambda-role"</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">  assume_role_policy</span><span style="color:#F97583"> =</span><span style="color:#79B8FF"> jsonencode</span><span style="color:#E1E4E8">({</span></span>
+<span class="line"><span style="color:#E1E4E8">    Version </span><span style="color:#F97583">=</span><span style="color:#9ECBFF"> "2012-10-17"</span></span>
+<span class="line"><span style="color:#E1E4E8">    Statement </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> [{</span></span>
+<span class="line"><span style="color:#E1E4E8">      Effect    </span><span style="color:#F97583">=</span><span style="color:#9ECBFF"> "Allow"</span></span>
+<span class="line"><span style="color:#E1E4E8">      Principal </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> { Service </span><span style="color:#F97583">=</span><span style="color:#9ECBFF"> "lambda.amazonaws.com"</span><span style="color:#E1E4E8"> }</span></span>
+<span class="line"><span style="color:#E1E4E8">      Action    </span><span style="color:#F97583">=</span><span style="color:#9ECBFF"> "sts:AssumeRole"</span></span>
+<span class="line"><span style="color:#E1E4E8">    }]</span></span>
+<span class="line"><span style="color:#E1E4E8">  })</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#B392F0">resource</span><span style="color:#79B8FF"> "aws_iam_role_policy_attachment"</span><span style="color:#79B8FF"> "lambda_basic"</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#E1E4E8">  role</span><span style="color:#F97583">       =</span><span style="color:#E1E4E8"> aws_iam_role</span><span style="color:#F97583">.</span><span style="color:#E1E4E8">lambda</span><span style="color:#F97583">.</span><span style="color:#E1E4E8">name</span></span>
+<span class="line"><span style="color:#E1E4E8">  policy_arn</span><span style="color:#F97583"> =</span><span style="color:#9ECBFF"> "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#B392F0">resource</span><span style="color:#79B8FF"> "aws_lambda_function"</span><span style="color:#79B8FF"> "credits"</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#E1E4E8">  function_name</span><span style="color:#F97583">    =</span><span style="color:#9ECBFF"> "</span><span style="color:#F97583">${</span><span style="color:#E1E4E8">local</span><span style="color:#F97583">.</span><span style="color:#E1E4E8">name</span><span style="color:#F97583">}</span><span style="color:#9ECBFF">-web-app"</span></span>
+<span class="line"><span style="color:#E1E4E8">  role</span><span style="color:#F97583">             =</span><span style="color:#E1E4E8"> aws_iam_role</span><span style="color:#F97583">.</span><span style="color:#E1E4E8">lambda</span><span style="color:#F97583">.</span><span style="color:#E1E4E8">arn</span></span>
+<span class="line"><span style="color:#E1E4E8">  handler</span><span style="color:#F97583">          =</span><span style="color:#9ECBFF"> "index.handler"</span></span>
+<span class="line"><span style="color:#E1E4E8">  runtime</span><span style="color:#F97583">          =</span><span style="color:#9ECBFF"> "python3.13"</span></span>
+<span class="line"><span style="color:#E1E4E8">  filename</span><span style="color:#F97583">         =</span><span style="color:#E1E4E8"> data</span><span style="color:#F97583">.</span><span style="color:#E1E4E8">archive_file</span><span style="color:#F97583">.</span><span style="color:#E1E4E8">lambda</span><span style="color:#F97583">.</span><span style="color:#E1E4E8">output_path</span></span>
+<span class="line"><span style="color:#E1E4E8">  source_code_hash</span><span style="color:#F97583"> =</span><span style="color:#E1E4E8"> data</span><span style="color:#F97583">.</span><span style="color:#E1E4E8">archive_file</span><span style="color:#F97583">.</span><span style="color:#E1E4E8">lambda</span><span style="color:#F97583">.</span><span style="color:#E1E4E8">output_base64sha256</span></span>
+<span class="line"><span style="color:#E1E4E8">  timeout</span><span style="color:#F97583">          =</span><span style="color:#79B8FF"> 30</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">  tags</span><span style="color:#F97583"> =</span><span style="color:#E1E4E8"> { Name </span><span style="color:#F97583">=</span><span style="color:#9ECBFF"> "</span><span style="color:#F97583">${</span><span style="color:#E1E4E8">local</span><span style="color:#F97583">.</span><span style="color:#E1E4E8">name</span><span style="color:#F97583">}</span><span style="color:#9ECBFF">-lambda"</span><span style="color:#E1E4E8"> }</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D"># ──────────────────────────────────────────────────────────────</span></span>
+<span class="line"><span style="color:#6A737D"># 4. RDS  →  $20 credit: "Create an Aurora or RDS database"</span></span>
+<span class="line"><span style="color:#6A737D"># ──────────────────────────────────────────────────────────────</span></span>
+<span class="line"><span style="color:#B392F0">resource</span><span style="color:#79B8FF"> "random_password"</span><span style="color:#79B8FF"> "rds"</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#E1E4E8">  length</span><span style="color:#F97583">           =</span><span style="color:#79B8FF"> 16</span></span>
+<span class="line"><span style="color:#E1E4E8">  special</span><span style="color:#F97583">          =</span><span style="color:#79B8FF"> true</span></span>
+<span class="line"><span style="color:#E1E4E8">  override_special</span><span style="color:#F97583"> =</span><span style="color:#9ECBFF"> "!#$%&#x26;*()-_=+[]{}&#x3C;>:?"</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#B392F0">resource</span><span style="color:#79B8FF"> "aws_db_subnet_group"</span><span style="color:#79B8FF"> "credits"</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#E1E4E8">  name</span><span style="color:#F97583">       =</span><span style="color:#9ECBFF"> "</span><span style="color:#F97583">${</span><span style="color:#E1E4E8">local</span><span style="color:#F97583">.</span><span style="color:#E1E4E8">name</span><span style="color:#F97583">}</span><span style="color:#9ECBFF">-db-subnet-group"</span></span>
+<span class="line"><span style="color:#E1E4E8">  subnet_ids</span><span style="color:#F97583"> =</span><span style="color:#E1E4E8"> data</span><span style="color:#F97583">.</span><span style="color:#E1E4E8">aws_subnets</span><span style="color:#F97583">.</span><span style="color:#E1E4E8">default</span><span style="color:#F97583">.</span><span style="color:#E1E4E8">ids</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">  tags</span><span style="color:#F97583"> =</span><span style="color:#E1E4E8"> { Name </span><span style="color:#F97583">=</span><span style="color:#9ECBFF"> "</span><span style="color:#F97583">${</span><span style="color:#E1E4E8">local</span><span style="color:#F97583">.</span><span style="color:#E1E4E8">name</span><span style="color:#F97583">}</span><span style="color:#9ECBFF">-db"</span><span style="color:#E1E4E8"> }</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#B392F0">resource</span><span style="color:#79B8FF"> "aws_security_group"</span><span style="color:#79B8FF"> "rds"</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#E1E4E8">  name</span><span style="color:#F97583">        =</span><span style="color:#9ECBFF"> "</span><span style="color:#F97583">${</span><span style="color:#E1E4E8">local</span><span style="color:#F97583">.</span><span style="color:#E1E4E8">name</span><span style="color:#F97583">}</span><span style="color:#9ECBFF">-rds-sg"</span></span>
+<span class="line"><span style="color:#E1E4E8">  description</span><span style="color:#F97583"> =</span><span style="color:#9ECBFF"> "Temporary SG for credits RDS instance"</span></span>
+<span class="line"><span style="color:#E1E4E8">  vpc_id</span><span style="color:#F97583">      =</span><span style="color:#E1E4E8"> data</span><span style="color:#F97583">.</span><span style="color:#E1E4E8">aws_vpc</span><span style="color:#F97583">.</span><span style="color:#E1E4E8">default</span><span style="color:#F97583">.</span><span style="color:#E1E4E8">id</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">  tags</span><span style="color:#F97583"> =</span><span style="color:#E1E4E8"> { Name </span><span style="color:#F97583">=</span><span style="color:#9ECBFF"> "</span><span style="color:#F97583">${</span><span style="color:#E1E4E8">local</span><span style="color:#F97583">.</span><span style="color:#E1E4E8">name</span><span style="color:#F97583">}</span><span style="color:#9ECBFF">-rds"</span><span style="color:#E1E4E8"> }</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#B392F0">resource</span><span style="color:#79B8FF"> "aws_db_instance"</span><span style="color:#79B8FF"> "credits"</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#E1E4E8">  identifier</span><span style="color:#F97583">             =</span><span style="color:#9ECBFF"> "</span><span style="color:#F97583">${</span><span style="color:#E1E4E8">local</span><span style="color:#F97583">.</span><span style="color:#E1E4E8">name</span><span style="color:#F97583">}</span><span style="color:#9ECBFF">-db"</span></span>
+<span class="line"><span style="color:#E1E4E8">  engine</span><span style="color:#F97583">                 =</span><span style="color:#9ECBFF"> "mysql"</span></span>
+<span class="line"><span style="color:#E1E4E8">  engine_version</span><span style="color:#F97583">         =</span><span style="color:#9ECBFF"> "8.0"</span></span>
+<span class="line"><span style="color:#E1E4E8">  instance_class</span><span style="color:#F97583">         =</span><span style="color:#9ECBFF"> "db.t3.micro"</span></span>
+<span class="line"><span style="color:#E1E4E8">  allocated_storage</span><span style="color:#F97583">      =</span><span style="color:#79B8FF"> 20</span></span>
+<span class="line"><span style="color:#E1E4E8">  db_name</span><span style="color:#F97583">                =</span><span style="color:#9ECBFF"> "credits"</span></span>
+<span class="line"><span style="color:#E1E4E8">  username</span><span style="color:#F97583">               =</span><span style="color:#9ECBFF"> "admin"</span></span>
+<span class="line"><span style="color:#E1E4E8">  password</span><span style="color:#F97583">               =</span><span style="color:#E1E4E8"> random_password</span><span style="color:#F97583">.</span><span style="color:#E1E4E8">rds</span><span style="color:#F97583">.</span><span style="color:#E1E4E8">result</span></span>
+<span class="line"><span style="color:#E1E4E8">  db_subnet_group_name</span><span style="color:#F97583">   =</span><span style="color:#E1E4E8"> aws_db_subnet_group</span><span style="color:#F97583">.</span><span style="color:#E1E4E8">credits</span><span style="color:#F97583">.</span><span style="color:#E1E4E8">name</span></span>
+<span class="line"><span style="color:#E1E4E8">  vpc_security_group_ids</span><span style="color:#F97583"> =</span><span style="color:#E1E4E8"> [aws_security_group</span><span style="color:#F97583">.</span><span style="color:#E1E4E8">rds</span><span style="color:#F97583">.</span><span style="color:#E1E4E8">id]</span></span>
+<span class="line"><span style="color:#E1E4E8">  skip_final_snapshot</span><span style="color:#F97583">    =</span><span style="color:#79B8FF"> true</span></span>
+<span class="line"><span style="color:#E1E4E8">  publicly_accessible</span><span style="color:#F97583">    =</span><span style="color:#79B8FF"> false</span></span>
+<span class="line"><span style="color:#E1E4E8">  deletion_protection</span><span style="color:#F97583">    =</span><span style="color:#79B8FF"> false</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">  tags</span><span style="color:#F97583"> =</span><span style="color:#E1E4E8"> { Name </span><span style="color:#F97583">=</span><span style="color:#9ECBFF"> "</span><span style="color:#F97583">${</span><span style="color:#E1E4E8">local</span><span style="color:#F97583">.</span><span style="color:#E1E4E8">name</span><span style="color:#F97583">}</span><span style="color:#9ECBFF">-db"</span><span style="color:#E1E4E8"> }</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D"># ──────────────────────────────────────────────────────────────</span></span>
+<span class="line"><span style="color:#6A737D"># Outputs</span></span>
+<span class="line"><span style="color:#6A737D"># ──────────────────────────────────────────────────────────────</span></span>
+<span class="line"><span style="color:#B392F0">output</span><span style="color:#79B8FF"> "ec2_instance_id"</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#E1E4E8">  value</span><span style="color:#F97583"> =</span><span style="color:#E1E4E8"> aws_instance</span><span style="color:#F97583">.</span><span style="color:#E1E4E8">credits</span><span style="color:#F97583">.</span><span style="color:#E1E4E8">id</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#B392F0">output</span><span style="color:#79B8FF"> "rds_endpoint"</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#E1E4E8">  value</span><span style="color:#F97583"> =</span><span style="color:#E1E4E8"> aws_db_instance</span><span style="color:#F97583">.</span><span style="color:#E1E4E8">credits</span><span style="color:#F97583">.</span><span style="color:#E1E4E8">endpoint</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span></code></pre> </div> </article> <!-- Back link --> <div class="mt-12 border-t border-brand-border pt-6"> <a href="/blog" class="inline-flex items-center gap-2 text-sm font-semibold text-brand-accent transition hover:text-brand-accent-hover"> <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"> <path stroke-linecap="round" stroke-linejoin="round" d="M7 16l-4-4m0 0l4-4m-4 4h18"></path> </svg>
+Back to all posts
+</a> </div> </main> <footer class="border-t border-brand-border py-8"> <div class="mx-auto max-w-2xl px-6 text-center text-sm text-brand-muted"> <p>&copy; 2026 Jordan Hornblow. Built with <a href="https://astro.build" target="_blank" rel="noopener noreferrer" class="text-brand-accent underline decoration-brand-accent/40 hover:decoration-brand-accent">Astro</a>. <a href="https://github.com/jch254/jch254.com" target="_blank" rel="noopener noreferrer" class="text-brand-accent underline decoration-brand-accent/40 hover:decoration-brand-accent">GitHub</a>. <a href="/rss.xml" target="_blank" rel="noopener noreferrer" class="text-brand-accent underline decoration-brand-accent/40 hover:decoration-brand-accent">RSS</a>.</p> </div> </footer>  </body></html>
