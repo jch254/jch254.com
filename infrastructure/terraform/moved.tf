@@ -42,3 +42,8 @@ moved {
   from = cloudflare_dns_record.google_mx_5
   to   = module.dns_records.cloudflare_dns_record.this["google_mx_5"]
 }
+
+moved {
+  from = cloudflare_ruleset.response_headers
+  to   = module.response_headers.cloudflare_ruleset.this
+}

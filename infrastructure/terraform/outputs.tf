@@ -7,6 +7,11 @@ output "dns_record_ids" {
   value       = module.dns_records.record_ids
 }
 
+output "response_headers_ruleset_id" {
+  description = "Cloudflare response-header ruleset ID."
+  value       = module.response_headers.id
+}
+
 output "cloudflare_api_token_parameter_name" {
   description = "SSM parameter name for the Cloudflare API token."
   value       = module.cloudflare_api_token_parameter.name

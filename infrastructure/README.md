@@ -25,8 +25,11 @@ DNS records are managed through the shared `cloudflare-dns-records` module in
   - `X-Content-Type-Options`
   - `X-Frame-Options`
 
-The response-header ruleset remains local because there is not yet a shared
-Cloudflare response-header module in `terraform-modules`.
+Response headers are managed through the shared `cloudflare-response-headers`
+module in `terraform-modules`.
+
+This repo expects `terraform-modules` tag `1.16.0` or newer for the shared
+response-header module.
 
 **CodeBuild deployment** (`aws_codebuild_project`)
 - `jch254dotcom` applies Terraform, then builds the Astro site from GitHub
@@ -115,11 +118,10 @@ root `buildspec.yml`.
 
 ## Reusable module candidates
 
-This repo now uses existing shared modules for Cloudflare DNS records and SSM
-token placeholders. Two useful follow-up modules for `terraform-modules` would
-be:
+This repo uses existing shared modules for Cloudflare DNS records, Cloudflare
+response headers, and SSM token placeholders. A useful follow-up module for
+`terraform-modules` would be:
 
-- `cloudflare-response-headers`, wrapping the standard security-header ruleset
 - `github-pages-codebuild-deploy`, composing the CodeBuild project, minimal IAM
   role, SSM token placeholders, and branch-push environment variables
 
@@ -132,9 +134,11 @@ If resources already exist in Cloudflare and need to be brought under Terraform 
 terraform import 'module.dns_records.cloudflare_dns_record.this["apex_github"]' <zone_id>/<record_id>
 
 # Ruleset - get ruleset ID from Cloudflare dashboard or API
-terraform import cloudflare_ruleset.response_headers <zone_id>/<ruleset_id>
+terraform import module.response_headers.cloudflare_ruleset.this <zone_id>/<ruleset_id>
 ```
 
 Existing root-level DNS record state is mapped into the shared DNS module by
 `terraform/moved.tf`; do not remove those moved blocks until after the migration
 has been applied everywhere that still has the old addresses in state.
+The root-level response-header ruleset is also mapped into the shared response
+headers module by `terraform/moved.tf`.

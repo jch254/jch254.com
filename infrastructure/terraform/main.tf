@@ -127,7 +127,7 @@ locals {
 }
 
 module "cloudflare_api_token_parameter" {
-  source = "github.com/jch254/terraform-modules//ssm-parameter-placeholder?ref=1.15.2"
+  source = "github.com/jch254/terraform-modules//ssm-parameter-placeholder?ref=1.16.0"
 
   name        = var.cloudflare_api_token_parameter_name
   description = "Cloudflare API token for jch254.com Terraform"
@@ -138,7 +138,7 @@ module "cloudflare_api_token_parameter" {
 }
 
 module "github_token_parameter" {
-  source = "github.com/jch254/terraform-modules//ssm-parameter-placeholder?ref=1.15.2"
+  source = "github.com/jch254/terraform-modules//ssm-parameter-placeholder?ref=1.16.0"
 
   name        = var.github_token_parameter_name
   description = "GitHub token for jch254.com CodeBuild Pages deploys"
@@ -290,7 +290,7 @@ resource "aws_iam_role_policy" "codebuild_deploy" {
 }
 
 module "codebuild_deploy_project" {
-  source = "github.com/jch254/terraform-modules//codebuild-project?ref=1.15.2"
+  source = "github.com/jch254/terraform-modules//codebuild-project?ref=1.16.0"
 
   name                               = var.codebuild_project_name
   description                        = "Build and deploy jch254.com to GitHub Pages"
@@ -337,52 +337,14 @@ module "codebuild_deploy_project" {
 }
 
 module "dns_records" {
-  source = "github.com/jch254/terraform-modules//cloudflare-dns-records?ref=1.15.2"
+  source = "github.com/jch254/terraform-modules//cloudflare-dns-records?ref=1.16.0"
 
   zone_id = data.cloudflare_zone.zone.id
   records = local.cloudflare_dns_records
 }
 
-resource "cloudflare_ruleset" "response_headers" {
+module "response_headers" {
+  source = "github.com/jch254/terraform-modules//cloudflare-response-headers?ref=1.16.0"
+
   zone_id = data.cloudflare_zone.zone.id
-  name    = "default"
-  kind    = "zone"
-  phase   = "http_response_headers_transform"
-
-  rules = [
-    {
-      description = "Security Headers"
-      expression  = "true"
-      action      = "rewrite"
-
-      action_parameters = {
-        headers = {
-          "Content-Security-Policy" = {
-            operation = "set"
-            value     = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https:; frame-src https://www.youtube-nocookie.com https://player.vimeo.com https://w.soundcloud.com https://open.spotify.com https://www.instagram.com https://embed.podcasts.apple.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self'; upgrade-insecure-requests"
-          }
-          "Permissions-Policy" = {
-            operation = "set"
-            value     = "camera=(), microphone=(), geolocation=(), payment=()"
-          }
-          "Referrer-Policy" = {
-            operation = "set"
-            value     = "strict-origin-when-cross-origin"
-          }
-          "Strict-Transport-Security" = {
-            operation = "set"
-            value     = "max-age=31536000; includeSubDomains; preload"
-          }
-          "X-Content-Type-Options" = {
-            operation = "set"
-            value     = "nosniff"
-          }
-          "X-Frame-Options" = {
-            operation = "set"
-            value     = "DENY"
-          }
-        }
-      }
-    }
-  ]
 }
