@@ -40,11 +40,13 @@ phases:
       - git config --global credential.helper '!f() { echo username=x-access-token; echo password="$GITHUB_TOKEN"; }; f'
 
   build:
+    on-failure: ABORT
     commands:
       - echo Deploying infrastructure...
       - bash ./infrastructure/deploy-infrastructure.bash
       - echo Building Astro site...
       - pnpm run build
+      - test -s "$CODEBUILD_SRC_DIR/$BUILD_OUTPUT_DIR/index.html" || { echo "Build did not produce $BUILD_OUTPUT_DIR/index.html"; exit 1; }
 
   post_build:
     commands:
