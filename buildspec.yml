@@ -25,7 +25,6 @@ phases:
       - echo Installing Node dependencies...
       - corepack enable
       - corepack prepare pnpm@10.32.0 --activate
-      - pnpm config set store-dir /root/.pnpm-store
       - pnpm install --frozen-lockfile
 
   pre_build:
@@ -81,4 +80,3 @@ phases:
 cache:
   paths:
     - "/root/.terraform.d/plugin-cache/**/*"
-    - "/root/.pnpm-store/**/*"
