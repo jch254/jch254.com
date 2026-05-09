@@ -80,7 +80,7 @@ On 13 March 2026 I sent NZ Post Cyber Security a responsible disclosure. I descr
 
 I followed up on 24 March. Nothing.
 
-On 6 May, after almost two months of silence, I sent a firmer follow-up and asked whether it would be better with media involvement. They replied the same day. They apologised for missing the earlier emails and said they were reviewing it.
+On 6 May, after almost two months of silence, I sent a firmer follow-up and asked whether involving media would be a better way to get the issue in front of the right people. They replied the same day. They apologised for missing the earlier emails and said they were reviewing it.
 
 On 8 May, NZ Post replied again. They said the affected legacy page had already been scheduled for decommissioning, and that after confirming my report they expedited that work. The page now redirected to the modern parcel tracking service. They had also submitted a request to remove the outdated result from public search.
 
@@ -102,6 +102,8 @@ These are usually the result of operational drift rather than a single decision.
 
 Then one day a parcel status phrase points back at it.
 
+This is one reason I care about boring platform discipline. Infrastructure as code, self-contained repositories, clear owners, deploy pipelines, monitoring, and documented decommissioning paths are not just tidy engineering habits. They make it harder for systems to become ghosts. If nobody can tell where a service lives, how it deploys, who owns it, or what depends on it, turning it off becomes risky. So it stays alive.
+
 ---
 
 ## The next version of this problem
@@ -110,9 +112,17 @@ I found this with ordinary Google. That is worth saying clearly.
 
 The economics of this kind of discovery are changing.
 
-LLMs lower the cost of connecting fragments, classifying pages, summarising what an old interface is for, and turning a vague discovery into a plan. They are good at the patient part. Labelling pages. Comparing fragments. Explaining what an old form probably does. Suggesting the next thing to check.
+Anthropic recently announced [Project Glasswing](https://www.anthropic.com/glasswing), built around Claude Mythos Preview, a frontier model used for defensive vulnerability research. One example stuck with me. Mythos reportedly found a 27-year-old vulnerability in OpenBSD, an operating system famous for taking security seriously. It also found a 16-year-old issue in FFmpeg and chained vulnerabilities in the Linux kernel.
 
-Indexed legacy interfaces are going to be discovered more reliably and described more usefully than before. The cost of doing what I did sits a step lower than it did a year ago, and is going to keep falling.
+OpenAI is moving in the same direction with [GPT-5.5 and GPT-5.5-Cyber through Trusted Access for Cyber](https://openai.com/index/gpt-5-5-with-trusted-access-for-cyber/). The framing is defensive, with identity checks and stronger controls around more capable workflows, but the direction is hard to miss. Models are becoming useful for vulnerability identification, triage, patch validation, and controlled security testing.
+
+That matters here because the next version of this problem is not just "someone Googles a weird parcel status".
+
+It is a model reading indexed pages, classifying old interfaces, explaining what they probably do, and suggesting the next thing to check. It is the boring connective work getting cheaper. Labelling pages. Comparing fragments. Summarising old workflows. Turning a vague discovery into a plan.
+
+That does not mean AI magically finds every hidden system. It means the cost of patience is falling.
+
+Indexed legacy interfaces are going to be discovered more reliably and described more usefully than before. The cost of doing what I did sits a step lower than it did a year ago, and it is going to keep falling.
 
 Indexed legacy pages are not really dormant. They are inputs for whatever finds them next.
 
