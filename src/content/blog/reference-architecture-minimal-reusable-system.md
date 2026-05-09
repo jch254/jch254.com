@@ -1,7 +1,7 @@
 ---
 title: "I Stopped Rebuilding the Same System"
 description: "Over ten years, my projects kept turning into the same backend, infrastructure, and deploy pipeline. I stopped treating that as coincidence and pulled the shared pieces into one reusable system."
-date: 2026-05-15
+date: 2026-05-20
 tags: ["architecture", "aws", "infrastructure"]
 draft: true
 ---
