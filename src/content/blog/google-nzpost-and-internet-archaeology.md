@@ -1,30 +1,25 @@
 ---
-title: "Google, NZ Post, and Internet Archaeology"
+title: "Google, NZ Post and the Ghosts in Legacy Infrastructure"
 description: "A normal parcel-status search found an old CourierPost interface. The risk was not one page, but what Google made discoverable."
-date: 2026-05-13
+date: 2026-05-27
 tags: ["security", "responsible disclosure", "internet"]
-draft: true
+heroImage: "google-nzpost-and-internet-archaeology-hero.png"
+draft: false
 ---
 
 After almost two months of silence, NZ Post replied to my disclosure on the same day I sent a firmer follow-up.
 
 Two days later, they confirmed the affected legacy page had been expedited for decommissioning. It now redirected to the modern parcel tracking service, and they had asked for the outdated result to be removed from public search.
 
-Good outcome.
+That looked like a good outcome.
 
-Still a weird one.
+It turned out to be only part of one.
 
-The part that stuck with me was not that I had found some clever exploit. I had not. I was trying to understand a parcel status on one of my own deliveries, searched Google, and ended up looking at an old CourierPost interface that should not have been discoverable that way.
+The thing that stuck with me was not that I had found a clever exploit. I had not. I was trying to understand a parcel status on one of my own deliveries, searched Google, and ended up looking at an old CourierPost interface that should not have been discoverable that way.
 
-That pattern felt familiar.
+Search engines have always connected fragments that people assume nobody will assemble. A name, a cached page, an old indexed interface, a date field that someone forgot was internet-facing. None of it secret. None of it obvious either. The web has always behaved more like a memory system than a collection of pages.
 
-Years before LLMs, I used Google from New Zealand to track down and eventually make contact with my German father. It was not magic. It was fragments. Names, old pages, cached traces, technical communities, and enough patience to keep following the edges.
-
-That changed how I saw search. It was never just a convenience layer over the web. It was a way to connect things that were technically public, but not obvious.
-
-That was a good outcome for me, but it also made the web feel different. Less like a set of pages. More like a memory system nobody fully controls.
-
-I am writing about it now because the affected page has been decommissioned, and because I am leaving out the details that would make it reproducible.
+I am writing about it now because both the original interface and the related PDF exposure have been remediated, and because I am leaving out the details that would make any of it reproducible.
 
 ---
 
@@ -84,11 +79,31 @@ On 6 May, after almost two months of silence, I sent a firmer follow-up and aske
 
 On 8 May, NZ Post replied again. They said the affected legacy page had already been scheduled for decommissioning, and that after confirming my report they expedited that work. The page now redirected to the modern parcel tracking service. They had also submitted a request to remove the outdated result from public search.
 
-That was enough to write about it at a high level. I am still leaving out the details that would help someone rediscover the old interface.
-
 I am not going to dunk on them for the silence. The eventual response was reasonable and the fix was correct.
 
-I will say this. Disclosure channels need to work. Silence puts the reporter in an awkward position, and two months of it made me consider going to media to force movement. That is bad for everyone involved.
+I will say this. Disclosure channels need to function reliably. Silence creates an awkward position for the reporter, and two months of it made me consider going to media to force movement. That is bad for everyone involved.
+
+---
+
+## Partial fix, indexed PDFs
+
+![Partial fix, indexed PDFs](./google-nzpost-and-internet-archaeology-inline.png)
+
+I held off publishing while I verified the fix end to end. Eleven days after their first confirmation I went back and re-tested. I am glad I did.
+
+The old search interface was gone. The legacy URLs now redirected to the modern parcel tracking service. That part of the fix held.
+
+What had not been addressed was the PDF delivery reports. Those reports were still indexed by Google and still downloadable directly from search results. A `site:` query into the legacy host still returned pages of records. Each PDF contained the kind of fields the original disclosure was about: tracking numbers, delivery status, depot details, customer references, delivery timestamps, signed-for names, and signatures.
+
+The redirect fix covered the legacy Track & Trace pages. It did not cover the generated reports those workflows had produced.
+
+I sent NZ Post an update the same day, on 19 May, describing what was still reachable. They replied that day and acknowledged it as a separate remediation gap, not something covered by the initial decommissioning. They said they were investigating and would update me once that work was complete.
+
+On 22 May they confirmed they had implemented controls to block public access to the PDF delivery reports and were progressing removal requests with Google.
+
+I held off publishing again while re-testing the controls and waiting for NZ Post to verify their fix had stuck across both rounds.
+
+I only became comfortable publishing once that second piece had been remediated. The story up to 8 May would have been "old interface gone". The story now is closer to the truth. The exposure was an ecosystem, not a page. Decommissioning the front door did not decommission the artifacts the front door used to surface.
 
 ---
 
@@ -96,11 +111,15 @@ I will say this. Disclosure channels need to work. Silence puts the reporter in 
 
 Old systems do not become safe because nobody remembers them. Internet-facing legacy software becomes archaeology. It sits there, still running, still indexed, still answering requests, until a search engine, a crawler, a cache, or a curious person follows an edge into it.
 
-Most organisations have something like this. A reporting screen from a previous platform. A search page built for staff workflows. A PDF generator that was never meant to be indexed.
+Most organisations have something like this. A reporting screen from a previous platform. A search page built for staff workflows. A PDF generator that was never meant to be indexed. A bucket of report artifacts that quietly outlived the interface that produced them.
 
-These are usually the result of operational drift rather than a single decision. Someone who owned the page left. Someone else assumed it had been turned off. Someone else assumed search engines would not find it. The system kept running because it was easier to leave it running than to argue about decommissioning it.
+These are usually the result of operational drift rather than a single decision. Someone who owned the page left. Someone else assumed it had been turned off. Someone else assumed search engines would not find it. The system kept running because decommissioning cost more than leaving it in place.
 
-Then one day a parcel status phrase points back at it.
+Then one day a routine parcel status phrase points back at it.
+
+The PDF gap follows the same pattern. The interface was on someone's roadmap to retire. The reports it generated probably were not. They lived in a different layer, with a different owner, on a different mental model. The decommissioning plan covered the part of the system that still had active operational visibility.
+
+Legacy systems are ecosystems. Front-ends, generated artifacts, storage layers, indexing rules, and old URLs that nobody is still mapping. Turning off one layer does not turn off the others.
 
 This is one reason I care about boring platform discipline. Infrastructure as code, self-contained repositories, clear owners, deploy pipelines, monitoring, and documented decommissioning paths are not just tidy engineering habits. They make it harder for systems to become ghosts. If nobody can tell where a service lives, how it deploys, who owns it, or what depends on it, turning it off becomes risky. So it stays alive.
 
@@ -122,7 +141,7 @@ It is a model reading indexed pages, classifying old interfaces, explaining what
 
 That does not mean AI magically finds every hidden system. It means the cost of patience is falling.
 
-Indexed legacy interfaces are going to be discovered more reliably and described more usefully than before. The cost of doing what I did sits a step lower than it did a year ago, and it is going to keep falling.
+Indexed legacy interfaces are discovered more reliably and described more usefully than before. The cost of doing what I did sits a step lower than it did a year ago, and it is going to keep falling.
 
 Indexed legacy pages are not really dormant. They are inputs for whatever finds them next.
 
@@ -130,8 +149,10 @@ Indexed legacy pages are not really dormant. They are inputs for whatever finds 
 
 ## What stayed with me
 
-I am glad I handled it through responsible disclosure. I am glad it was fixed.
+I am glad I handled it through responsible disclosure. I am glad both parts were eventually fixed.
 
-What stays with me is how ordinary the discovery was. No zero-day. No clever exploit chain. Just search, weak boundaries, and an old interface that should not have been reachable.
+NZ Post got there. The first remediation was the obvious one. The second one clarified the real shape of the exposure. The issue was not a single page. It was a legacy ecosystem with surfaces nobody was actively watching. Responsible disclosure worked, even if it took a louder follow-up and a re-test to get there.
 
-Search turns weak assumptions into maps. That has been true for a long time. The map is just easier to read now.
+What stays with me is how ordinary the discovery was. No zero-day. No clever exploit chain. Just search, operational drift, and an old interface that should not have been reachable, sitting on top of artifacts that should not have been indexed.
+
+Search turns weak assumptions into maps. That has been true for a long time. The map is just easier to read now, and the ghosts are easier to find.
