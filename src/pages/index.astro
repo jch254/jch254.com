@@ -17,17 +17,33 @@ const latestPosts = (await getCollection('blog', ({ data }) => !data.draft && !d
       <h2 class="mb-6 text-2xl font-extrabold tracking-tight md:text-3xl">Who am I?</h2>
       <div class="space-y-4 text-base leading-relaxed text-brand-text">
         <p>
-          Hi, I'm Jordan. I turn code into systems by day and get lost in music by night.
-          I was born in New Zealand, where I spent the first 23 years of my life. After living
-          through thousands of earthquakes in Christchurch, I decided a broken city wasn't for
-          me at the time and moved to Melbourne, Australia in 2014. Eight years later, in mid-2022,
-          I relocated to Austin, Texas for work.
+          Kia ora, I'm Jordan. I'm a New Zealand software engineer focused on building scalable
+          web platforms, cloud infrastructure, and developer tooling.
         </p>
         <p>
-          I returned to Te Waipounamu, Aotearoa in early 2024 for health reasons and worked
-          remotely from home. Coming home was energizing, the warmth and
-          strength of Kiwi culture reminded me how greedy and transactional much of the world
-          had become in my decade away.
+          Over the past 15+ years I've worked across fintech, hospitality, legal tech, and
+          startups. I've built APIs, distributed systems, deployment pipelines, and internal
+          tooling. My background spans companies like Xero, me&u, and LawVu.
+        </p>
+        <p>
+          Lately I've been focused on AI-assisted product development, reusable architecture
+          patterns, and shipping smaller systems quickly without sacrificing long-term
+          maintainability. A lot of my recent work sits at the intersection of infrastructure,
+          automation, and product engineering.
+        </p>
+        <p>
+          I like systems that are minimal, explicit, tenant-aware, and operationally predictable.
+        </p>
+        <p>
+          Outside of client and product work I maintain a handful of open-source projects and
+          experiments. One of those is <a href="https://github.com/jch254/reference-architecture" target="_blank" rel="noopener noreferrer" class="font-semibold text-brand-accent hover:underline">Reference Architecture</a>,
+          a production-ready scaffolding platform for bootstrapping modern applications and
+          AI-assisted workflows. I also build smaller product experiments, including Lush Aural
+          Treats, an AI-assisted music discovery platform.
+        </p>
+        <p>
+          After years in Melbourne and Austin I returned home to Te Waipounamu, Aotearoa in 2024
+          and got back on the tools.
         </p>
       </div>
     </section>
@@ -37,23 +53,23 @@ const latestPosts = (await getCollection('blog', ({ data }) => !data.draft && !d
       <h2 class="mb-6 text-2xl font-extrabold tracking-tight md:text-3xl">What do I do?</h2>
       <div class="space-y-4 text-base leading-relaxed text-brand-text">
         <p>
-          I see product development like music. Every layer of the stack is an instrument: you
-          can play them on their own, but when you understand how they fit together, that's when
-          you create something that really sings. Going deep into the full stack lets me architect
-          systems that are stronger, more resilient, and easier to tune when things go off-key.
+          I design and build systems that support real products in production.
         </p>
         <p>
-          I thrive on the creative rush of building from the ground up. But I've also learned to
-          appreciate working with existing systems: maintaining, refining, and
-          pushing them to perform better. Whether it's writing code, squashing bugs,
-          or shaping the bigger picture, I approach it like composing: build, listen, adjust,
-          iterate until it feels right.
+          That includes backend architecture, cloud infrastructure, automation, multi-tenant
+          applications, developer tooling, and AI-assisted workflows. I enjoy working close to the
+          infrastructure layer, but I also care deeply about product shape, usability, and
+          developer experience.
         </p>
         <p>
-          My current stack includes AWS, Terraform, Node.js/Nest.js, TypeScript,
-          React, GraphQL, and Python. I've been experimenting with AI-assisted
-          development workflows, modern cloud infrastructure, and building smaller systems
-          quickly from first principles.
+          A lot of my recent work has focused on reusable foundations for fast-moving teams and
+          modern product development. The goal is to reduce friction, increase reliability, and
+          make systems easier to evolve over time.
+        </p>
+        <p>
+          I'm drawn to systems that stay understandable as they scale. Clear operational
+          boundaries. Explicit infrastructure. Predictable deployment models. Simple runtime
+          behaviour over unnecessary complexity.
         </p>
       </div>
     </section>
@@ -85,8 +101,8 @@ const latestPosts = (await getCollection('blog', ({ data }) => !data.draft && !d
       <h2 class="mb-6 text-2xl font-extrabold tracking-tight md:text-3xl">Systems I build</h2>
       <div class="space-y-6 text-base leading-relaxed text-brand-text">
         <div>
-          <h3 class="mb-1 font-semibold text-brand-accent">Scalable SaaS platforms</h3>
-          <p>Designing and evolving systems that handle real-world complexity: multi-tenant architectures, integrations, and large operational workflows.</p>
+          <h3 class="mb-1 font-semibold text-brand-accent">Scalable web platforms</h3>
+          <p>Designing and evolving systems that handle real-world complexity, including multi-tenant architectures, integrations, and operational workflows.</p>
         </div>
         <div>
           <h3 class="mb-1 font-semibold text-brand-accent">Automation and developer infrastructure</h3>
@@ -94,7 +110,7 @@ const latestPosts = (await getCollection('blog', ({ data }) => !data.draft && !d
         </div>
         <div>
           <h3 class="mb-1 font-semibold text-brand-accent">AI-assisted systems</h3>
-          <p>Applying AI and automation to practical problems: document processing, workflow automation, and intelligent pipelines.</p>
+          <p>Applying AI and automation to practical problems, product workflows, and intelligent tooling.</p>
         </div>
         <div>
           <h3 class="mb-1 font-semibold text-brand-accent">Integration platforms</h3>
@@ -116,9 +132,9 @@ const latestPosts = (await getCollection('blog', ({ data }) => !data.draft && !d
       <h2 class="mb-6 text-2xl font-extrabold tracking-tight md:text-3xl">What does jch254 mean?</h2>
       <div class="space-y-4 text-base leading-relaxed text-brand-text">
         <p>
-          jch254 was my University of Canterbury login username. I've been using it as my handle
-          across GitHub, domains, and everywhere else since 2009. At this point it's less of a
-          username and more of an identity.
+          jch254 was my University of Canterbury login username. I've been using it across GitHub,
+          domains, and the internet since 2009. At this point it's less of a username and more of
+          an identity.
         </p>
       </div>
     </section>
@@ -128,21 +144,18 @@ const latestPosts = (await getCollection('blog', ({ data }) => !data.draft && !d
       <h2 class="mb-6 text-2xl font-extrabold tracking-tight md:text-3xl">Anything else?</h2>
       <div class="space-y-4 text-base leading-relaxed text-brand-text">
         <p>
-          Music is life. I'm a musician, producer, and long-time vinyl collector. During the
-          Melbourne COVID lockdowns I leaned hard into that passion, amassing over 800 records,
-          which I catalog and track through Discogs (OS beta tester represent). Music
-          isn't just a hobby, it's a way of making sense of the world: listening, creating, and
-          always chasing the next sound that moves me.
+          Music is a huge part of my life. I'm a musician, producer, and long-time vinyl
+          collector. During the Melbourne COVID lockdowns I leaned hard into that passion, building
+          a collection of more than 800 records that I catalogue through Discogs.
         </p>
         <p>
-          I'm also an active contributor to open-source software. Beyond code, I enjoy stepping behind the camera to
-          capture moments. I keep a blog, project portfolio, and GitHub profile where I share
-          what I'm building.
+          I'm also an active contributor to open-source software. Beyond code, I enjoy photography
+          and documenting what I'm building through my blog, project portfolio, and GitHub profile.
         </p>
         <p>
           Most importantly, I'm an advocate for suicide awareness and prevention, a cause deeply
           personal after losing an uncle and two close friends. It's a reminder that behind the
-          code, the projects, and the music, people and connection matter most.
+          code, projects, and systems, people and connection matter most.
         </p>
       </div>
     </section>
