@@ -3,7 +3,8 @@ title: "I Stopped Rebuilding the Same System"
 description: "Over ten years, my projects kept turning into the same backend, infrastructure, tenancy, auth, deployment, and validation. I stopped treating those as fresh decisions for every product and pulled them into one reusable system."
 date: 2026-06-08
 tags: ["architecture", "aws", "infrastructure"]
-draft: true
+heroImage: "reference-architecture-minimal-reusable-system-hero.png"
+draft: false
 ---
 
 Over the last ten years, nearly every system I built kept converging into the same shape.
