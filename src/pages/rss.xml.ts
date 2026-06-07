@@ -11,16 +11,17 @@ export async function GET(context: APIContext) {
     .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 
   return rss({
-    title: 'Jordan Hornblow',
-    description: 'Writing about engineering, AI, systems, and the human side of building technology.',
+    title: "Jordan Hornblow",
+    description:
+      "Writing about engineering systems, AI-assisted development, infrastructure, and the human side of building technology.",
     site: context.site!,
     items: posts.map((post) => ({
       title: post.data.title,
       pubDate: post.data.date,
       description: post.data.description,
-      link: `/blog/${post.id.replace(/\.(md|mdx)$/, '')}/`,
-      content: sanitizeHtml(parser.render(post.body ?? ''), {
-        allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img']),
+      link: `/blog/${post.id.replace(/\.(md|mdx)$/, "")}/`,
+      content: sanitizeHtml(parser.render(post.body ?? ""), {
+        allowedTags: sanitizeHtml.defaults.allowedTags.concat(["img"]),
       }),
     })),
   });
