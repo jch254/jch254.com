@@ -1,7 +1,7 @@
 ---
 title: "I Stopped Rebuilding the Same System"
-description: "Over ten years, my projects kept turning into the same backend, infrastructure, and deploy pipeline. I stopped treating that as coincidence and pulled the shared pieces into one reusable system."
-date: 2026-05-20
+description: "Over ten years, my projects kept turning into the same backend, infrastructure, tenancy, auth, deployment, and validation. I stopped treating those as fresh decisions for every product and pulled them into one reusable system."
+date: 2026-06-08
 tags: ["architecture", "aws", "infrastructure"]
 draft: true
 ---
@@ -10,7 +10,7 @@ Over the last ten years, nearly every system I built kept converging into the sa
 
 It didn't matter whether the project was a Spotify analytics tool, a Pokemon Go API, a Messenger bot, a GTD app, or an email-driven music sharing platform. After enough iterations, they all ended up looking similar underneath.
 
-Stateless API. Docker container. Terraform. Multi-tenant data model. CI/CD pipeline. Push to main, deploy to ECS, wait for stabilisation.
+Stateless API. Docker container. Terraform. Multi-tenant data model. Auth boundary. CI/CD pipeline. Push to main, deploy to ECS, wait for stabilisation.
 
 For years I kept rebuilding that stack from scratch.
 
@@ -54,9 +54,9 @@ The Docker build repos became one build model.
 
 The Terraform repos became reusable modules.
 
-The deployment patterns standardised.
+The deployment patterns settled into one model.
 
-The auth flows standardised.
+Auth stopped being per-project code and became a provider boundary.
 
 The infrastructure got smaller.
 
@@ -100,7 +100,15 @@ buildspec.yml               → CI/CD (CodeBuild)
 
 Web and mobile clients sit above the same API. No extra backend. Just different entry points.
 
-The backend is a NestJS app with request context middleware that resolves the tenant from the `Host` header. Every request gets a `tenantSlug` and a `requestId`.
+The backend is a NestJS app with request context middleware that resolves the tenant and attaches a `requestId` to every request.
+
+Tenant resolution is explicit now, not implicit. `TENANT_RESOLUTION_MODE` is either `fixed` or `subdomain`.
+
+In `fixed` mode the tenant comes from `APP_TENANT_ID`. That suits single-product deployments where there is only ever one tenant.
+
+In `subdomain` mode the tenant resolves from a subdomain under `BASE_DOMAIN`. Apex domains and localhost fall back to `default`. That suits multi-tenant deployments where each tenant gets its own subdomain.
+
+Both modes produce tenant-prefixed DynamoDB keys, so the data model does not change when the resolution mode does. The earlier host-derived version was too implicit. Making the mode explicit removed a class of "which tenant am I" surprises.
 
 Controllers delegate to services. Services talk to DynamoDB. Nothing else sits in the request path.
 
@@ -114,7 +122,7 @@ The build pipeline does five things.
 * Run Terraform
 * Wait for ECS stabilisation
 
-Then it applies the Cloudflare DNS layer and runs validation against the live system. If any step fails, the build fails.
+Then it applies the Cloudflare DNS layer and, when validation is enabled for that deployment, checks the live system. If a required step fails, the build fails.
 
 Infrastructure is split into two Terraform layers.
 
@@ -136,14 +144,32 @@ That matters.
 
 ## The data model
 
-Single DynamoDB table. PAY_PER_REQUEST. Two key patterns.
+Single DynamoDB table. PAY_PER_REQUEST.
 
-Tenant-scoped entities:
+Resources are scoped by tenant and user:
 
 ```text
 PK = TENANT#<tenantId>
-SK = EXAMPLE#<entityId>
+SK = USER#<userId>#EXAMPLE#<exampleId>
 ```
+
+Tenant isolation and user ownership are separate boundaries. The partition keeps tenants apart. The sort key keeps users within a tenant apart. A client cannot supply its own `tenantId` or `userId` to reach across either boundary. The tenant comes from request context. The user comes from the local user mapping.
+
+The local user is tenant-scoped:
+
+```text
+PK = TENANT#<tenantId>
+SK = USER#<userId>
+```
+
+Auth identity maps to a local user through an identity record:
+
+```text
+PK = TENANT#<tenantId>
+SK = USER_IDENTITY#<provider>#<sha256(providerSubject)>
+```
+
+The provider subject does not become the app's user model. It maps to a local user. That keeps the user model stable when the auth provider changes, and keeps provider subjects out of resource keys.
 
 Every query stays inside a tenant partition. No scans. No cross-tenant queries.
 
@@ -163,6 +189,24 @@ No buffering layer. No retry workers. No extra infrastructure.
 Analytics and domain data share the same table, the same IAM policy, and the same Terraform resource.
 
 One table. One permission boundary.
+
+---
+
+## The auth boundary
+
+Auth used to be project-specific code. Now it is a provider boundary.
+
+`AUTH_PROVIDER` is `none`, `internal_magic_link`, or `oidc`.
+
+Internal magic-link auth covers first-party and simple apps. OIDC, backed by Auth0 in the demo deployment, covers deployments that need an external identity provider. The choice is configuration, not a rewrite.
+
+For authenticated modes, the guard normalises provider identity into the same `AuthPrincipal`. Controllers and services do not know whether the request came through internal magic link or OIDC. `AUTH_PROVIDER=none` keeps protected routes closed unless a route is explicitly public.
+
+`/api/auth/check` is a lightweight protected route that confirms the principal. `/api/me` is the local user boundary. It finds or creates a tenant-scoped user from the current `AuthPrincipal`.
+
+The app does not trust auth or JWT claims for tenancy. Tenancy comes from the resolution mode. The principal identifies a provider subject, not a tenant. Keeping those separate is what lets the same backend run as a fixed-tenant app or a subdomain-tenant app without branching the code.
+
+The browser frontend reads its auth behaviour at runtime from `/api/config`. The same frontend bundle supports different deployment auth modes. OIDC deployments expose only the public Auth0 SPA config they need. Magic-link deployments do not activate the OIDC UI. Nothing about the deployment's auth mode gets baked into the frontend build.
 
 ---
 
@@ -206,9 +250,11 @@ No ORM. No repository pattern.
 
 ### Staging environments
 
-One environment. One deploy target.
+One deploy target per deployment. No fake staging copy by default.
 
-After deployment, validation runs against the live URL. If validation fails, the build fails.
+This does not mean one deployment exists. Separate products and demos each get their own deployment. What I dropped is the mirror staging environment that sits alongside production and pretends to be it.
+
+After deployment, validation can run against the live URL. If enabled validation fails, the build fails.
 
 I spent years maintaining staging environments that drifted from production and still failed to catch real issues.
 
@@ -232,7 +278,7 @@ Boring infrastructure survives longer.
 
 ## The validation layer
 
-After every deploy, a validation script runs against the live system.
+After deploy, a validation script can run against the live system.
 
 No mocks. No test harness. Just `fetch` against real endpoints.
 
@@ -243,7 +289,9 @@ GET  /api/example       → item visible
 DELETE /api/example/:id → cleanup
 ```
 
-It also checks tenant isolation by overriding the `Host` header and verifying the created item is not visible across tenants.
+Validation is aware of the auth provider mode. The health check stays public. `AUTH_PROVIDER=none` validates the public surface only. Internal magic-link deployments run the full CRUD smoke path above. OIDC deployments check that `/api/auth/check` rejects missing bearer tokens, then validate the same route with a supplied bearer token when one is available.
+
+In magic-link mode it also attempts a light tenant isolation check by resolving a second tenant and verifying the created item is not visible across tenants. If the proxy does not forward the overridden host, the script reports that check as skipped instead of pretending it proved isolation.
 
 If validation fails, the build fails.
 
@@ -254,6 +302,68 @@ They are the same thing.
 The whole validation layer is one TypeScript file. It runs in a few seconds.
 
 Every heavier post-deploy setup I built before this gave me more maintenance than confidence.
+
+---
+
+## What changed after real usage
+
+The first version of this was mostly extraction.
+
+Remove domain logic. Keep the structure. Make it reusable.
+
+That changed once I started building real products on top of it.
+
+I had already spent years building reusable Terraform modules, CI/CD pipelines, and ECS infrastructure patterns across different projects.
+
+The current shape came together while building an email-driven album sharing platform. Multi-tenancy, inbound email handling, deployment flow, analytics, auth, and client boundaries all started using the same repo structure.
+
+That became the basis for `reference-architecture`.
+
+From there I used the reference architecture to scaffold newer systems, including a GTD app with web and mobile clients sharing the same backend and auth boundary.
+
+As the apps expanded, shared infrastructure kept moving out of product repos.
+
+SES inbound routing. Terraform modules. Shared deployment patterns. The auth provider boundary.
+
+Anything that survived repeated real usage moved down into the platform.
+
+Auth stopped being demo code.
+
+Magic links, session handling, mobile deep links, token verification, rate limiting. The implementation stayed small, but it became production code.
+
+Mobile became a first-class client.
+
+The backend did not need special mobile infrastructure. That was the point. Web and mobile stayed thin layers over the same API.
+
+The architecture got tighter under pressure.
+
+Anything that created friction got simplified or removed.
+
+The system didn't really get bigger.
+
+It got sharper.
+
+---
+
+## The part that changed under pressure
+
+The shape held. The boundaries inside it got more deliberate.
+
+Tenant resolution became explicit. A mode, not a guess off the `Host` header.
+
+Auth became provider-neutral. A configured boundary, not a hard-wired flow.
+
+Users became local app entities. Provider subjects map in, they do not leak through.
+
+Resources became user-owned. Tenant isolation and user ownership are separate boundaries now.
+
+Frontend config moved to runtime. One bundle, many deployment auth modes.
+
+Validation became auth-provider-aware. It checks the system that actually got deployed.
+
+None of these made the system bigger. Each one removed an assumption that only worked for one kind of deployment.
+
+The same baseline now runs in more than one shape. The internal magic-link reference demo and a separate Auth0 OIDC demo come from the same architecture. They are not forks. They are the same system with different modes selected.
 
 ---
 
@@ -275,7 +385,7 @@ The AI sees:
 * response envelopes
 * Terraform conventions
 * deployment patterns
-* auth flows
+* the auth provider boundary
 * analytics integration
 
 The generated code tends to fit because the patterns already exist in working systems.
@@ -295,46 +405,6 @@ AI tooling works best against systems that are internally consistent.
 The architecture matters more now, not less.
 
 Good patterns keep showing up because the AI reuses what is already there.
-
----
-
-## What changed after real usage
-
-The first version of this was mostly extraction.
-
-Remove domain logic. Keep the structure. Make it reusable.
-
-That changed once I started building real products on top of it.
-
-I had already spent years building reusable Terraform modules, CI/CD pipelines, and ECS infrastructure patterns across different projects.
-
-The current shape came together while building an email-driven album sharing platform. Multi-tenancy, inbound email handling, deployment flow, analytics, auth, and client boundaries all started using the same repo structure.
-
-That became the basis for `reference-architecture`.
-
-From there I used the reference architecture to scaffold newer systems, including a GTD app with web and mobile clients sharing the same backend and auth flow.
-
-As the apps expanded, shared infrastructure kept moving out of product repos.
-
-SES inbound routing. Terraform modules. Shared deployment patterns. Common auth flows.
-
-Anything that survived repeated real usage moved down into the platform.
-
-Auth stopped being demo code.
-
-Magic links, session handling, mobile deep links, token verification, rate limiting. The implementation stayed small, but it became production code.
-
-Mobile became a first-class client.
-
-The backend did not need special mobile infrastructure. That was the point. Web and mobile stayed thin layers over the same API.
-
-The architecture got tighter under pressure.
-
-Anything that created friction got simplified or removed.
-
-The system didn't really get bigger.
-
-It got sharper.
 
 ---
 
@@ -376,12 +446,12 @@ Most importantly, new projects no longer start from infrastructure decisions.
 
 They start from product logic.
 
-The deployment plumbing already exists.
+The deployment plumbing already exists. So does the tenancy model, the auth boundary, and the validation.
 
-After ten years of rebuilding variations of the same backend, infrastructure, and deployment pipeline, I stopped treating them as separate projects.
+After ten years of rebuilding variations of the same backend, infrastructure, auth, tenancy, deployment, and validation, I stopped treating them as fresh decisions for every product.
 
-Now there is one operational system.
+`reference-architecture` is not just a starter template I copy and abandon. It is where architecture decisions go after they survive real use.
 
-New apps inherit it.
+A new product can choose fixed or subdomain tenancy, internal magic-link or OIDC auth, web or mobile clients. It still inherits the same operational baseline.
 
-It keeps evolving under real pressure.
+That is the part worth keeping. Not the code. The decisions that stopped needing to be made again.
