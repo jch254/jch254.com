@@ -1,0 +1,256 @@
+<!DOCTYPE html><html lang="en" class="scroll-smooth"> <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="canonical" href="https://jch254.com/blog/reference-architecture-minimal-reusable-system/"><link rel="alternate" type="application/rss+xml" title="Jordan Hornblow" href="/rss.xml"><!-- Primary Meta Tags --><title>I Stopped Rebuilding the Same System | Jordan Hornblow</title><meta name="title" content="I Stopped Rebuilding the Same System | Jordan Hornblow"><meta name="description" content="Over ten years, my projects kept turning into the same backend, infrastructure, tenancy, auth, deployment, and validation. I stopped treating those as fresh decisions for every product and pulled them into one reusable system."><meta name="generator" content="Astro v6.0.2"><!-- Open Graph / Facebook --><meta property="og:type" content="article"><meta property="article:published_time" content="2026-06-08T00:00:00.000Z"><meta property="og:url" content="https://jch254.com/blog/reference-architecture-minimal-reusable-system/"><meta property="og:title" content="I Stopped Rebuilding the Same System | Jordan Hornblow"><meta property="og:description" content="Over ten years, my projects kept turning into the same backend, infrastructure, tenancy, auth, deployment, and validation. I stopped treating those as fresh decisions for every product and pulled them into one reusable system."><meta property="og:image" content="https://jch254.com/_astro/reference-architecture-minimal-reusable-system-hero.DtYuCBR_.png"><!-- Twitter --><meta property="twitter:card" content="summary_large_image"><meta property="twitter:url" content="https://jch254.com/blog/reference-architecture-minimal-reusable-system/"><meta property="twitter:title" content="I Stopped Rebuilding the Same System | Jordan Hornblow"><meta property="twitter:description" content="Over ten years, my projects kept turning into the same backend, infrastructure, tenancy, auth, deployment, and validation. I stopped treating those as fresh decisions for every product and pulled them into one reusable system."><meta property="twitter:image" content="https://jch254.com/_astro/reference-architecture-minimal-reusable-system-hero.DtYuCBR_.png"><!-- JSON-LD Structured Data --><script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"I Stopped Rebuilding the Same System | Jordan Hornblow","description":"Over ten years, my projects kept turning into the same backend, infrastructure, tenancy, auth, deployment, and validation. I stopped treating those as fresh decisions for every product and pulled them into one reusable system.","image":"https://jch254.com/_astro/reference-architecture-minimal-reusable-system-hero.DtYuCBR_.png","datePublished":"2026-06-08T00:00:00.000Z","url":"https://jch254.com/blog/reference-architecture-minimal-reusable-system/","author":{"@type":"Person","name":"Jordan Hornblow","url":"https://jch254.com"},"publisher":{"@type":"Person","name":"Jordan Hornblow","url":"https://jch254.com"}}</script><!-- Fonts (non-render-blocking) --><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"><link rel="stylesheet" href="/_astro/Footer.1DFuyS8A.css"></head> <body class="bg-brand-bg text-brand-text font-sans min-h-screen antialiased">  <header class="relative overflow-hidden pb-10 pt-16 md:pt-24" data-astro-cid-bbe6dxrz> <!-- Matrix-style background --> <div class="absolute inset-0 z-0" data-astro-cid-bbe6dxrz> <div class="matrix-bg absolute inset-0 opacity-50" data-astro-cid-bbe6dxrz></div> <div class="absolute inset-0 bg-gradient-to-b from-transparent via-brand-bg/60 to-brand-bg" data-astro-cid-bbe6dxrz></div> </div> <div class="relative z-10 mx-auto max-w-2xl px-6 text-center" data-astro-cid-bbe6dxrz>  <a href="/" class="mb-6 inline-block text-4xl font-extrabold tracking-tight md:text-5xl hover:text-brand-accent transition-colors" data-astro-cid-bbe6dxrz>
+Jordan Hornblow
+</a>  <!-- CTA + Social Icons --> <div class="flex flex-wrap items-center justify-center gap-4" data-astro-cid-bbe6dxrz> <a href="https://603.nz" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 rounded-full bg-brand-accent px-6 py-2.5 text-sm font-semibold text-brand-bg transition hover:bg-brand-accent-hover" data-astro-cid-bbe6dxrz> <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" data-astro-cid-bbe6dxrz> <path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" data-astro-cid-bbe6dxrz></path> </svg>
+PROJECTS
+</a> <a href="/resume" class="inline-flex items-center gap-2 rounded-full border border-brand-border px-6 py-2.5 text-sm font-semibold text-brand-text transition hover:border-brand-accent hover:text-white" data-astro-cid-bbe6dxrz> <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" data-astro-cid-bbe6dxrz> <path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" data-astro-cid-bbe6dxrz></path> </svg>
+RESUME
+</a> <a href="/blog" class="inline-flex items-center gap-2 rounded-full border border-brand-border px-6 py-2.5 text-sm font-semibold text-brand-text transition hover:border-brand-accent hover:text-white" data-astro-cid-bbe6dxrz> <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" data-astro-cid-bbe6dxrz> <path stroke-linecap="round" stroke-linejoin="round" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" data-astro-cid-bbe6dxrz></path> </svg>
+BLOG
+</a> <!-- Social icons: own row on mobile, inline on md+ --> <div class="flex basis-full justify-center gap-4 md:basis-auto" data-astro-cid-bbe6dxrz> <!-- GitHub --> <a href="https://github.com/jch254" target="_blank" rel="noopener noreferrer" class="text-brand-muted transition hover:text-white" aria-label="GitHub" data-astro-cid-bbe6dxrz> <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" data-astro-cid-bbe6dxrz><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" data-astro-cid-bbe6dxrz></path></svg> </a> <!-- LinkedIn --> <a href="https://linkedin.com/in/jch254" target="_blank" rel="noopener noreferrer" class="text-brand-muted transition hover:text-white" aria-label="LinkedIn" data-astro-cid-bbe6dxrz> <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" data-astro-cid-bbe6dxrz><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" data-astro-cid-bbe6dxrz></path></svg> </a> <!-- Email --> <a href="mailto:jordan@jch254.com" class="text-brand-muted transition hover:text-white" aria-label="Email" data-astro-cid-bbe6dxrz> <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" data-astro-cid-bbe6dxrz><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" data-astro-cid-bbe6dxrz></path></svg> </a> </div> </div> </div> </header> <nav class="mx-auto max-w-2xl px-6 py-3 text-sm text-brand-muted" aria-label="Breadcrumb"> <ol class="flex items-center gap-1.5"> <li class="flex items-center gap-1.5">  <a href="/" class="transition hover:text-white">Jordan Hornblow</a> </li><li class="flex items-center gap-1.5"> <span class="text-brand-border">&rsaquo;</span> <a href="/blog" class="transition hover:text-white">Blog</a> </li><li class="flex items-center gap-1.5"> <span class="text-brand-border">&rsaquo;</span> <span class="text-brand-text">Post</span> </li> </ol> </nav> <main class="mx-auto max-w-2xl px-6 pb-16"> <article> <header class="mb-8"> <h1 class="mb-3 text-2xl font-extrabold leading-tight tracking-tight md:text-3xl"> I Stopped Rebuilding the Same System </h1> <div class="flex flex-wrap items-center gap-3 text-sm text-brand-muted"> <time datetime="2026-06-08T00:00:00.000Z"> 8 June 2026 </time>  <span class="text-brand-border">·</span> <div class="flex flex-wrap gap-1.5"> <span class="rounded-full bg-brand-accent/10 px-2.5 py-0.5 text-xs font-medium text-brand-accent"> architecture </span><span class="rounded-full bg-brand-accent/10 px-2.5 py-0.5 text-xs font-medium text-brand-accent"> aws </span><span class="rounded-full bg-brand-accent/10 px-2.5 py-0.5 text-xs font-medium text-brand-accent"> infrastructure </span> </div>  </div> </header> <figure class="mb-8"> <div class="overflow-hidden rounded-xl"> <img src="/_astro/reference-architecture-minimal-reusable-system-hero.DtYuCBR_.png" alt="I Stopped Rebuilding the Same System" class="mx-auto max-h-72 md:max-h-96 w-auto rounded-xl"> </div>  </figure> <div class="prose prose-invert max-w-none prose-headings:font-bold prose-headings:tracking-tight prose-a:text-brand-accent prose-a:underline prose-a:decoration-brand-accent/40 hover:prose-a:decoration-brand-accent prose-strong:text-white prose-code:text-brand-accent prose-code:bg-brand-card prose-code:rounded prose-code:px-1.5 prose-code:py-0.5 prose-code:text-sm prose-pre:bg-brand-card prose-pre:border prose-pre:border-brand-border [&_pre_code]:bg-transparent [&_pre_code]:p-0 [&_pre_code]:rounded-none prose-blockquote:border-brand-accent prose-li:marker:text-brand-accent"> <p>Over the last ten years, nearly every system I built kept converging into the same shape.</p>
+<p>It didn’t matter whether the project was a Spotify analytics tool, a Pokemon Go API, a Messenger bot, a GTD app, or an email-driven music sharing platform. After enough iterations, they all ended up looking similar underneath.</p>
+<p>Stateless API. Docker container. Terraform. Multi-tenant data model. Auth boundary. CI/CD pipeline. Push to main, deploy to ECS, wait for stabilisation.</p>
+<p>For years I kept rebuilding that stack from scratch.</p>
+<p>Not because the patterns changed. They mostly didn’t. I’d copy infrastructure between repos, strip out domain logic, rename things, then spend days reconnecting plumbing I already understood.</p>
+<p>The systems were different.</p>
+<p>The operational shape wasn’t.</p>
+<p>A lot of the earlier open source repos came from patterns I was already using professionally. I generalised them, cleaned them up, and published them. Over time those repos started converging too.</p>
+<p>The old serverless repos. The ECS infrastructure repos. Docker build environments. CI/CD tooling. Terraform modules. Different generations of the same system.</p>
+<p>Eventually I stopped treating that convergence as accidental.</p>
+<p>I extracted the common structure into <a href="https://github.com/jch254/reference-architecture" rel="noopener noreferrer" target="_blank">reference-architecture</a>.</p>
+<p>Not a template. A system I could keep evolving under real usage.</p>
+<hr>
+<h2 id="the-convergence-happened-slowly">The convergence happened slowly</h2>
+<p>The earlier projects solved isolated problems.</p>
+<p>One repo handled Serverless APIs. Another handled Dockerised CI builds. Another focused on ECS autoscaling. Another was a React starter kit with auth already wired in.</p>
+<p>At the time they felt separate.</p>
+<p>Looking back, they were all solving the same operational problems from different angles.</p>
+<ul>
+<li>How do you deploy safely?</li>
+<li>How do you keep environments consistent?</li>
+<li>How do you isolate tenants?</li>
+<li>How do you structure infrastructure so you can reuse it later?</li>
+<li>How do you stop every new project becoming a pile of slightly different decisions?</li>
+</ul>
+<p>Over time the repo set got smaller.</p>
+<p>The Docker build repos became one build model.</p>
+<p>The Terraform repos became reusable modules.</p>
+<p>The deployment patterns settled into one model.</p>
+<p>Auth stopped being per-project code and became a provider boundary.</p>
+<p>The infrastructure got smaller.</p>
+<p>I removed things more often than I added them.</p>
+<p>That was the real direction of the system.</p>
+<hr>
+<h2 id="what-i-actually-needed">What I actually needed</h2>
+<p>After enough projects, the list became pretty small.</p>
+<ul>
+<li>A backend that handles requests, resolves the tenant, and talks to a database</li>
+<li>A runtime that behaves the same locally and in production</li>
+<li>Infrastructure that deploys from one pipeline with no manual steps</li>
+<li>A data model that isolates tenants from day one</li>
+<li>A way to know the system actually works after deploy</li>
+<li>A web or mobile client that can sit on top without changing the backend</li>
+</ul>
+<p>That’s the system.</p>
+<p>No queues by default. No event buses. No staging environment. No extra services for problems that don’t exist yet.</p>
+<p>I’ve built systems with all of those pieces before. Most created operational drag long before they created value.</p>
+<p>Most of the decisions were removals.</p>
+<hr>
+<h2 id="the-layers">The layers</h2>
+<p>Four layers. Each lines up with the one below it.</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>/src/backend                → API (NestJS)</span></span>
+<span class="line"><span>Dockerfile                  → runtime</span></span>
+<span class="line"><span>buildspec.yml               → CI/CD (CodeBuild)</span></span>
+<span class="line"><span>/infrastructure/terraform   → deployment (AWS + Cloudflare)</span></span></code></pre>
+<p>Web and mobile clients sit above the same API. No extra backend. Just different entry points.</p>
+<p>The backend is a NestJS app with request context middleware that resolves the tenant and attaches a <code>requestId</code> to every request.</p>
+<p>Tenant resolution is explicit now, not implicit. <code>TENANT_RESOLUTION_MODE</code> is either <code>fixed</code> or <code>subdomain</code>.</p>
+<p>In <code>fixed</code> mode the tenant comes from <code>APP_TENANT_ID</code>. That suits single-product deployments where there is only ever one tenant.</p>
+<p>In <code>subdomain</code> mode the tenant resolves from a subdomain under <code>BASE_DOMAIN</code>. Apex domains and localhost fall back to <code>default</code>. That suits multi-tenant deployments where each tenant gets its own subdomain.</p>
+<p>Both modes produce tenant-prefixed DynamoDB keys, so the data model does not change when the resolution mode does. The earlier host-derived version was too implicit. Making the mode explicit removed a class of “which tenant am I” surprises.</p>
+<p>Controllers delegate to services. Services talk to DynamoDB. Nothing else sits in the request path.</p>
+<p>The Dockerfile is a multi-stage build. <code>node dist/main.js</code> runs the compiled output. Non-root user. Port 3000. Same image locally and in ECS Fargate.</p>
+<p>The build pipeline does five things.</p>
+<ul>
+<li>Install dependencies</li>
+<li>Build the app</li>
+<li>Push the image to ECR</li>
+<li>Run Terraform</li>
+<li>Wait for ECS stabilisation</li>
+</ul>
+<p>Then it applies the Cloudflare DNS layer and, when validation is enabled for that deployment, checks the live system. If a required step fails, the build fails.</p>
+<p>Infrastructure is split into two Terraform layers.</p>
+<p>AWS handles ECS, API Gateway, DynamoDB, ECR, Cloud Map, and IAM.</p>
+<p>Cloudflare reads outputs from AWS remote state and creates DNS records. Cloudflare handles TLS termination.</p>
+<p>The system stays small enough that I can still hold the whole thing in my head.</p>
+<p>I also kept repos self-contained.</p>
+<p>The app, infrastructure, deployment pipeline, runtime, and validation all live together. If you clone the repo, you can see how the system runs and how it deploys without chasing dependencies across other repos.</p>
+<p>Shared pieces only get extracted once they survive repeated use across projects. Terraform modules, SES infrastructure, auth patterns. The projects stay independently deployable systems.</p>
+<p>That matters.</p>
+<hr>
+<h2 id="the-data-model">The data model</h2>
+<p>Single DynamoDB table. PAY_PER_REQUEST.</p>
+<p>Resources are scoped by tenant and user:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>PK = TENANT#&#x3C;tenantId></span></span>
+<span class="line"><span>SK = USER#&#x3C;userId>#EXAMPLE#&#x3C;exampleId></span></span></code></pre>
+<p>Tenant isolation and user ownership are separate boundaries. The partition keeps tenants apart. The sort key keeps users within a tenant apart. A client cannot supply its own <code>tenantId</code> or <code>userId</code> to reach across either boundary. The tenant comes from request context. The user comes from the local user mapping.</p>
+<p>The local user is tenant-scoped:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>PK = TENANT#&#x3C;tenantId></span></span>
+<span class="line"><span>SK = USER#&#x3C;userId></span></span></code></pre>
+<p>Auth identity maps to a local user through an identity record:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>PK = TENANT#&#x3C;tenantId></span></span>
+<span class="line"><span>SK = USER_IDENTITY#&#x3C;provider>#&#x3C;sha256(providerSubject)></span></span></code></pre>
+<p>The provider subject does not become the app’s user model. It maps to a local user. That keeps the user model stable when the auth provider changes, and keeps provider subjects out of resource keys.</p>
+<p>Every query stays inside a tenant partition. No scans. No cross-tenant queries.</p>
+<p>Analytics events use the same table:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>PK = TENANT#&#x3C;tenantId></span></span>
+<span class="line"><span>SK = EVENT#&#x3C;timestamp>#&#x3C;eventName>#&#x3C;requestId></span></span></code></pre>
+<p>Append-only. No updates. No deletes.</p>
+<p>The analytics service resolves tenant and request ID from the request context and writes directly with <code>putItem</code>.</p>
+<p>No buffering layer. No retry workers. No extra infrastructure.</p>
+<p>Analytics and domain data share the same table, the same IAM policy, and the same Terraform resource.</p>
+<p>One table. One permission boundary.</p>
+<hr>
+<h2 id="the-auth-boundary">The auth boundary</h2>
+<p>Auth used to be project-specific code. Now it is a provider boundary.</p>
+<p><code>AUTH_PROVIDER</code> is <code>none</code>, <code>internal_magic_link</code>, or <code>oidc</code>.</p>
+<p>Internal magic-link auth covers first-party and simple apps. OIDC, backed by Auth0 in the demo deployment, covers deployments that need an external identity provider. The choice is configuration, not a rewrite.</p>
+<p>For authenticated modes, the guard normalises provider identity into the same <code>AuthPrincipal</code>. Controllers and services do not know whether the request came through internal magic link or OIDC. <code>AUTH_PROVIDER=none</code> keeps protected routes closed unless a route is explicitly public.</p>
+<p><code>/api/auth/check</code> is a lightweight protected route that confirms the principal. <code>/api/me</code> is the local user boundary. It finds or creates a tenant-scoped user from the current <code>AuthPrincipal</code>.</p>
+<p>The app does not trust auth or JWT claims for tenancy. Tenancy comes from the resolution mode. The principal identifies a provider subject, not a tenant. Keeping those separate is what lets the same backend run as a fixed-tenant app or a subdomain-tenant app without branching the code.</p>
+<p>The browser frontend reads its auth behaviour at runtime from <code>/api/config</code>. The same frontend bundle supports different deployment auth modes. OIDC deployments expose only the public Auth0 SPA config they need. Magic-link deployments do not activate the OIDC UI. Nothing about the deployment’s auth mode gets baked into the frontend build.</p>
+<hr>
+<h2 id="what-i-removed">What I removed</h2>
+<p>Most architecture discussions focus on what got added.</p>
+<p>The useful decisions were usually the opposite.</p>
+<h3 id="async-pipelines">Async pipelines</h3>
+<p>Early versions had background processing.</p>
+<p>I removed it.</p>
+<p>If the system needs queues or workers later, I can add them. Carrying async infrastructure from day one meant more moving parts for workloads that didn’t exist yet.</p>
+<h3 id="dtos-and-validation-frameworks">DTOs and validation frameworks</h3>
+<p>The controller checks <code>if (!body.name)</code> and throws a <code>BadRequestException</code>.</p>
+<p>That’s enough here.</p>
+<p>No decorators. No transformation pipes. No validation class hierarchy.</p>
+<p>The system does not need more than that.</p>
+<h3 id="abstractions-over-dynamodb">Abstractions over DynamoDB</h3>
+<p>The <code>DynamoDbService</code> is flat.</p>
+<ul>
+<li><code>getItem</code></li>
+<li><code>putItem</code></li>
+<li><code>updateItem</code></li>
+<li><code>query</code></li>
+<li><code>deleteItem</code></li>
+</ul>
+<p>It wraps the SDK client and nothing else.</p>
+<p>No ORM. No repository pattern.</p>
+<h3 id="staging-environments">Staging environments</h3>
+<p>One deploy target per deployment. No fake staging copy by default.</p>
+<p>This does not mean one deployment exists. Separate products and demos each get their own deployment. What I dropped is the mirror staging environment that sits alongside production and pretends to be it.</p>
+<p>After deployment, validation can run against the live URL. If enabled validation fails, the build fails.</p>
+<p>I spent years maintaining staging environments that drifted from production and still failed to catch real issues.</p>
+<p>I trust live validation more.</p>
+<h3 id="infrastructure-layers">Infrastructure layers</h3>
+<p>No ALB.</p>
+<p>API Gateway connects directly to ECS through VPC Link and Cloud Map.</p>
+<p>Public subnets only. No NAT gateway.</p>
+<p>Security groups restrict ingress to port 3000 from the VPC Link.</p>
+<p>Rolling deploys. Circuit breaker enabled. Health check grace period configured.</p>
+<p>Boring infrastructure survives longer.</p>
+<hr>
+<h2 id="the-validation-layer">The validation layer</h2>
+<p>After deploy, a validation script can run against the live system.</p>
+<p>No mocks. No test harness. Just <code>fetch</code> against real endpoints.</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>GET  /api/health        → status is "ok"</span></span>
+<span class="line"><span>POST /api/example       → item created</span></span>
+<span class="line"><span>GET  /api/example       → item visible</span></span>
+<span class="line"><span>DELETE /api/example/:id → cleanup</span></span></code></pre>
+<p>Validation is aware of the auth provider mode. The health check stays public. <code>AUTH_PROVIDER=none</code> validates the public surface only. Internal magic-link deployments run the full CRUD smoke path above. OIDC deployments check that <code>/api/auth/check</code> rejects missing bearer tokens, then validate the same route with a supplied bearer token when one is available.</p>
+<p>In magic-link mode it also attempts a light tenant isolation check by resolving a second tenant and verifying the created item is not visible across tenants. If the proxy does not forward the overridden host, the script reports that check as skipped instead of pretending it proved isolation.</p>
+<p>If validation fails, the build fails.</p>
+<p>There is no separate concept of “deployment succeeded” and “the system works”.</p>
+<p>They are the same thing.</p>
+<p>The whole validation layer is one TypeScript file. It runs in a few seconds.</p>
+<p>Every heavier post-deploy setup I built before this gave me more maintenance than confidence.</p>
+<hr>
+<h2 id="what-changed-after-real-usage">What changed after real usage</h2>
+<p>The first version of this was mostly extraction.</p>
+<p>Remove domain logic. Keep the structure. Make it reusable.</p>
+<p>That changed once I started building real products on top of it.</p>
+<p>I had already spent years building reusable Terraform modules, CI/CD pipelines, and ECS infrastructure patterns across different projects.</p>
+<p>The current shape came together while building an email-driven album sharing platform. Multi-tenancy, inbound email handling, deployment flow, analytics, auth, and client boundaries all started using the same repo structure.</p>
+<p>That became the basis for <code>reference-architecture</code>.</p>
+<p>From there I used the reference architecture to scaffold newer systems, including a GTD app with web and mobile clients sharing the same backend and auth boundary.</p>
+<p>As the apps expanded, shared infrastructure kept moving out of product repos.</p>
+<p>SES inbound routing. Terraform modules. Shared deployment patterns. The auth provider boundary.</p>
+<p>Anything that survived repeated real usage moved down into the platform.</p>
+<p>Auth stopped being demo code.</p>
+<p>Magic links, session handling, mobile deep links, token verification, rate limiting. The implementation stayed small, but it became production code.</p>
+<p>Mobile became a first-class client.</p>
+<p>The backend did not need special mobile infrastructure. That was the point. Web and mobile stayed thin layers over the same API.</p>
+<p>The architecture got tighter under pressure.</p>
+<p>Anything that created friction got simplified or removed.</p>
+<p>The system didn’t really get bigger.</p>
+<p>It got sharper.</p>
+<hr>
+<h2 id="the-part-that-changed-under-pressure">The part that changed under pressure</h2>
+<p>The shape held. The boundaries inside it got more deliberate.</p>
+<p>Tenant resolution became explicit. A mode, not a guess off the <code>Host</code> header.</p>
+<p>Auth became provider-neutral. A configured boundary, not a hard-wired flow.</p>
+<p>Users became local app entities. Provider subjects map in, they do not leak through.</p>
+<p>Resources became user-owned. Tenant isolation and user ownership are separate boundaries now.</p>
+<p>Frontend config moved to runtime. One bundle, many deployment auth modes.</p>
+<p>Validation became auth-provider-aware. It checks the system that actually got deployed.</p>
+<p>None of these made the system bigger. Each one removed an assumption that only worked for one kind of deployment.</p>
+<p>The same baseline now runs in more than one shape. The internal magic-link reference demo and a separate Auth0 OIDC demo come from the same architecture. They are not forks. They are the same system with different modes selected.</p>
+<hr>
+<h2 id="the-ai-part-changed-the-equation">The AI part changed the equation</h2>
+<p>This architecture existed before AI tooling.</p>
+<p>AI made the repo more valuable.</p>
+<p>The repo stopped being documentation. It became operational context.</p>
+<p>When I start a new project, I point Copilot or Claude at the example project and tell it to scaffold a module that follows the same patterns.</p>
+<p>The AI sees:</p>
+<ul>
+<li>controller structure</li>
+<li>DynamoDB key builders</li>
+<li>request context flow</li>
+<li>response envelopes</li>
+<li>Terraform conventions</li>
+<li>deployment patterns</li>
+<li>the auth provider boundary</li>
+<li>analytics integration</li>
+</ul>
+<p>The generated code tends to fit because the patterns already exist in working systems.</p>
+<p>The AI is not inventing architecture.</p>
+<p>It’s copying from a real operational baseline.</p>
+<p>The same thing happens with infrastructure.</p>
+<p>The Terraform already exists. The naming conventions already exist. IAM structure already exists. ECS wiring already exists.</p>
+<p>I don’t need giant prompts explaining conventions because the conventions are embedded in the repo itself.</p>
+<p>AI tooling works best against systems that are internally consistent.</p>
+<p>The architecture matters more now, not less.</p>
+<p>Good patterns keep showing up because the AI reuses what is already there.</p>
+<hr>
+<h2 id="why-the-architecture-converged">Why the architecture converged</h2>
+<p>Some of this looks like the Twelve-Factor App model.</p>
+<p>Stateless processes. Config from environment variables. Disposable containers. Logs as streams.</p>
+<p>That part wasn’t planned. Those patterns survived because they made deploys and debugging less annoying.</p>
+<p>Other decisions came from repeatedly building systems in AWS.</p>
+<p>Multi-tenancy became a first-class constraint because retrofitting tenant isolation later is painful.</p>
+<p>Async infrastructure stopped being the default because most early workloads did not justify it.</p>
+<p>I stayed AWS-native because portability layers usually added more code without solving my actual problems.</p>
+<p>The architecture wasn’t designed upfront.</p>
+<p>It slowly compressed under real usage.</p>
+<hr>
+<h2 id="what-this-gives-me-now">What this gives me now</h2>
+<p>The pipeline is deterministic.</p>
+<p>Push to main. Build Docker image. Terraform apply. ECS stabilisation. Cloudflare apply. Validation.</p>
+<p>Same steps every time.</p>
+<p>The app binds to port 3000. The Dockerfile exposes 3000. ECS maps 3000. Security groups allow 3000. Health checks hit 3000.</p>
+<p>Simple systems are easier to reason about. Easier to debug. Easier for AI tooling to work against.</p>
+<p>Most importantly, new projects no longer start from infrastructure decisions.</p>
+<p>They start from product logic.</p>
+<p>The deployment plumbing already exists. So does the tenancy model, the auth boundary, and the validation.</p>
+<p>After ten years of rebuilding variations of the same backend, infrastructure, auth, tenancy, deployment, and validation, I stopped treating them as fresh decisions for every product.</p>
+<p><code>reference-architecture</code> is not just a starter template I copy and abandon. It is where architecture decisions go after they survive real use.</p>
+<p>A new product can choose fixed or subdomain tenancy, internal magic-link or OIDC auth, web or mobile clients. It still inherits the same operational baseline.</p>
+<p>That is the part worth keeping. Not the code. The decisions that stopped needing to be made again.</p> </div> </article> <!-- Back link --> <div class="mt-12 border-t border-brand-border pt-6"> <a href="/blog" class="inline-flex items-center gap-2 text-sm font-semibold text-brand-accent transition hover:text-brand-accent-hover"> <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"> <path stroke-linecap="round" stroke-linejoin="round" d="M7 16l-4-4m0 0l4-4m-4 4h18"></path> </svg>
+Back to all posts
+</a> </div> </main> <footer class="border-t border-brand-border py-8"> <div class="mx-auto max-w-2xl px-6 text-center text-sm text-brand-muted"> <p>&copy; 2026 Jordan Hornblow. Built with <a href="https://astro.build" target="_blank" rel="noopener noreferrer" class="text-brand-accent underline decoration-brand-accent/40 hover:decoration-brand-accent">Astro</a>. <a href="https://github.com/jch254/jch254.com" target="_blank" rel="noopener noreferrer" class="text-brand-accent underline decoration-brand-accent/40 hover:decoration-brand-accent">GitHub</a>. <a href="/rss.xml" target="_blank" rel="noopener noreferrer" class="text-brand-accent underline decoration-brand-accent/40 hover:decoration-brand-accent">RSS</a>.</p> </div> </footer>  </body></html>
