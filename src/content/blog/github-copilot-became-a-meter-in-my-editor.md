@@ -1,11 +1,11 @@
 ---
 title: "GitHub Copilot Became a Meter Running in My Editor"
 description: "My annual Copilot Pro+ subscription ended right as GitHub switched from Premium Request Units to usage-based AI Credits. GitHub's own preview repriced my April from $147.38 to $1,297.49."
-date: 2026-06-12
+date: 2026-06-17
 tags: ["ai", "developer tools", "pricing"]
 heroImage: "github-copilot-became-a-meter-in-my-editor-hero.png"
 heroImageCaption: "GitHub's billing preview for my April 2026 usage. $147.38 under the old model. $1,297.49 under AI Credits."
-draft: true
+draft: false
 ---
 
 My annual Copilot Pro+ subscription ran out almost exactly as GitHub changed what Copilot feels like to use.
@@ -15,6 +15,18 @@ That was luck, not planning. I had been coding daily for months, rebuilding mome
 Then GitHub announced that from June 1, 2026, Copilot usage is measured and billed in AI Credits instead of Premium Request Units. They shipped a preview tool so you can see what your past usage maps to under the new model.
 
 I ran my April through it.
+
+---
+
+## While I was writing this
+
+A few days into drafting this, I went to ship a normal Android build in Claude Code and got stopped by this:
+
+> There's an issue with the selected model (claude-fable-5). It may not exist or you may not have access to it.
+
+Nothing wrong with my build. Anthropic had suspended access to Fable 5 and Mythos 5 under a US government directive. I posted the screenshot and notes on [LinkedIn](https://www.linkedin.com/posts/jch254_ai-anthropic-claude-ugcPost-7471390878629199872-DRCf/), but the source of record is [Anthropic's own statement](https://www.anthropic.com/news/fable-mythos-access).
+
+Different vendor, different mechanism, same shape. The Copilot story is about pricing becoming unpredictable. This was a model I used yesterday being gone today, for reasons that have nothing to do with my code or my bill. Pricing changes, model access removal, vendor governance, and jurisdictional decisions all land in the same place. The tool in your editor stops behaving the way it did, and you did not get a say.
 
 ---
 
