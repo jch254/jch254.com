@@ -3,6 +3,7 @@ title: "I Was Up To Date on the Wrong Future"
 description: "My M2 said it was up to date. It was only current inside the beta lane I had forgotten I was on."
 date: 2026-07-08
 tags: ["macos", "software engineering", "release management"]
+heroImage: "up-to-date-wrong-future-hero.jpeg"
 draft: true
 ---
 

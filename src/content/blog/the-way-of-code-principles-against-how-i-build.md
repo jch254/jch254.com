@@ -1,8 +1,9 @@
 ---
 title: "The Way of Code Against Production"
 description: "Rick Rubin rewrote the Tao Te Ching as vibe-coding aphorisms. Some of it maps cleanly to how I build. Some of it falls apart the moment a pager goes off."
-date: 2026-07-01
+date: 2026-06-30
 tags: ["ai", "software engineering", "vibe coding"]
+heroImage: "the-way-of-code-principles-against-how-i-build-hero.jpeg"
 draft: true
 ---
 
