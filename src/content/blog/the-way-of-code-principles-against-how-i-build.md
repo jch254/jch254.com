@@ -4,7 +4,7 @@ description: "Rick Rubin rewrote the Tao Te Ching as vibe-coding aphorisms. Some
 date: 2026-06-30
 tags: ["ai", "software engineering", "vibe coding"]
 heroImage: "the-way-of-code-principles-against-how-i-build-hero.jpeg"
-draft: true
+draft: false
 ---
 
 Someone sent me [The Way of Code](https://www.thewayofcode.com/) last week, and they knew exactly what they were doing. I make music, and Rick Rubin is one of the reasons I hear records the way I do: the Chili Peppers albums I wore out, the spare menace of "99 Problems". Rubin's public mythology was never about technical knob-twiddling. He doesn't sell himself as the person engineering the sessions or playing on the records. His method, at least from the outside, is reduction: strip the song back, stay out of the artist's way, and react honestly to what's left. So when I learned he'd reworked the Tao Te Ching into 81 short chapters about building software, I did not close the tab. Lao Tzu's sage had been renamed The Vibe Coder, and the whole thing was wrapped in an interactive site Anthropic built. I was already sold.
