@@ -3,7 +3,7 @@ title: "The Claude Tag Session That Survived a Reinstall"
 description: "One channel's Claude in Slack session pinned a six-day-old connector config and silently ignored every change after it. Removing and reinstalling the app didn't touch it. The rollout turned into a security rebuild."
 date: 2026-07-09
 tags: ["ai", "security", "developer tools"]
-heroImage: "claude-tag-hero.jpeg"
+heroImage: "claude-session-survived-reinstall-hero.jpeg"
 draft: false
 ---
 
