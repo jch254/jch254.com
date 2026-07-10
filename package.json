@@ -21,6 +21,7 @@
     "@astrojs/rss": "^4.0.18",
     "@astrojs/sitemap": "^3.7.1",
     "@astrojs/tailwind": "^6.0.2",
+    "@react-pdf/renderer": "^4.5.1",
     "@tailwindcss/typography": "^0.5.19",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
