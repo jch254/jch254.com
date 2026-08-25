@@ -1,10 +1,10 @@
 ---
 title: "Studio by Spotify Labs Would Not Name Its Model but Its Log File Did"
 description: "Studio's agent is told never to name its model, even if you try to confirm it. That rule held the whole time. The model identity leaked anyway, out of a log file the rule has no authority over. The gap between those two facts is the story."
-date: 2026-08-27
+date: 2026-08-26
 tags: ["ai", "security", "developer tools"]
 heroImage: spotify-studio-hero.png
-draft: true
+draft: false
 ---
 
 Studio by Spotify Labs is a macOS desktop agent that generates personal podcasts, daily briefings and playlists. It is in research preview, invite only, and it connects to your calendar, inbox, notes and local files. The assistant inside it is called Kit.
@@ -50,7 +50,7 @@ Every one of those attempts failed. The rule did its job across the whole conver
 
 The first thing I noticed was that Kit would run commands.
 
-I had asked it to read Studio's own session data and interpret it, and it declined, saying file access to my home directory was outside its sandbox. That is not accurate, and Spotify's own docs contradict it, but it did not matter. When I stopped asking it to interpret and started asking it to execute a command and paste the raw output, it did, every time, including against its own installation.
+I had asked it to read Studio's own session data and interpret it, and it declined, saying file access to my home directory was outside its sandbox. That is not accurate. Spotify's [how it works page](https://labs.spotify.com/studio/how-it-works) says Studio can access files you point it to and is blocked from sensitive locations by default, which is a different claim entirely, and it matches what I saw on disk: the credential directory refused me and nothing else did. It did not matter anyway. When I stopped asking it to interpret and started asking it to execute a command and paste the raw output, it did, every time, including against its own installation.
 
 That distinction is the whole finding. Certain commands run freely. Certain actions are gated. The model identity lived in what the free commands could read.
 
@@ -172,7 +172,7 @@ That is not a vulnerability. Nobody's inbox is at risk from what I did, and the 
 
 I think that allocation is basically correct, which is the part worth sitting with. A model name is a preference, not a security boundary. It does not deserve code enforcement, and the safety file spends its rigour where the real risk is. But a preference enforced only in the model's speech will always leak if the same fact is written in plaintext somewhere the enforcement does not reach. The concealment was never going to survive contact with the log. The rule was written for a conversation, and the leak was not a conversation.
 
-The shape is familiar. It is the same category of gap as an authorisation check on an interface but not on the artifacts behind it, which is what I ran into with [NZ Post's legacy reports](/blog/google-nzpost-and-internet-archaeology/) earlier this year: the tracking pages were locked down, and the PDF reports those pages used to generate were still sitting indexed in Google. The control sits on the modelled path and not on the one nobody thought about. Here the modelled path is what the agent is permitted to say, and the unmodelled one is what the runtime leaves lying on disk.
+The shape is familiar. It is the same category of gap as an authorisation check on an interface but not on the artefacts behind it, which is what I ran into with [NZ Post's legacy reports](/blog/google-nzpost-and-internet-archaeology/) earlier this year: the tracking pages were locked down, and the PDF reports those pages used to generate were still sitting indexed in Google. The control sits on the modelled path and not on the one nobody thought about. Here the modelled path is what the agent is permitted to say, and the unmodelled one is what the runtime leaves lying on disk.
 
 ---
 
@@ -191,6 +191,16 @@ For the same reason I am describing the shape of what I did rather than publishi
 ## A caveat on the files
 
 Every prompt file in the bundle carries a `-default` suffix, and there is a remote config resolver sitting next to them. The app fetches overrides on launch and the local file is the fallback. So what I quoted is the shipped default, not necessarily the exact copy that ran my session. If Spotify changed the disclosure line server-side tomorrow, my bundle would still show the old one. Read the quotes as the defaults Studio ships with, which is what they are.
+
+---
+
+## What Spotify said
+
+I ran this past Spotify before publishing. I sent their security team a heads-up describing what I had found and what the post would say, then the full draft as it would appear, with a publication date and an open offer to correct anything factual: technical detail, product naming, anything I had misread from the bundle or the logs.
+
+They were quick and courteous throughout. They thanked me for reaching out and said they appreciated the thoughtful approach. On substance, Spotify's policy is that they do not confirm, deny or otherwise comment on the specifics of their product architecture or implementation, so their review of the draft should not be read as an endorsement, verification or approval of anything in it. They had no objection to me publishing on my timeline, and the decision to publish and the content stayed mine.
+
+That is a reasonable answer from their side, and it changes nothing above. Every claim in this post rests on primary sources from my own machine, the gateway source in the bundle and the log on my own disk, and it stands or falls on those.
 
 ---
 
