@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-label="Draft placeholder: image pending">
+  <rect width="1200" height="630" fill="#1a1a2e"/>
+  <rect x="24" y="24" width="1152" height="582" rx="20" fill="none" stroke="#2a2a45" stroke-width="2"/>
+  <rect x="72" y="72" width="1056" height="486" rx="14" fill="none" stroke="#2a2a45" stroke-width="3" stroke-dasharray="14 12"/>
+  <g transform="translate(600 268)">
+    <rect x="-58" y="-44" width="116" height="88" rx="10" fill="none" stroke="#9a9ab0" stroke-width="4"/>
+    <circle cx="-22" cy="-14" r="11" fill="#1DB954"/>
+    <path d="M-50 30 L-10 -8 L14 16 L34 -2 L50 30 Z" fill="#9a9ab0"/>
+  </g>
+  <text x="600" y="404" text-anchor="middle" font-family="JetBrains Mono, Fira Code, ui-monospace, monospace" font-size="26" letter-spacing="8" fill="#1DB954">DRAFT</text>
+  <text x="600" y="462" text-anchor="middle" font-family="Inter, system-ui, -apple-system, sans-serif" font-size="40" font-weight="600" fill="#e2e2ef">Image pending</text>
+  <text x="600" y="512" text-anchor="middle" font-family="Inter, system-ui, -apple-system, sans-serif" font-size="24" fill="#9a9ab0">Add the file named in the build warning before publishing</text>
+</svg>
