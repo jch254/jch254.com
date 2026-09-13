@@ -6,7 +6,9 @@ import Breadcrumb from '../../components/Breadcrumb.astro';
 import Footer from '../../components/Footer.astro';
 
 export async function getStaticPaths() {
-  const posts = await getCollection('blog', ({ data }) => !data.draft);
+  // Drafts are routable in astro dev only, so they can be previewed.
+  // The production build still excludes them.
+  const posts = await getCollection('blog', ({ data }) => !data.draft || import.meta.env.DEV);
   return posts.map((post) => ({
     params: { slug: post.id.replace(/\.(md|mdx)$/, '') },
     props: { post },
