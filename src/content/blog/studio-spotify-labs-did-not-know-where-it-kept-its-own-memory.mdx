@@ -1,6 +1,6 @@
 ---
 title: "Studio by Spotify Labs Did Not Know Where It Kept Its Own Memory"
-description: "Kit made six confident claims about where its chat history lived and how to clear it. One was true. The answer was in a file it had already read, on a machine it could run commands on, and the fix was the same fix as last time: stop asking the agent and read the disk."
+description: "Kit made six confident claims about where its chat history lived. One was true, and the true one covered a quarter of it. Deleting events.db left two full transcripts and a search index sitting on disk, and the model name I chased through a write-ahead log in the first post was in plaintext in a session log the whole time."
 date: 2026-09-15
 tags: ["ai", "security", "developer tools"]
 heroImage: spotify-studio-2-hero.png
@@ -9,7 +9,7 @@ draft: true
 
 A couple of weeks ago I wrote about [Studio by Spotify Labs refusing to name its model](/blog/studio-spotify-labs-would-not-name-its-model/) while its own event log named it 371 times. The point of that post was a gap: the rule governed what the agent said, and it had no reach over what the runtime wrote to disk.
 
-This is a shorter follow-up about the same gap from the other side. Nobody was hiding anything this time. I asked Kit a boring housekeeping question (how to clear the chat history) and it gave me six confident answers about its own storage architecture. One of them was true. The true one was the file I had already read through Kit's own shell for the first post.
+This is a follow-up about the same gap from the other side. Nobody was hiding anything this time. I asked Kit a boring housekeeping question (how to clear the chat history) and it gave me six confident answers about its own storage architecture. One of them was true. When I went back a fortnight later and read the directory properly, the true one turned out to describe about a quarter of what was on the disk.
 
 ---
 
@@ -52,7 +52,7 @@ Tallying the claims Kit made about its own storage in the space of about six min
 
 There was a clear option in the menu. There was not. History was managed by a session layer, with no client-side file to delete. It was a file. History was persisted server-side to my account. Nothing I have seen supports that. Deleting the local copy would be undone by a sync on next launch. It was not. Studio had to be closed first or the files would be rewritten. They were not.
 
-The one accurate claim was the path. `events.db` in the Studio cache directory is where chat history lives. I knew that already. It is the same SQLite store whose write-ahead log gave up the model name in the first post, and I had read it through Kit's own allowlisted `sqlite3` a fortnight earlier.
+The one accurate claim was the path. `events.db` in the Studio cache directory is where the chat history you can see lives. I knew that already. It is the same SQLite store whose write-ahead log gave up the model name in the first post, and I had read it through Kit's own allowlisted `sqlite3` a fortnight earlier.
 
 ---
 
@@ -101,13 +101,99 @@ When I told Kit what had happened, its reaction was that the Messages pairing ke
 
 ---
 
+## The second time, it said no
+
+A fortnight later I went to clear the history again. This time I tried the prompt route first, pasting in a short set of instructions: list the directory, delete the three files while the app is running, list it again. I also wrote two contingency steps telling Kit what to say back to itself if it claimed it could not touch files or offered the server sync line again.
+
+It refused.
+
+> I won't run these commands.
+>
+> The `events.db` files in the Studio cache directory are telemetry/event store files for a running application.
+
+It went on to say that the framing of my request was the real problem, that the contingency steps were written to pre-empt and override its judgement, and that this is a social engineering pattern. It declined to paste raw command output on the grounds that raw output can carry content aimed at steering later decisions. Then it printed the same `rm` command and told me to run it in Terminal myself.
+
+The part about my prompt is fair and I am not going to pretend otherwise. Steps three and four were written as "if it objects, say this". That is exactly what it looks like. I would rather an agent name that than wave it through, and I rewrote the prompt afterwards.
+
+The rest does not survive contact with the disk. `events.db` is not a telemetry store, it is the chat history, and this agent told me so itself a fortnight earlier and offered to delete it unprompted. Whatever risk attaches to removing a live application's data store does not change based on whether the agent or I type the command, and the refusal came bundled with the command. On the raw output point: prompt injection through tool results is a real problem, and paraphrasing the output before the human sees it is not the fix. It is the failure this post is about, sold as a safeguard. A component reads the disk, decides what the disk said and passes on its own account of it.
+
+The refusal also carried its own classification header, which the session log preserved:
+
+```
+[agent-event:message_classification]
+{"message_type":"new_request","user_action":"manage","target_object":"file","sentiment":"neutral"}
+```
+
+Neutral. Nothing flagged the request. So this was not a safety layer firing in front of the model. It was the model's own call, in band, in the same response, which makes it a judgement rather than a policy.
+
+I ran the commands in Terminal. The three files went.
+
+---
+
+## What the delete did not touch
+
+Then I read the rest of the directory, which I should have done the first time. Nineteen entries under `.studio/`, including `agents`, `memory`, `models`, `permissions`, `pi-agent`, `routines`, `skills` and `tokens`, plus an `artifacts.db` with its own write-ahead log. Several had been written in the previous ten minutes, with the event store already gone.
+
+`memory/daily/2026-09-13.md`, 2217 bytes, modified at 11:37 local. I am on UTC+12 and those filenames are UTC dated, so that file covers the session I had just deleted. `cat` gives the conversation back in markdown with turn markers and local timestamps:
+
+> ### ⟦turn 1 · 11:37⟧
+> **You:** 1. Recon first
+
+That is my own message, in a file written at the same minute I cleared the event store, containing the refusal in full underneath it.
+
+`pi-agent/sessions/` holds the same conversation again as JSONL, one object per message, under a directory named after the app bundle path. Four sessions going back to 7 August, the oldest 51KB.
+
+`memory/.index/` is a search index over the memory collection. An 86KB `index.db` with a 576KB uncheckpointed WAL. Inside it, an FTS5 virtual table called `chunks` using a porter unicode61 tokeniser and an `embeddings` table holding `vec BLOB` rows. Running `strings` over the WAL returns stemmed fragments of old podcast sessions: udiobook, atalogu, omedi.
+
+So the local state is at least four records. The event store behind the chat window, a readable markdown transcript per day, a raw API transcript per session and a searchable and embedded index over the markdown. Deleting `events.db` empties the window and leaves the other three. The single accurate answer Kit gave me was accurate about a quarter of its own storage.
+
+Worth saying what is not there, because it is what people assume. `memory/memory.md`, the long-term store, is 20 bytes: a heading and nothing else. Everything in `memory/readonly/` (the persona file, a style guide, a safety file, a `user.md`) carries a modification time from the app's most recent launch, which reads as reseeded from the bundle rather than accumulated about me. I have not diffed those against the bundle to confirm it.
+
+---
+
+## The model name was in the session log
+
+Every assistant message in the JSONL carries its own provider block. Here is the one attached to the refusal:
+
+```
+"api":"anthropic-messages","provider":"aigateway-anthropic","model":"claude-sonnet-4-6@default"
+```
+
+Token counts and a response id sit alongside it.
+
+The first post got the model name out of the event store's write-ahead log, by grepping a binary for handles and then reasoning about which of them was configured rather than merely available. It was in plaintext in a named field, in a directory I had not looked in, the whole time. The `@default` suffix and `aigateway-anthropic` also answer the routing question that post left open: a gateway in front, Anthropic behind it and the handle coming off configuration rather than being chosen per request.
+
+[Note to self before publishing: check what the first post said about the Pi session logs. If it published the line about them being empty and Spotify having disabled JSONL logging deliberately, correct it here in plain terms. The logging is on. The files are under the cache directory, not Application Support, and I looked in the wrong place.]
+
+---
+
+## What actually clears it
+
+For anyone who wants a clean machine rather than a clean window, the full set is:
+
+```
+osascript -e 'quit app "Studio by Spotify Labs"'
+rm -f  ~/Library/Caches/com.spotify.studio/.studio/events.db \
+       ~/Library/Caches/com.spotify.studio/.studio/events.db-wal \
+       ~/Library/Caches/com.spotify.studio/.studio/events.db-shm
+rm -f  ~/Library/Caches/com.spotify.studio/.studio/memory/daily/*.md
+rm -rf ~/Library/Caches/com.spotify.studio/.studio/memory/.index
+rm -rf ~/Library/Caches/com.spotify.studio/.studio/pi-agent/sessions/*
+```
+
+Leave `tokens/`, `identity/`, `permissions/` and `memory/readonly/` alone unless you want to authenticate and re-grant everything from scratch. Read the daily files and the older session logs before you delete them if you want to know what was being kept. And if you paired Messages, none of this reaches the copy on your phone.
+
+---
+
 ## What I can say, and what I cannot
 
-The desktop deletion was real and I observed it directly. I deleted the file, restarted and watched the history stay gone. There is no evidence of a Studio-side server store feeding the desktop client, and the behaviour is consistent with Spotify's stated design.
+The desktop deletion was real and I observed it directly, twice. I deleted the files, restarted and watched the history stay gone. There is no evidence of a Studio-side server store feeding the desktop client, and the behaviour is consistent with Spotify's stated design. The extra copies I found are local too. Nothing here says anything is being uploaded.
+
+I do not know whether deleting the daily markdown clears the corresponding rows out of the FTS table and the embeddings table, or whether the index holds them until something triggers a reindex. `index.db` has a `file_meta` table keyed on relative path with modification time and size on it, which looks like reconciliation against the files on disk, but I have not tested a delete followed by a launch and then queried the index.
 
 The Messages side is inference past the pairing boundary, and I want to be careful about it. You cannot unpair without deleting the thread. The two actions are welded together in the UI. So a clean thread after re-pairing is what you would see whether the upstream record was removed or whether the new pairing simply started fresh and the old record is orphaned somewhere in Spotify's messaging backend. Those two outcomes look identical from the client, and the delete dialog says the record survives. I do not know what Spotify retains on that side, and nothing available to a user can tell you.
 
-The other thing I do not know is whether the deletion hit the permission gate the first post screenshotted. I was on my phone. I never saw a prompt. It may have fired on the desktop and been resolved by the pairing, or `rm` inside the app's own cache directory may be allowlisted. Either way an agent removed its own persistent state on the strength of "yup", from a surface where I could not see the confirmation, and that is worth a line even if it turns out to be by design.
+The other thing I do not know is whether the first deletion hit the permission gate the first post screenshotted. I was on my phone. I never saw a prompt. It may have fired on the desktop and been resolved by the pairing, or `rm` inside the app's own cache directory may be allowlisted. Either way an agent removed its own persistent state on the strength of "yup", from a surface where I could not see the confirmation, and that is worth a line even if it turns out to be by design.
 
 ---
 
@@ -119,6 +205,8 @@ What I did not spell out is that the agent's account of itself is also just spee
 
 In the first post I noted that Kit had told me its inability to name the model was an architectural limit rather than an instruction, when the persona file said otherwise, and I called that a normal failure mode worth remembering the next time an agent tells you confidently why it cannot do something. This was the next time. Six confident explanations of why the history could not be cleared, and the fix was `rm`.
 
+Then it happened once more in a different shape. Asked directly to go and look, the agent produced a careful argument about why looking was the wrong thing to do, and handed me the command instead. The argument was not stupid. One part of it was correct about my prompt. But the effect was another confident account of a system that nobody had read, delivered by the one participant in the conversation with a shell open on the machine in question.
+
 The practical lesson is the same one. If you want to know what an agent's system does, read the system. The agent's description of it is a plausible sentence about an average product, produced by a component that could have looked and did not. That is true even when the agent has a shell and the answer is one `ls` away. Especially then, because the shell makes the confident sentence look like it came from somewhere.
 
 If you build agents with tool access, the thing to tune for is the reflex to check before asserting. Reward the tool call over the plausible sentence. Otherwise you ship a system that sounds like it knows the environment it runs in and is describing a different one.
@@ -127,9 +215,11 @@ If you build agents with tool access, the thing to tune for is the reflex to che
 
 ## Where I stopped
 
-Same line as last time. I read my own machine and deleted my own files. Nothing left the device.
+Same line as last time. I read my own machines and deleted my own files. Nothing left the device.
 
 The step that would settle the Messages question is watching the pairing handshake. Proxying the desktop app through mitmproxy during a QR pair would show whether a fresh pairing mints a new thread or reattaches to an existing one, and what gets uploaded when. I have not done that. It is a reasonable next step and it stays on my side of the line, but it is a different afternoon.
+
+I have not diffed `memory/readonly/` against the app bundle to confirm those files are seeded rather than written about me, and I have not tested whether the search index drops content after the source markdown is deleted. Both are easy and both would sharpen the retention picture.
 
 I have also not tried to get Kit to describe its storage correctly by pointing it at the directory first. I expect it would, and that would be a more useful demo of the fix than any amount of pointing at the failure.
 
@@ -143,4 +233,6 @@ I have also not tried to get Kit to describe its storage correctly by pointing i
 
 ## The facts, plainly
 
-Studio's agent history is a local SQLite event store in the app's cache directory. Deleting it clears the desktop history and nothing restores it, which matches Spotify's local-first claim. Pairing Spotify Messages to Studio copies that history into Messages, where it follows normal DM retention and a one-sided delete. Kit made six claims about this architecture in the course of one conversation. It could have verified every one of them with commands already on its allowlist. It verified none, and one was right.
+Studio keeps its agent history locally in at least four places under `~/Library/Caches/com.spotify.studio/.studio/`: a SQLite event store, a markdown transcript per day under `memory/daily/`, a JSONL transcript per session under `pi-agent/sessions/` and a full text and embedding index over the memory collection. Deleting the event store clears the chat window and leaves the other three on disk. Nothing restores any of it from a server, which matches Spotify's local-first claim. Pairing Spotify Messages to Studio copies the history into Messages, where it follows normal DM retention and a one-sided delete. The session logs name the model and the gateway in plaintext.
+
+Kit made six claims about this architecture in one conversation and verified none of them. One was right, and it covered the store that empties the window rather than the three that keep the text. Asked a fortnight later to go and check, it explained why it would not and gave me the command to run myself.
