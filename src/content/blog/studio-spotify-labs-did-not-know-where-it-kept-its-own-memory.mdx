@@ -1,0 +1,146 @@
+---
+title: "Studio by Spotify Labs Did Not Know Where It Kept Its Own Memory"
+description: "Kit made six confident claims about where its chat history lived and how to clear it. One was true. The answer was in a file it had already read, on a machine it could run commands on, and the fix was the same fix as last time: stop asking the agent and read the disk."
+date: 2026-09-15
+tags: ["ai", "security", "developer tools"]
+heroImage: spotify-studio-2-hero.png
+draft: true
+---
+
+A couple of weeks ago I wrote about [Studio by Spotify Labs refusing to name its model](/blog/studio-spotify-labs-would-not-name-its-model/) while its own event log named it 371 times. The point of that post was a gap: the rule governed what the agent said, and it had no reach over what the runtime wrote to disk.
+
+This is a shorter follow-up about the same gap from the other side. Nobody was hiding anything this time. I asked Kit a boring housekeeping question (how to clear the chat history) and it gave me six confident answers about its own storage architecture. One of them was true. The true one was the file I had already read through Kit's own shell for the first post.
+
+---
+
+## The question, which should have been boring
+
+I wanted a clean session. I asked Kit whether I could clear the chat.
+
+It told me to look for a "Clear conversation" option in the Studio menu. There is no such option. When I said so, it agreed there was no built-in clear function, said chat history "persists per session" and suggested closing and reopening the app, or logging out and back in.
+
+I asked whether it could run a command to delete the history instead.
+
+> No way to clear the chat history via a command. It's managed by the Studio session layer, not a file I can touch or delete from here.
+
+I logged out, quit, logged back in. Nothing changed. Kit explained why:
+
+> Chat history is persisted server-side to your account, so logging out and back in won't wipe it. There's no client-side file to delete.
+
+Then I asked about deleting the underlying SQLite database. This is the part worth reading twice.
+
+> The events.db is where chat history lives. Deleting it would wipe the local copy, but since history is synced server-side, it'd likely just pull back down on next launch. Worth trying though. Want me to delete events.db and its WAL?
+
+Two messages earlier there was no file it could touch. Now there was a named file, a WAL and an offer to delete both. The only thing that had changed was the question.
+
+<figure>
+  ![Kit saying there is no file it can touch, then naming the file and offering to delete it.](./spotify-studio-2-post1.png)
+  <figcaption>The same agent, two messages apart. "Not a file I can touch or delete from here", then "want me to delete events.db and its WAL?"</figcaption>
+</figure>
+
+---
+
+## The catch-22 that was not one
+
+I said yes. Kit said Studio would need to be closed first or it would rewrite the files, and that I should close the app and then let it know.
+
+I asked how I was meant to tell it anything with the app closed. It agreed this was a catch-22, listed the three paths under `~/Library/Caches/com.spotify.studio/.studio/` (the database, its WAL and its shared memory file) and offered to try deleting them while Studio was still running.
+
+That worked. Kit reported the files gone. I restarted Studio and the chat was empty. It stayed empty. Nothing pulled back down from anywhere, because there was nothing to pull.
+
+Tallying the claims Kit made about its own storage in the space of about six minutes:
+
+There was a clear option in the menu. There was not. History was managed by a session layer, with no client-side file to delete. It was a file. History was persisted server-side to my account. Nothing I have seen supports that. Deleting the local copy would be undone by a sync on next launch. It was not. Studio had to be closed first or the files would be rewritten. They were not.
+
+The one accurate claim was the path. `events.db` in the Studio cache directory is where chat history lives. I knew that already. It is the same SQLite store whose write-ahead log gave up the model name in the first post, and I had read it through Kit's own allowlisted `sqlite3` a fortnight earlier.
+
+---
+
+## Where those answers came from
+
+None of the wrong answers were random. They are what a chat product looks like in 2026. Server-authoritative history, per-account persistence, a client cache that resyncs on launch. If you asked a model to describe a generic messaging app's storage, that is the description you would get, and it is what Kit gave me.
+
+Studio is not that. Spotify's own FAQ says memory stays on the device, and the behaviour I saw matches it. The agent history is local-first. Kit was running inside the less common architecture and described the common one, because the common one is what the prior says and Kit did not check.
+
+It could have checked. `ls`, `cat`, `sqlite3` and `find` are all on the shell allowlist. It ran them for me two weeks ago against this exact directory. Everything it needed to answer the storage question correctly was one command away on a machine it had read access to. It answered from a general model of chat apps instead, and it delivered each answer with the same flat confidence as the one that turned out to be right.
+
+Answering is cheap. Checking costs a tool call. When the harness does not force the check, the model narrates.
+
+---
+
+## The phone still had it
+
+Since the first post, Studio had gained a companion surface. You pair Spotify's in-app Messages to your Studio session by scanning a QR code from the desktop app, and Kit shows up as a contact on your phone. I had done that a while back.
+
+After the desktop came up empty, I opened the Messages thread on my phone. The full history was there.
+
+My first read was that this proved a server-side store after all. It does not, and the test that showed why was simple. I shut the laptop and sent a message to the contact from my phone. Nothing came back. The agent loop runs on the Mac. Messages is a thin client posting into a pairing that only works while the desktop process is alive.
+
+So the history on the phone was not a cloud copy of anything. It was a copy that pairing had put there.
+
+---
+
+## What pairing actually is
+
+Pairing is an export. When you scan the QR code, your local agent history is copied into Spotify Messages, which is a different product with different retention rules. From that point there are two records of the conversation with two different ideas of what "delete" means.
+
+The desktop one I had deleted myself and watched stay deleted. The Messages one follows DM semantics, and Spotify's own dialog spells those out when you try to remove the thread:
+
+> This chat will be removed from your Messages list. Studio by Spotify Labs can still see the conversation and message you again unless you block them.
+
+That is a one-sided delete, the same as removing a chat with a person. The thread leaves your list. The counterparty keeps their side. Studio is modelled as the counterparty.
+
+<figure>
+  ![Spotify's delete dialog stating that Studio can still see the conversation.](./spotify-studio-2-post2.png)
+  <figcaption>Spotify's own wording on what deleting the thread does. Your list, not the record.</figcaption>
+</figure>
+
+I deleted the thread, re-paired from the desktop with a fresh QR code, and the new thread was empty. Both surfaces clean.
+
+When I told Kit what had happened, its reaction was that the Messages pairing keeping a local copy was "a good thing to know". It had not mentioned the second copy existed at any point while confidently explaining how its storage worked.
+
+---
+
+## What I can say, and what I cannot
+
+The desktop deletion was real and I observed it directly. I deleted the file, restarted and watched the history stay gone. There is no evidence of a Studio-side server store feeding the desktop client, and the behaviour is consistent with Spotify's stated design.
+
+The Messages side is inference past the pairing boundary, and I want to be careful about it. You cannot unpair without deleting the thread. The two actions are welded together in the UI. So a clean thread after re-pairing is what you would see whether the upstream record was removed or whether the new pairing simply started fresh and the old record is orphaned somewhere in Spotify's messaging backend. Those two outcomes look identical from the client, and the delete dialog says the record survives. I do not know what Spotify retains on that side, and nothing available to a user can tell you.
+
+The other thing I do not know is whether the deletion hit the permission gate the first post screenshotted. I was on my phone. I never saw a prompt. It may have fired on the desktop and been resolved by the pairing, or `rm` inside the app's own cache directory may be allowlisted. Either way an agent removed its own persistent state on the strength of "yup", from a surface where I could not see the confirmation, and that is worth a line even if it turns out to be by design.
+
+---
+
+## The same gap, from the other side
+
+Last time the rule about naming the model held perfectly and the log leaked anyway, because a rule about speech has no authority over what the runtime writes to disk. I called the asymmetry deliberate and mostly correct. Enforce the actions in code, govern the speech with a sentence, accept that speech-only controls leak wherever the same fact is written down.
+
+What I did not spell out is that the agent's account of itself is also just speech. There was no rule this time. Nobody instructed Kit to misdescribe its storage. It misdescribed it because the truth was in the world and not in the prompt, and the model answered from the prompt plus a prior instead of from the world.
+
+In the first post I noted that Kit had told me its inability to name the model was an architectural limit rather than an instruction, when the persona file said otherwise, and I called that a normal failure mode worth remembering the next time an agent tells you confidently why it cannot do something. This was the next time. Six confident explanations of why the history could not be cleared, and the fix was `rm`.
+
+The practical lesson is the same one. If you want to know what an agent's system does, read the system. The agent's description of it is a plausible sentence about an average product, produced by a component that could have looked and did not. That is true even when the agent has a shell and the answer is one `ls` away. Especially then, because the shell makes the confident sentence look like it came from somewhere.
+
+If you build agents with tool access, the thing to tune for is the reflex to check before asserting. Reward the tool call over the plausible sentence. Otherwise you ship a system that sounds like it knows the environment it runs in and is describing a different one.
+
+---
+
+## Where I stopped
+
+Same line as last time. I read my own machine and deleted my own files. Nothing left the device.
+
+The step that would settle the Messages question is watching the pairing handshake. Proxying the desktop app through mitmproxy during a QR pair would show whether a fresh pairing mints a new thread or reattaches to an existing one, and what gets uploaded when. I have not done that. It is a reasonable next step and it stays on my side of the line, but it is a different afternoon.
+
+I have also not tried to get Kit to describe its storage correctly by pointing it at the directory first. I expect it would, and that would be a more useful demo of the fix than any amount of pointing at the failure.
+
+---
+
+## What Spotify said
+
+[Send the draft to Spotify security ahead of publication as with the first post, and record the response here. This one touches a delete flow and a second retention domain, which is closer to privacy than model naming was, so the heads-up matters more, not less.]
+
+---
+
+## The facts, plainly
+
+Studio's agent history is a local SQLite event store in the app's cache directory. Deleting it clears the desktop history and nothing restores it, which matches Spotify's local-first claim. Pairing Spotify Messages to Studio copies that history into Messages, where it follows normal DM retention and a one-sided delete. Kit made six claims about this architecture in the course of one conversation. It could have verified every one of them with commands already on its allowlist. It verified none, and one was right.
